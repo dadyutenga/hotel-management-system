@@ -8,17 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Stancl\Tenancy\Database\Concerns\CentralConnection;
 
-/**
- * Tenant Model
- * 
- * Corresponds to: core.tenants table
- * Represents businesses using the system
- */
+
 class Tenant extends Model
 {
     use HasFactory, HasUuids, SoftDeletes, CentralConnection;
 
-    protected $table = 'core.tenants';
+    protected $table = 'tenants';
 
     protected $fillable = [
         'name',

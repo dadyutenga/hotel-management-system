@@ -17,7 +17,7 @@ class Superadmin extends Authenticatable
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'auth.superadmins';
+    protected $table = 'superadmins';
 
     protected $fillable = [
         'username',

@@ -18,7 +18,7 @@ class Property extends Model
 {
     use HasFactory, HasUuids, SoftDeletes, BelongsToTenant;
 
-    protected $table = 'core.properties';
+    protected $table = 'properties';
 
     protected $fillable = [
         'tenant_id',

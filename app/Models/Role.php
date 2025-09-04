@@ -16,7 +16,7 @@ class Role extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'auth.roles';
+    protected $table = 'roles';
     
     public $timestamps = false;
 

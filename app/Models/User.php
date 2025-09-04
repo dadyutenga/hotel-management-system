@@ -9,17 +9,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
-/**
- * User Model
- * 
- * Corresponds to: auth.users table
- * All system users (employees)
- */
 class User extends Authenticatable
 {
     use HasFactory, HasUuids, SoftDeletes, Notifiable, BelongsToTenant;
 
-    protected $table = 'auth.users';
+    protected $table = 'users';
 
     protected $fillable = [
         'tenant_id',

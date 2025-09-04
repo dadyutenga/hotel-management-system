@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('auth.superadmins', function (Blueprint $table) {
+        Schema::create('superadmins', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('username');
             $table->string('email')->unique();
@@ -28,7 +28,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('auth.superadmins');
+        Schema::dropIfExists('superadmins');
     }
 
 };

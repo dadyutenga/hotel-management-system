@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('auth.users', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('tenant_id');
             $table->uuid('property_id')->nullable();
@@ -29,9 +29,9 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->foreign('tenant_id')->references('id')->on('core.tenants')->onDelete('cascade');
-            $table->foreign('property_id')->references('id')->on('core.properties')->onDelete('set null');
-            $table->foreign('role_id')->references('id')->on('auth.roles')->onDelete('restrict');
+            $table->foreign('tenant_id')->references('id')->on('tenants')->onDelete('cascade');
+            $table->foreign('property_id')->references('id')->on('properties')->onDelete('set null');
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('restrict');
         });
     }
 
@@ -40,6 +40,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('auth.users');
+        Schema::dropIfExists('users');
     }
 };
