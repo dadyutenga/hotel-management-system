@@ -4,13 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
  * Superadmin Model
  * 
- * Corresponds to: auth.superadmins table
+ * Corresponds to: superadmins table
  * Superadmin users who manage the entire system
  */
 class Superadmin extends Authenticatable
@@ -29,6 +28,7 @@ class Superadmin extends Authenticatable
 
     protected $hidden = [
         'password_hash',
+        'remember_token',
     ];
 
     protected $casts = [
@@ -37,4 +37,10 @@ class Superadmin extends Authenticatable
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    // Map password_hash to password for Laravel authentication
+    public function getAuthPassword()
+    {
+        return $this->password_hash;
+    }
 }
