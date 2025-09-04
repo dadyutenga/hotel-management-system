@@ -27,17 +27,11 @@ class Property extends Model
         'contact_phone',
         'email',
         'website',
-        'star_rating',
-        'checkin_time',
-        'checkout_time',
         'timezone',
         'is_active',
     ];
 
     protected $casts = [
-        'star_rating' => 'integer',
-        'checkin_time' => 'time',
-        'checkout_time' => 'time',
         'is_active' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

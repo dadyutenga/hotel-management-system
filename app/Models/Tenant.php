@@ -25,17 +25,15 @@ class Tenant extends Model
         'address',
         'contact_email',
         'contact_phone',
+        'certification_type',
         'certification_proof',
         'business_type',
-        'subscription_level',
-        'subscription_expires_at',
         'base_currency',
+        'status',
         'is_active',
-        'created_by',
     ];
 
     protected $casts = [
-        'subscription_expires_at' => 'datetime',
         'is_active' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -51,12 +49,29 @@ class Tenant extends Model
         'PUB'
     ];
 
-    // Relationships
-    public function creator()
-    {
-        return $this->belongsTo(Superadmin::class, 'created_by');
-    }
+    // Certification type constants
+    const CERT_TYPE_BRELA = 'BRELA';
+    const CERT_TYPE_VAT = 'VAT';
+    const CERT_TYPE_TIN = 'TIN';
 
+    const CERTIFICATION_TYPES = [
+        self::CERT_TYPE_BRELA,
+        self::CERT_TYPE_VAT,
+        self::CERT_TYPE_TIN,
+    ];
+
+    // Status constants
+    const STATUS_PENDING = 'pending';
+    const STATUS_VERIFIED = 'verified';
+    const STATUS_REJECTED = 'rejected';
+
+    const STATUSES = [
+        self::STATUS_PENDING,
+        self::STATUS_VERIFIED,
+        self::STATUS_REJECTED,
+    ];
+
+    // Relationships
     public function properties()
     {
         return $this->hasMany(Property::class, 'tenant_id');

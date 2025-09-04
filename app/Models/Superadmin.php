@@ -37,10 +37,4 @@ class Superadmin extends Authenticatable
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
-
-    // Relationships
-    public function createdTenants()
-    {
-        return $this->hasMany(Tenant::class, 'created_by');
-    }
 }
