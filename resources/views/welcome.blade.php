@@ -43,6 +43,8 @@
                     max-width: 1200px;
                     margin: 0 auto;
                     padding: 0 20px;
+                    position: relative;
+                    z-index: 10;
                 }
                 .navbar {
                     display: flex;
@@ -61,32 +63,54 @@
                 }
                 .btn {
                     display: inline-block;
-                    padding: 10px 20px;
-                    border-radius: 5px;
-                    font-weight: 500;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-weight: 600;
                     text-align: center;
                     text-decoration: none;
                     transition: all 0.3s ease;
+                    font-size: 14px;
+                    border: 2px solid transparent;
+                    cursor: pointer;
+                    position: relative;
+                    z-index: 100;
                 }
                 .btn-primary {
                     background-color: #f44336;
                     color: white;
+                    border-color: #f44336;
                 }
                 .btn-primary:hover {
                     background-color: #e53935;
+                    border-color: #e53935;
                     transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
+                    color: white;
+                    text-decoration: none;
                 }
                 .btn-secondary {
                     background-color: rgba(255, 255, 255, 0.2);
                     color: white;
+                    border-color: rgba(255, 255, 255, 0.4);
                 }
                 .btn-secondary:hover {
                     background-color: rgba(255, 255, 255, 0.3);
+                    border-color: rgba(255, 255, 255, 0.6);
                     transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+                    color: white;
+                    text-decoration: none;
+                }
+                .btn-large {
+                    padding: 16px 32px;
+                    font-size: 16px;
+                    font-weight: 700;
                 }
                 .hero-content {
                     max-width: 600px;
                     margin: 50px 0;
+                    position: relative;
+                    z-index: 10;
                 }
                 .hero-title {
                     font-size: 48px;
@@ -96,8 +120,13 @@
                 }
                 .hero-subtitle {
                     font-size: 18px;
-                    margin-bottom: 30px;
+                    margin-bottom: 40px;
                     opacity: 0.9;
+                }
+                .hero-buttons {
+                    display: flex;
+                    gap: 20px;
+                    margin-bottom: 30px;
                 }
                 .features {
                     padding: 80px 0;
@@ -168,14 +197,30 @@
                     .feature-card {
                         padding: 20px;
                     }
+                    .hero-buttons {
+                        flex-direction: column;
+                        gap: 15px;
+                    }
+                    .btn-large {
+                        padding: 14px 24px;
+                        font-size: 15px;
+                    }
                 }
                 @media (max-width: 480px) {
                     .navbar {
                         flex-direction: column;
                         gap: 20px;
                     }
+                    .nav-buttons {
+                        flex-direction: column;
+                        width: 100%;
+                        gap: 10px;
+                    }
                     .hero-title {
                         font-size: 30px;
+                    }
+                    .btn {
+                        width: 100%;
                     }
                 }
             </style>
@@ -190,16 +235,11 @@
                     <div class="logo">
                         <i class="fas fa-hotel"></i> HotelPro
                     </div>
-                    @if (Route::has('login'))
                     <div class="nav-buttons">
-                        <a href="{{ route('superadmin.login') }}" class="btn btn-secondary">
-                            <i class="fas fa-user-shield"></i> Admin Login
-                        </a>
-                        <a href="{{ url('/register') }}" class="btn btn-primary">
-                            <i class="fas fa-building"></i> Register Hotel
+                        <a href="{{ url('/') }}" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Home
                         </a>
                     </div>
-                    @endif
                 </div>
                 
                 <div class="hero-content">
@@ -208,7 +248,18 @@
                         Streamline your operations, boost efficiency, and enhance guest experience with our 
                         comprehensive hotel management platform. Perfect for hotels, resorts, and lodges of all sizes.
                     </p>
-                    <a href="{{ url('/register') }}" class="btn btn-primary">
+                    
+                    <!-- Main Action Buttons -->
+                    <div class="hero-buttons">
+                        <a href="/superadmin/login" class="btn btn-secondary btn-large">
+                            <i class="fas fa-user-shield"></i> SUPERADMIN LOGIN
+                        </a>
+                        <a href="/register" class="btn btn-primary btn-large">
+                            <i class="fas fa-building"></i> USER REGISTRATION
+                        </a>
+                    </div>
+                    
+                    <a href="/register" class="btn btn-primary">
                         <i class="fas fa-rocket"></i> Get Started Free
                     </a>
                 </div>
@@ -298,7 +349,7 @@
                     Join thousands of successful businesses who have improved their operations with our system.
                     No credit card required to get started.
                 </p>
-                <a href="{{ url('/register') }}" class="btn btn-primary">
+                <a href="/register" class="btn btn-primary btn-large">
                     <i class="fas fa-sign-up"></i> Register Your Property Now
                 </a>
             </div>
