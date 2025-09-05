@@ -61,7 +61,28 @@ class SuperAdminAuthController extends Controller
      */
     public function dashboard()
     {
-        return view('Superadmin.Dashboard');
+        $superadmin = Auth::guard('superadmin')->user();
+        
+        // Get notifications for this superadmin
+        $notifications = \App\Models\Notification::where('superadmin_id', $superadmin->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+        
+        // Get pending tenant registrations
+        $pendingTenants = \App\Models\Tenant::where('status', \App\Models\Tenant::STATUS_PENDING)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        // Get statistics
+        $stats = [
+            'total_tenants' => \App\Models\Tenant::count(),
+            'active_tenants' => \App\Models\Tenant::where('status', \App\Models\Tenant::STATUS_VERIFIED)->count(),
+            'pending_tenants' => \App\Models\Tenant::where('status', \App\Models\Tenant::STATUS_PENDING)->count(),
+            'rejected_tenants' => \App\Models\Tenant::where('status', \App\Models\Tenant::STATUS_REJECTED)->count(),
+        ];
+
+        return view('Superadmin.Dashboard', compact('notifications', 'pendingTenants', 'stats'));
     }
 
     /**

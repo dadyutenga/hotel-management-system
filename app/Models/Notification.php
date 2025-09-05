@@ -16,17 +16,19 @@ class Notification extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'ops.notifications';
+    protected $table = 'notifications';
     
     public $timestamps = false;
 
     protected $fillable = [
         'tenant_id',
         'user_id',
+        'superadmin_id',
         'title',
         'message',
         'type',
         'is_read',
+        'created_at',
     ];
 
     protected $casts = [
@@ -43,5 +45,10 @@ class Notification extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function superadmin()
+    {
+        return $this->belongsTo(Superadmin::class, 'superadmin_id');
     }
 }

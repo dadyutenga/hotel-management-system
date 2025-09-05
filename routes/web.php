@@ -1,11 +1,27 @@
 <?php
 
 use App\Http\Controllers\SuperAdminAuthController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 // Welcome page
 Route::get('/', function () {
     return view('welcome');
+});
+
+// User Authentication Routes
+Route::middleware('guest')->group(function () {
+    Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+// User Protected Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard/pending', [AuthController::class, 'showPendingDashboard'])->name('dashboard.pending');
+    Route::get('/dashboard', [AuthController::class, 'showDashboard'])->name('dashboard');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
 // Superadmin routes
