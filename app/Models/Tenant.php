@@ -26,6 +26,11 @@ class Tenant extends Model
         'base_currency',
         'status',
         'is_active',
+        'tin_vat_number',
+        'business_license',
+        'tax_certificate',
+        'owner_id',
+        'registration_certificate',
     ];
 
     protected $casts = [

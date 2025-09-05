@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
@@ -29,8 +31,9 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+                // Validate the form data
         $validated = $request->validate([
-            // Business Details
+            // Business details
             'business_name' => 'required|string|max:255',
             'business_address' => 'required|string|max:500',
             'country' => 'required|string|max:100',
@@ -72,17 +75,23 @@ class AuthController extends Controller
             }
 
             // Create tenant
+                        // Create the tenant record
             $tenant = Tenant::create([
+                'id' => Str::uuid(),
                 'name' => $validated['business_name'],
                 'address' => $validated['business_address'] . ', ' . $validated['city'] . ', ' . $validated['country'],
                 'contact_email' => $validated['business_email'],
                 'contact_phone' => $validated['business_phone'],
                 'certification_type' => $validated['certification_type'],
-                'certification_proof' => json_encode($documents),
                 'business_type' => $validated['business_type'],
-                'base_currency' => 'TZS', // Default currency
-                'status' => Tenant::STATUS_PENDING,
+                'base_currency' => 'TZS',
+                'status' => 'pending',
                 'is_active' => false,
+                'tin_vat_number' => $validated['tin_vat_number'],
+                'business_license' => $documents['business_license'] ?? null,
+                'tax_certificate' => $documents['tax_certificate'] ?? null,
+                'owner_id' => $documents['owner_id'] ?? null,
+                'registration_certificate' => $documents['registration_certificate'] ?? null,
             ]);
 
             // Get or create admin role
