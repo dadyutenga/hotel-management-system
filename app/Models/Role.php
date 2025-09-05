@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Role Model
  * 
- * Corresponds to: auth.roles table
+ * Corresponds to: roles table
  * Predefined system roles
  */
 class Role extends Model
@@ -48,6 +48,6 @@ class Role extends Model
 
     public function permissions()
     {
-        return $this->belongsToMany(Permission::class, 'auth.role_permissions', 'role_id', 'permission_id');
+        return $this->belongsToMany(Permission::class, 'role_permissions', 'role_id', 'permission_id');
     }
 }
