@@ -18,10 +18,10 @@ class SuperadminController extends Controller
     {
         $superadmin = Auth::guard('superadmin')->user();
         
-        // Get all pending tenants with their admin users
+        // Get all pending tenants with their admin users (DIRECTOR role)
         $pendingTenants = Tenant::with(['users' => function($query) {
-            $query->whereHas('roles', function($roleQuery) {
-                $roleQuery->where('name', 'admin');
+            $query->whereHas('role', function($roleQuery) {
+                $roleQuery->where('name', 'DIRECTOR');
             });
         }])
         ->where('status', Tenant::STATUS_PENDING)
@@ -38,10 +38,10 @@ class SuperadminController extends Controller
     {
         $superadmin = Auth::guard('superadmin')->user();
         
-        // Get all tenants with their admin users
+        // Get all tenants with their admin users (DIRECTOR role)
         $tenants = Tenant::with(['users' => function($query) {
-            $query->whereHas('roles', function($roleQuery) {
-                $roleQuery->where('name', 'admin');
+            $query->whereHas('role', function($roleQuery) {
+                $roleQuery->where('name', 'DIRECTOR');
             });
         }])
         ->orderBy('created_at', 'desc')
@@ -58,8 +58,8 @@ class SuperadminController extends Controller
         $superadmin = Auth::guard('superadmin')->user();
         
         $tenant = Tenant::with(['users' => function($query) {
-            $query->whereHas('roles', function($roleQuery) {
-                $roleQuery->where('name', 'admin');
+            $query->whereHas('role', function($roleQuery) {
+                $roleQuery->where('name', 'DIRECTOR');
             });
         }])->findOrFail($tenantId);
 
@@ -94,9 +94,9 @@ class SuperadminController extends Controller
             'is_active' => true,
         ]);
 
-        // Activate the admin user
-        $adminUser = $tenant->users()->whereHas('roles', function($query) {
-            $query->where('name', 'admin');
+        // Activate the admin user (DIRECTOR role)
+        $adminUser = $tenant->users()->whereHas('role', function($query) {
+            $query->where('name', 'DIRECTOR');
         })->first();
 
         if ($adminUser) {
@@ -143,9 +143,9 @@ class SuperadminController extends Controller
             'is_active' => false,
         ]);
 
-        // Deactivate the admin user
-        $adminUser = $tenant->users()->whereHas('roles', function($query) {
-            $query->where('name', 'admin');
+        // Deactivate the admin user (DIRECTOR role)
+        $adminUser = $tenant->users()->whereHas('role', function($query) {
+            $query->where('name', 'DIRECTOR');
         })->first();
 
         if ($adminUser) {
