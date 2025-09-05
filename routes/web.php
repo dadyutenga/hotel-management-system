@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\SuperAdminAuthController;
+use App\Http\Controllers\SuperadminController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,7 +37,15 @@ Route::group(['prefix' => 'superadmin'], function () {
     Route::middleware('auth:superadmin')->group(function () {
         Route::get('/dashboard', [SuperAdminAuthController::class, 'dashboard'])->name('superadmin.dashboard');
         Route::post('/logout', [SuperAdminAuthController::class, 'logout'])->name('superadmin.logout');
-        Route::get('/verify-accounts', function() { return view('Superadmin.VerifyAcc'); })->name('superadmin.verify');
-        Route::get('/view-accounts', function() { return view('Superadmin.ViewAcc'); })->name('superadmin.view');
+        
+        // Tenant management routes
+        Route::get('/verify-accounts', [SuperadminController::class, 'verifyAccounts'])->name('superadmin.verify');
+        Route::get('/view-accounts', [SuperadminController::class, 'viewAccounts'])->name('superadmin.view');
+        
+        // Tenant actions
+        Route::get('/tenants/{tenant}/details', [SuperadminController::class, 'showTenantDetails']);
+        Route::post('/tenants/{tenant}/approve', [SuperadminController::class, 'approveTenant']);
+        Route::post('/tenants/{tenant}/reject', [SuperadminController::class, 'rejectTenant']);
+        Route::get('/tenants/{tenant}/documents/{type}/download', [SuperadminController::class, 'downloadDocument']);
     });
 });
