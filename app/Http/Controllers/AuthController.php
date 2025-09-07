@@ -187,6 +187,11 @@ class AuthController extends Controller
         $user = Auth::user();
         $tenant = $user->tenant;
 
+        // Check if the tenant is now verified and redirect to main dashboard
+        if ($tenant->status === Tenant::STATUS_VERIFIED) {
+            return redirect()->route('dashboard');
+        }
+
         return view('Users.PendingDashboard', compact('tenant'));
     }
 
