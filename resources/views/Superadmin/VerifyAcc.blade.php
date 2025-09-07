@@ -8,6 +8,10 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Import the separate sidebar CSS -->
+    <link rel="stylesheet" href="{{ asset(path: 'css/superadmin-sidebar.css') }}">
+
     <style>
         * {
             margin: 0;

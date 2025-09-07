@@ -1,0 +1,102 @@
+/* Sidebar Styles */
+.sidebar {
+    width: 280px;
+    background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+    color: white;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 30px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+}
+
+.brand-logo {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.brand-subtitle {
+    font-size: 14px;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+.sidebar-nav {
+    padding: 20px 0;
+}
+
+.nav-item {
+    margin-bottom: 5px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+    transform: translateX(5px);
+}
+
+.nav-link.active {
+    background-color: rgba(255,255,255,0.2);
+    color: white;
+    border-right: 4px solid #f44336;
+}
+
+.nav-link i {
+    margin-right: 12px;
+    width: 18px;
+    text-align: center;
+}
+
+.logout-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.logout-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.8);
+    width: 100%;
+    text-align: left;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Responsive Design for Sidebar */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+}
