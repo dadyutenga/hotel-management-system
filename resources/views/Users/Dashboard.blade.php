@@ -254,6 +254,32 @@
             color: #666;
         }
         
+        /* Add styles for the logout button */
+        .btn-logout {
+            background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #e53935 0%, #d32f2f 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+        }
+        
+        .btn-logout i {
+            font-size: 12px;
+        }
+        
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: 1fr;
@@ -283,6 +309,13 @@
                 <h1 class="header-title">Dashboard</h1>
                 <div class="user-info">
                     Welcome, {{ $user->full_name }}
+                    <!-- Logout Button -->
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline; margin-left: 15px;">
+                        @csrf
+                        <button type="submit" class="btn-logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </form>
                 </div>
             </div>
             
