@@ -643,16 +643,17 @@
 
         function generateDocumentCard(name, url, tenantId, type) {
             if (url) {
+                const downloadUrl = `/superadmin/tenants/${tenantId}/documents/${type}/download`;
                 return `
                     <div class="document-card">
                         <div class="document-icon">
                             <i class="fas fa-file-pdf"></i>
                         </div>
                         <div class="document-name">${name}</div>
-                        <a href="${url}" target="_blank" class="btn btn-primary btn-sm">
+                        <button class="btn btn-primary btn-sm" onclick="openDocumentViewer('${url}', '${name}', '${downloadUrl}')">
                             <i class="fas fa-eye"></i> View
-                        </a>
-                        <a href="/superadmin/tenants/${tenantId}/documents/${type}/download" class="btn btn-secondary btn-sm">
+                        </button>
+                        <a href="${downloadUrl}" class="btn btn-secondary btn-sm">
                             <i class="fas fa-download"></i> Download
                         </a>
                     </div>
