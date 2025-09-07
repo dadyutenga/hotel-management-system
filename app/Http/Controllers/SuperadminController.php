@@ -192,4 +192,15 @@ class SuperadminController extends Controller
 
         return Storage::disk('public')->download($filePath);
     }
+
+    /**
+     * Mark a notification as read
+     */
+    public function markNotificationAsRead(Request $request, $notificationId)
+    {
+        $notification = Notification::findOrFail($notificationId);
+        $notification->update(['is_read' => true]);
+
+        return response()->json(['success' => true]);
+    }
 }
