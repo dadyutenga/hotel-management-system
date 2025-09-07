@@ -529,6 +529,9 @@
         </div>
     </div>
 
+    <!-- Include the Document Viewer Component -->
+    @include('Superadmin.components.Viewdocs')
+
     <script>
         let currentTenantId = null;
 
