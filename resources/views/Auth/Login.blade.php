@@ -8,25 +8,33 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Figtree', sans-serif;
             background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            padding: 20px;
         }
         
         .overlay-pattern {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            z-index: 0;
         }
         
         .login-container {
@@ -41,33 +49,53 @@
             text-align: center;
             margin-bottom: 30px;
             color: white;
+            padding: 0 10px;
         }
         
         .brand-logo {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         
         .brand-subtitle {
             font-size: 16px;
             opacity: 0.9;
             font-weight: 500;
+            letter-spacing: 0.5px;
         }
         
         .card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
             border: none;
             backdrop-filter: blur(10px);
+            overflow: hidden;
         }
         
         .card-header {
             background: transparent;
-            border-bottom: 2px solid #f0f0f0;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
             padding: 30px 30px 20px;
             text-align: center;
+            position: relative;
+        }
+        
+        .card-header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #1a237e, transparent);
         }
         
         .card-title {
@@ -81,50 +109,76 @@
             gap: 10px;
         }
         
+        .card-title i {
+            background: rgba(26, 35, 126, 0.1);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
         .card-body {
             padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
         }
         
         .form-label {
             font-weight: 600;
             color: #333;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            display: block;
         }
         
         .form-control {
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 12px 16px;
+            border-radius: 10px;
+            padding: 14px 18px;
             font-size: 16px;
             transition: all 0.3s ease;
             width: 100%;
+            background: #f9f9f9;
         }
         
         .form-control:focus {
             border-color: #1a237e;
             box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
             outline: none;
+            background: #fff;
         }
         
         .form-control.is-invalid {
             border-color: #f44336;
+            background: #fff;
         }
         
         .invalid-feedback {
             color: #f44336;
             font-weight: 500;
+            font-size: 14px;
+            margin-top: 6px;
+            display: block;
         }
         
         .btn-primary {
             background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
             border: none;
-            border-radius: 8px;
-            padding: 14px 24px;
+            border-radius: 10px;
+            padding: 16px 24px;
             font-weight: 600;
             font-size: 16px;
             transition: all 0.3s ease;
             width: 100%;
             color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
         .btn-primary:hover {
@@ -135,27 +189,33 @@
         
         .alert {
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-weight: 500;
             padding: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         
         .alert-danger {
             background-color: #ffebee;
             color: #c62828;
-            border-left: 4px solid #f44336;
         }
         
         .alert-success {
             background-color: #e8f5e8;
             color: #2e7d32;
-            border-left: 4px solid #4caf50;
+        }
+        
+        .alert i {
+            font-size: 18px;
         }
         
         .back-to-home {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 25px;
+            padding: 5px;
         }
         
         .back-to-home a {
@@ -166,11 +226,15 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            padding: 10px 16px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
         }
         
         .back-to-home a:hover {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: underline;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
         
         .input-group {
@@ -182,8 +246,9 @@
             left: 16px;
             top: 50%;
             transform: translateY(-50%);
-            color: #666;
+            color: #777;
             z-index: 2;
+            pointer-events: none;
         }
         
         .form-control.with-icon {
@@ -192,19 +257,24 @@
         
         .register-link {
             text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
+            margin-top: 25px;
+            padding-top: 25px;
             border-top: 1px solid #f0f0f0;
         }
         
         .register-link a {
             color: #f44336;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            display: inline-block;
+            padding: 3px 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
         }
         
         .register-link a:hover {
-            text-decoration: underline;
+            border-bottom-color: #f44336;
+            text-decoration: none;
         }
         
         @media (max-width: 480px) {
@@ -214,15 +284,23 @@
             }
             
             .card-body {
-                padding: 20px;
+                padding: 25px 20px;
             }
             
             .card-header {
-                padding: 20px 20px 15px;
+                padding: 25px 20px 15px;
             }
             
             .brand-logo {
-                font-size: 28px;
+                font-size: 30px;
+            }
+            
+            .form-control {
+                padding: 12px 16px;
+            }
+            
+            .btn-primary {
+                padding: 14px 20px;
             }
         }
     </style>
@@ -236,7 +314,7 @@
             <div class="brand-logo">
                 <i class="fas fa-hotel"></i> HotelPro
             </div>
-            <div class="brand-subtitle">Management System</div>
+            <div class="brand-subtitle">Hotel Management System</div>
         </div>
         
         <!-- Login Card -->
@@ -251,20 +329,20 @@
                 @if(session('error'))
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-triangle"></i>
-                    {{ session('error') }}
+                    <span>{{ session('error') }}</span>
                 </div>
                 @endif
 
                 @if(session('success'))
                 <div class="alert alert-success">
                     <i class="fas fa-check-circle"></i>
-                    {{ session('success') }}
+                    <span>{{ session('success') }}</span>
                 </div>
                 @endif
 
                 <form method="POST" action="/login">
                     @csrf
-                    <div class="mb-3">
+                    <div class="form-group">
                         <label for="email" class="form-label">
                             <i class="fas fa-envelope"></i> Email Address
                         </label>
@@ -286,7 +364,7 @@
                         @enderror
                     </div>
 
-                    <div class="mb-4">
+                    <div class="form-group">
                         <label for="password" class="form-label">
                             <i class="fas fa-lock"></i> Password
                         </label>

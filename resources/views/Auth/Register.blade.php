@@ -617,8 +617,33 @@
     </div>
 
     <script>
+        // Initialize step based on validation errors
         let currentStep = 1;
         const totalSteps = 3;
+        
+        // Check for validation errors and set appropriate step
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if we have validation errors
+            const hasErrors = document.querySelectorAll('.invalid-feedback').length > 0;
+            
+            if (hasErrors) {
+                // Determine which step has errors
+                const step1Errors = document.querySelectorAll('#step1 .invalid-feedback').length > 0;
+                const step2Errors = document.querySelectorAll('#step2 .invalid-feedback').length > 0;
+                const step3Errors = document.querySelectorAll('#step3 .invalid-feedback').length > 0;
+                
+                if (step3Errors) {
+                    currentStep = 3;
+                } else if (step2Errors) {
+                    currentStep = 2;
+                } else {
+                    currentStep = 1;
+                }
+                
+                // Apply the correct step
+                showStep(currentStep);
+            }
+        });
 
         function showStep(step) {
             // Hide all steps
@@ -646,9 +671,28 @@
         }
 
         function nextStep() {
+            // Basic validation before moving to next step
+            const currentFields = document.querySelectorAll(`#step${currentStep} input[required], #step${currentStep} select[required], #step${currentStep} textarea[required]`);
+            let isValid = true;
+            
+            currentFields.forEach(field => {
+                if (!field.value) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                return; // Don't proceed if validation fails
+            }
+            
             if (currentStep < totalSteps) {
                 currentStep++;
                 showStep(currentStep);
+                // Scroll to top of form for better UX
+                document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
             }
         }
 
@@ -656,6 +700,8 @@
             if (currentStep > 1) {
                 currentStep--;
                 showStep(currentStep);
+                // Scroll to top of form for better UX
+                document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
             }
         }
 
@@ -668,6 +714,17 @@
                     textDiv.textContent = this.files[0].name;
                     uploadDiv.style.borderColor = '#4caf50';
                     uploadDiv.style.backgroundColor = '#f8fff8';
+                }
+            });
+        });
+        
+        // Add field validation on blur for better UX
+        document.querySelectorAll('.form-control').forEach(field => {
+            field.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && !this.value) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
                 }
             });
         });

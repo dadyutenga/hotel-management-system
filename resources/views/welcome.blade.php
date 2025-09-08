@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Hotel Management System</title>
+        <title>HotelPro Management System</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -17,12 +17,19 @@
         @else
             <style>
                 /* Default styles */
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+                
                 body {
                     font-family: 'Figtree', sans-serif;
                     background-color: #f8f9fa;
                     color: #333;
                     line-height: 1.6;
                 }
+                
                 .hero-section {
                     background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
                     color: white;
@@ -30,6 +37,7 @@
                     position: relative;
                     overflow: hidden;
                 }
+                
                 .overlay-pattern {
                     position: absolute;
                     top: 0;
@@ -38,6 +46,7 @@
                     height: 100%;
                     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
                 }
+                
                 .container {
                     width: 100%;
                     max-width: 1200px;
@@ -46,23 +55,32 @@
                     position: relative;
                     z-index: 10;
                 }
+                
                 .navbar {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     padding: 20px 0;
                 }
+                
                 .logo {
                     font-size: 24px;
                     font-weight: 600;
                     color: #fff;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
                 }
+                
                 .nav-buttons {
                     display: flex;
                     gap: 15px;
                 }
+                
                 .btn {
-                    display: inline-block;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
                     padding: 12px 24px;
                     border-radius: 8px;
                     font-weight: 600;
@@ -75,11 +93,13 @@
                     position: relative;
                     z-index: 100;
                 }
+                
                 .btn-primary {
                     background-color: #f44336;
                     color: white;
                     border-color: #f44336;
                 }
+                
                 .btn-primary:hover {
                     background-color: #e53935;
                     border-color: #e53935;
@@ -88,11 +108,13 @@
                     color: white;
                     text-decoration: none;
                 }
+                
                 .btn-secondary {
                     background-color: rgba(255, 255, 255, 0.2);
                     color: white;
                     border-color: rgba(255, 255, 255, 0.4);
                 }
+                
                 .btn-secondary:hover {
                     background-color: rgba(255, 255, 255, 0.3);
                     border-color: rgba(255, 255, 255, 0.6);
@@ -101,36 +123,43 @@
                     color: white;
                     text-decoration: none;
                 }
+                
                 .btn-large {
                     padding: 16px 32px;
                     font-size: 16px;
                     font-weight: 700;
                 }
+                
                 .hero-content {
                     max-width: 600px;
-                    margin: 50px 0;
+                    margin: 60px 0;
                     position: relative;
                     z-index: 10;
                 }
+                
                 .hero-title {
                     font-size: 48px;
                     font-weight: 700;
                     margin-bottom: 20px;
                     line-height: 1.2;
                 }
+                
                 .hero-subtitle {
                     font-size: 18px;
                     margin-bottom: 40px;
                     opacity: 0.9;
                 }
+                
                 .hero-buttons {
                     display: flex;
                     gap: 20px;
                     margin-bottom: 30px;
                 }
+                
                 .features {
                     padding: 80px 0;
                 }
+                
                 .section-title {
                     text-align: center;
                     margin-bottom: 60px;
@@ -138,87 +167,183 @@
                     font-weight: 600;
                     color: #333;
                 }
+                
                 .features-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
                     gap: 30px;
                 }
+                
                 .feature-card {
                     background-color: #fff;
-                    border-radius: 10px;
-                    padding: 30px;
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+                    border-radius: 16px;
+                    padding: 40px 30px;
+                    box-shadow: 0 5px 25px rgba(0,0,0,0.05);
                     transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    text-align: center;
                 }
+                
                 .feature-card:hover {
                     transform: translateY(-5px);
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
                 }
+                
                 .feature-icon {
+                    background-color: rgba(26, 35, 126, 0.1);
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                     font-size: 36px;
-                    margin-bottom: 20px;
+                    margin: 0 auto 20px;
                     color: #1a237e;
                 }
+                
                 .feature-title {
-                    font-size: 20px;
+                    font-size: 22px;
                     font-weight: 600;
                     margin-bottom: 15px;
+                    color: #1a237e;
                 }
+                
                 .cta-section {
                     background-color: #f5f5f5;
                     padding: 80px 0;
                     text-align: center;
                 }
+                
                 .cta-title {
                     font-size: 36px;
                     font-weight: 600;
                     margin-bottom: 20px;
+                    color: #1a237e;
                 }
+                
                 .cta-subtitle {
                     font-size: 18px;
                     max-width: 600px;
                     margin: 0 auto 30px;
                     opacity: 0.8;
                 }
-                .footer {
-                    background-color: #333;
-                    color: #fff;
-                    padding: 20px 0;
-                    text-align: center;
+                
+                .cta-buttons {
+                    display: flex;
+                    justify-content: center;
+                    gap: 20px;
                 }
+                
+                .footer {
+                    background-color: #1a237e;
+                    color: #fff;
+                    padding: 40px 0 20px;
+                }
+                
+                .footer-content {
+                    display: flex;
+                    flex-wrap: wrap;
+                    justify-content: space-between;
+                    gap: 40px;
+                    margin-bottom: 30px;
+                }
+                
+                .footer-section {
+                    flex: 1;
+                    min-width: 250px;
+                }
+                
+                .footer-section h3 {
+                    font-size: 18px;
+                    margin-bottom: 20px;
+                    position: relative;
+                    padding-bottom: 10px;
+                }
+                
+                .footer-section h3::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 40px;
+                    height: 2px;
+                    background-color: #f44336;
+                }
+                
+                .footer-links {
+                    list-style: none;
+                }
+                
+                .footer-links li {
+                    margin-bottom: 10px;
+                }
+                
+                .footer-links a {
+                    color: rgba(255,255,255,0.8);
+                    text-decoration: none;
+                    transition: all 0.3s ease;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                
+                .footer-links a:hover {
+                    color: #fff;
+                    text-decoration: none;
+                }
+                
+                .footer-bottom {
+                    text-align: center;
+                    padding-top: 20px;
+                    border-top: 1px solid rgba(255,255,255,0.1);
+                }
+                
                 /* Responsive adjustments */
                 @media (max-width: 768px) {
                     .hero-title {
                         font-size: 36px;
                     }
+                    
                     .section-title {
                         font-size: 30px;
                     }
+                    
                     .feature-card {
-                        padding: 20px;
+                        padding: 30px 20px;
                     }
+                    
                     .hero-buttons {
                         flex-direction: column;
                         gap: 15px;
                     }
+                    
                     .btn-large {
                         padding: 14px 24px;
                         font-size: 15px;
                     }
+                    
+                    .cta-buttons {
+                        flex-direction: column;
+                        align-items: center;
+                    }
                 }
+                
                 @media (max-width: 480px) {
                     .navbar {
                         flex-direction: column;
                         gap: 20px;
                     }
+                    
                     .nav-buttons {
                         flex-direction: column;
                         width: 100%;
                         gap: 10px;
                     }
+                    
                     .hero-title {
                         font-size: 30px;
                     }
+                    
                     .btn {
                         width: 100%;
                     }
@@ -236,8 +361,11 @@
                         <i class="fas fa-hotel"></i> HotelPro
                     </div>
                     <div class="nav-buttons">
-                        <a href="{{ url('/') }}" class="btn btn-secondary">
-                            <i class="fas fa-home"></i> Home
+                        <a href="{{ route('login') }}" class="btn btn-secondary">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                        <a href="{{ route('register') }}" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Register
                         </a>
                     </div>
                 </div>
@@ -251,17 +379,13 @@
                     
                     <!-- Main Action Buttons -->
                     <div class="hero-buttons">
-                        <a href="/superadmin/login" class="btn btn-secondary btn-large">
-                            <i class="fas fa-user-shield"></i> SUPERADMIN LOGIN
+                        <a href="{{ route('login') }}" class="btn btn-secondary btn-large">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
                         </a>
-                        <a href="/register" class="btn btn-primary btn-large">
-                            <i class="fas fa-building"></i> USER REGISTRATION
+                        <a href="{{ route('register') }}" class="btn btn-primary btn-large">
+                            <i class="fas fa-user-plus"></i> Create Account
                         </a>
                     </div>
-                    
-                    <a href="/register" class="btn btn-primary">
-                        <i class="fas fa-rocket"></i> Get Started Free
-                    </a>
                 </div>
             </div>
         </section>
@@ -269,7 +393,7 @@
         <!-- Features Section -->
         <section class="features">
             <div class="container">
-                <h2 class="section-title">Powerful Features</h2>
+                <h2 class="section-title">Key Features</h2>
                 
                 <div class="features-grid">
                     <div class="feature-card">
