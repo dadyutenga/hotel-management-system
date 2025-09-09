@@ -26,7 +26,7 @@
         
         .overlay-pattern {
             position: fixed;
-            top: 0;
+            top: 0
             left: 0;
             width: 100%;
             height: 100%;
@@ -549,8 +549,23 @@
                 </div>
                 @endif
 
-                <form method="POST" action="/register" enctype="multipart/form-data" id="registration-form">
+                <form method="POST" action="/register" enctype="multipart/form-data" id="registration-form" novalidate>
                     @csrf
+                    
+
+                    <!-- Hidden fields to track old file input values -->
+                    @if(old('business_license'))
+                        <input type="hidden" data-old-input="business_license" value="1">
+                    @endif
+                    @if(old('tax_certificate'))
+                        <input type="hidden" data-old-input="tax_certificate" value="1">
+                    @endif
+                    @if(old('owner_id'))
+                        <input type="hidden" data-old-input="owner_id" value="1">
+                    @endif
+                    @if(old('registration_certificate'))
+                        <input type="hidden" data-old-input="registration_certificate" value="1">
+                    @endif
                     
                     <!-- Step 1: Business Details -->
                     <div class="form-section active" id="step1">
@@ -826,21 +841,16 @@
     </div>
 
     <script>
-        // Initialize step based on validation errors
         let currentStep = 1;
         const totalSteps = 3;
-        
-        // Check for validation errors and set appropriate step
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if we have validation errors
-            const hasErrors = document.querySelectorAll('.invalid-feedback').length > 0;
-            
-            if (hasErrors) {
-                // Determine which step has errors
-                const step1Errors = document.querySelectorAll('#step1 .invalid-feedback').length > 0;
-                const step2Errors = document.querySelectorAll('#step2 .invalid-feedback').length > 0;
-                const step3Errors = document.querySelectorAll('#step3 .invalid-feedback').length > 0;
-                
+            const hasServerErrors = document.querySelector('.is-invalid') !== null;
+
+            if (hasServerErrors) {
+                const step3Errors = document.querySelectorAll('#step3 .is-invalid').length > 0;
+                const step2Errors = document.querySelectorAll('#step2 .is-invalid').length > 0;
+
                 if (step3Errors) {
                     currentStep = 3;
                 } else if (step2Errors) {
@@ -848,22 +858,16 @@
                 } else {
                     currentStep = 1;
                 }
-                
-                // Apply the correct step
                 showStep(currentStep);
             }
+            
+            initializeFileUploads();
         });
 
         function showStep(step) {
-            // Hide all steps
-            document.querySelectorAll('.form-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Show current step
+            document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
             document.getElementById(`step${step}`).classList.add('active');
-            
-            // Update step indicators
+
             document.querySelectorAll('.step').forEach((stepEl, index) => {
                 stepEl.classList.remove('active', 'completed');
                 if (index + 1 < step) {
@@ -872,36 +876,67 @@
                     stepEl.classList.add('active');
                 }
             });
+
+            document.getElementById('prev-btn').style.display = step === 1 ? 'none' : 'inline-flex';
+            document.getElementById('next-btn').style.display = step === totalSteps ? 'none' : 'inline-flex';
+            document.getElementById('submit-btn').style.display = step === totalSteps ? 'inline-flex' : 'none';
+        }
+
+        function validateCurrentStep() {
+            let isValid = true;
+            const currentSection = document.getElementById(`step${currentStep}`);
             
-            // Update navigation buttons
-            document.getElementById('prev-btn').style.display = step === 1 ? 'none' : 'inline-block';
-            document.getElementById('next-btn').style.display = step === totalSteps ? 'none' : 'inline-block';
-            document.getElementById('submit-btn').style.display = step === totalSteps ? 'inline-block' : 'none';
+            // Clear previous custom errors
+            currentSection.querySelectorAll('.custom-invalid-feedback').forEach(el => el.remove());
+
+            // Validate all required inputs in the current step
+            const inputs = currentSection.querySelectorAll('input[required], select[required], textarea[required]');
+
+            inputs.forEach(input => {
+                let fieldIsValid = true;
+                const isFile = input.type === 'file';
+                const fileUploadDiv = isFile ? input.closest('.file-upload') : null;
+
+                if (isFile) {
+                    const hasOldValue = document.querySelector(`[data-old-input="${input.name}"]`) !== null;
+                    if (input.files.length === 0 && !hasOldValue) {
+                        fieldIsValid = false;
+                        fileUploadDiv.style.borderColor = '#f44336';
+                    } else {
+                        fileUploadDiv.style.borderColor = ''; // Reset
+                    }
+                } else {
+                    if (!input.value.trim()) {
+                        fieldIsValid = false;
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                }
+
+                if (!fieldIsValid) {
+                    isValid = false;
+                    // Show custom error message if one doesn't exist
+                    const parentGroup = input.closest('.form-group');
+                    if (parentGroup && !parentGroup.querySelector('.invalid-feedback')) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback custom-invalid-feedback';
+                        errorDiv.textContent = 'This field is required.';
+                        parentGroup.appendChild(errorDiv);
+                    }
+                }
+            });
+
+            return isValid;
         }
 
         function nextStep() {
-            // Basic validation before moving to next step
-            const currentFields = document.querySelectorAll(`#step${currentStep} input[required], #step${currentStep} select[required], #step${currentStep} textarea[required]`);
-            let isValid = true;
-            
-            currentFields.forEach(field => {
-                if (!field.value) {
-                    field.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    field.classList.remove('is-invalid');
+            if (validateCurrentStep()) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    showStep(currentStep);
+                    document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
                 }
-            });
-            
-            if (!isValid) {
-                return; // Don't proceed if validation fails
-            }
-            
-            if (currentStep < totalSteps) {
-                currentStep++;
-                showStep(currentStep);
-                // Scroll to top of form for better UX
-                document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
             }
         }
 
@@ -909,34 +944,29 @@
             if (currentStep > 1) {
                 currentStep--;
                 showStep(currentStep);
-                // Scroll to top of form for better UX
                 document.querySelector('.form-card').scrollIntoView({ behavior: 'smooth' });
             }
         }
 
-        // File upload feedback
-        document.querySelectorAll('input[type="file"]').forEach(input => {
-            input.addEventListener('change', function() {
-                const uploadDiv = this.parentElement;
+        function initializeFileUploads() {
+            document.querySelectorAll('.file-upload').forEach(uploadDiv => {
+                const input = uploadDiv.querySelector('input[type="file"]');
                 const textDiv = uploadDiv.querySelector('.file-upload-text');
-                if (this.files.length > 0) {
-                    textDiv.textContent = this.files[0].name;
+                const hasOldValue = document.querySelector(`[data-old-input="${input.name}"]`) !== null;
+
+                if (hasOldValue && !uploadDiv.closest('.form-group').querySelector('.invalid-feedback')) {
+                    textDiv.textContent = "File previously uploaded & verified.";
                     uploadDiv.style.borderColor = '#4caf50';
-                    uploadDiv.style.backgroundColor = '#f8fff8';
                 }
+
+                input.addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        textDiv.textContent = this.files[0].name;
+                        uploadDiv.style.borderColor = '#4caf50';
+                    }
+                });
             });
-        });
-        
-        // Add field validation on blur for better UX
-        document.querySelectorAll('.form-control').forEach(field => {
-            field.addEventListener('blur', function() {
-                if (this.hasAttribute('required') && !this.value) {
-                    this.classList.add('is-invalid');
-                } else {
-                    this.classList.remove('is-invalid');
-                }
-            });
-        });
+        }
     </script>
 </body>
 </html>
