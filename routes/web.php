@@ -25,6 +25,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
+// Add this route for the rejected dashboard
+Route::get('/dashboard/rejected', [AuthController::class, 'showRejectedDashboard'])
+    ->middleware('auth')
+    ->name('dashboard.rejected');
+
 // Superadmin routes
 Route::group(['prefix' => 'superadmin'], function () {
     // Guest routes

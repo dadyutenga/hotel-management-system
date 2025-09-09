@@ -163,20 +163,25 @@ class AuthController extends Controller
             ]);
         }
 
-        // Check if tenant is verified
-        $tenant = $user->tenant;
-        if ($tenant->status !== Tenant::STATUS_VERIFIED) {
-            Auth::login($user);
-            return redirect()->route('dashboard.pending');
-        }
-
         // Login successful
         Auth::login($user);
         
         // Update last login timestamp
         $user->update(['last_login_at' => now()]);
 
-        return redirect()->intended(route('dashboard'));
+        // Check tenant status and redirect accordingly
+        $tenant = $user->tenant;
+        
+        if ($tenant->status === Tenant::STATUS_VERIFIED) {
+            return redirect()->intended(route('dashboard'));
+        } elseif ($tenant->status === Tenant::STATUS_PENDING) {
+            return redirect()->route('dashboard.pending');
+        } elseif ($tenant->status === Tenant::STATUS_REJECTED) {
+            return redirect()->route('dashboard.rejected');
+        }
+
+        // Fallback to pending if status is unknown
+        return redirect()->route('dashboard.pending');
     }
 
     /**
@@ -187,9 +192,11 @@ class AuthController extends Controller
         $user = Auth::user();
         $tenant = $user->tenant;
 
-        // Check if the tenant is now verified and redirect to main dashboard
+        // Check tenant status and redirect accordingly
         if ($tenant->status === Tenant::STATUS_VERIFIED) {
             return redirect()->route('dashboard');
+        } elseif ($tenant->status === Tenant::STATUS_REJECTED) {
+            return redirect()->route('dashboard.rejected');
         }
 
         return view('Users.PendingDashboard', compact('tenant'));
@@ -203,8 +210,12 @@ class AuthController extends Controller
         $user = Auth::user();
         $tenant = $user->tenant;
 
-        // Ensure tenant is verified
-        if ($tenant->status !== Tenant::STATUS_VERIFIED) {
+        // Ensure tenant is verified, redirect to appropriate status page
+        if ($tenant->status === Tenant::STATUS_PENDING) {
+            return redirect()->route('dashboard.pending');
+        } elseif ($tenant->status === Tenant::STATUS_REJECTED) {
+            return redirect()->route('dashboard.rejected');
+        } elseif ($tenant->status !== Tenant::STATUS_VERIFIED) {
             return redirect()->route('dashboard.pending');
         }
 
@@ -242,5 +253,29 @@ class AuthController extends Controller
                 'created_at' => now(),
             ]);
         }
+    }
+
+    /**
+     * Show rejected verification dashboard
+     */
+    public function showRejectedDashboard()
+    {
+        $user = Auth::user();
+        $tenant = $user->tenant;
+
+        // Check if the tenant status has changed and redirect accordingly
+        if ($tenant->status === Tenant::STATUS_VERIFIED) {
+            return redirect()->route('dashboard');
+        } elseif ($tenant->status === Tenant::STATUS_PENDING) {
+            return redirect()->route('dashboard.pending');
+        }
+
+        // Get the rejection notification for this tenant
+        $rejectionNotification = Notification::where('tenant_id', $tenant->id)
+            ->where('type', 'account_rejected')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        return view('Users.Rejected', compact('tenant', 'rejectionNotification'));
     }
 }
