@@ -264,4 +264,40 @@ class SuperadminController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    /**
+     * View a document in browser
+     */
+    public function viewDocument($tenantId, $documentType)
+    {
+        try {
+            $superadmin = Auth::guard('superadmin')->user();
+            
+            $tenant = Tenant::findOrFail($tenantId);
+            
+            $allowedTypes = ['business_license', 'tax_certificate', 'owner_id', 'registration_certificate'];
+            
+            if (!in_array($documentType, $allowedTypes)) {
+                abort(400, 'Invalid document type');
+            }
+
+            $filePath = $tenant->$documentType;
+            
+            if (!$filePath || !Storage::disk('public')->exists($filePath)) {
+                abort(404, 'Document not found');
+            }
+
+            // Return the file with proper headers for viewing in browser
+            $fullPath = storage_path('app/public/' . $filePath);
+            $mimeType = mime_content_type($fullPath);
+            
+            return response()->file($fullPath, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error viewing document: ' . $e->getMessage());
+            abort(404, 'Document not found');
+        }
+    }
 }

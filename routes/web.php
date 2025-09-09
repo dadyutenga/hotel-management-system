@@ -48,5 +48,7 @@ Route::group(['prefix' => 'superadmin'], function () {
         Route::post('/tenants/{tenant}/reject', [SuperadminController::class, 'rejectTenant']);
         Route::get('/tenants/{tenant}/documents/{type}/download', [SuperadminController::class, 'downloadDocument']);
         Route::post('/superadmin/notifications/{notificationId}/mark-read', [SuperadminController::class, 'markNotificationAsRead'])->name('superadmin.markNotificationAsRead');
+        Route::get('/tenants/{tenant}/documents/{documentType}', [SuperadminController::class, 'viewDocument'])->name('superadmin.tenant.document');
+        Route::get('/tenants/{tenant}/documents/{documentType}/download', [SuperadminController::class, 'downloadDocument'])->name('superadmin.tenant.download');
     });
 });

@@ -708,16 +708,20 @@
             `;
         }
 
-        function generateDocumentCard(name, url, tenantId, type) {
-            if (url) {
-                const downloadUrl = `/superadmin/tenants/${tenantId}/documents/${type}/download`;
+        function generateDocumentCard(name, filePath, tenantId, documentType) {
+            const hasDocument = filePath && filePath.trim() !== '';
+            
+            if (hasDocument) {
+                const documentUrl = `/superadmin/tenants/${tenantId}/documents/${documentType}`;
+                const downloadUrl = `/superadmin/tenants/${tenantId}/documents/${documentType}/download`;
+                
                 return `
                     <div class="document-card">
                         <div class="document-icon">
-                            <i class="fas fa-file-pdf"></i>
+                            <i class="fas ${getDocumentIcon(documentType)}"></i>
                         </div>
                         <div class="document-name">${name}</div>
-                        <button class="btn btn-primary btn-sm" onclick="openDocumentViewer('${url}', '${name}', '${downloadUrl}')">
+                        <button class="btn btn-primary btn-sm" onclick="viewDocument('${tenantId}', '${documentType}', '${name}')">
                             <i class="fas fa-eye"></i> View
                         </button>
                         <a href="${downloadUrl}" class="btn btn-secondary btn-sm">
@@ -736,6 +740,25 @@
                     </div>
                 `;
             }
+        }
+
+        function getDocumentIcon(documentType) {
+            switch(documentType) {
+                case 'business_license': return 'fa-certificate';
+                case 'tax_certificate': return 'fa-file-invoice';
+                case 'owner_id': return 'fa-id-card';
+                case 'registration_certificate': return 'fa-file-contract';
+                default: return 'fa-file-alt';
+            }
+        }
+
+        function viewDocument(tenantId, documentType, documentName) {
+            // Construct the document URL and download URL
+            const documentUrl = `/superadmin/tenants/${tenantId}/documents/${documentType}`;
+            const downloadUrl = `/superadmin/tenants/${tenantId}/documents/${documentType}/download`;
+            
+            // Use the document viewer component function
+            openDocumentViewer(documentUrl, documentName, downloadUrl);
         }
 
         function closeTenantModal() {

@@ -66,18 +66,43 @@
         // Set download link
         downloadLink.href = downloadUrl;
 
-        // Determine file type and display accordingly
-        const fileExtension = url.split('.').pop().toLowerCase();
-        if (fileExtension === 'pdf') {
-            container.innerHTML = `<iframe src="${url}" title="${title}"></iframe>`;
-        } else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
-            container.innerHTML = `<img src="${url}" alt="${title}" />`;
-        } else {
-            container.innerHTML = `<p>Unsupported file type. <a href="${url}" target="_blank">Open in new tab</a></p>`;
-        }
-
-        // Show modal
+        // Show modal first
         modal.style.display = 'block';
+
+        // Show loading state
+        container.innerHTML = '<div style="text-align: center; padding: 50px;"><i class="fas fa-spinner fa-spin"></i> Loading document...</div>';
+
+        // Try to load as image first
+        const img = new Image();
+        img.onload = function() {
+            // Successfully loaded as image
+            container.innerHTML = `<img src="${url}" alt="${title}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />`;
+        };
+
+        img.onerror = function() {
+            // Failed as image, try as PDF in iframe
+            const iframe = document.createElement('iframe');
+            iframe.src = url;
+            iframe.title = title;
+            iframe.style.cssText = 'width: 100%; height: 100%; border: none;';
+            
+            // Clear container and add iframe
+            container.innerHTML = '';
+            container.appendChild(iframe);
+
+            // Set a timeout to check if iframe loaded successfully
+            setTimeout(function() {
+                try {
+                    // If we can't access iframe content, assume it failed
+                    iframe.contentDocument;
+                } catch (e) {
+                    // Iframe likely loaded successfully (cross-origin restriction is normal)
+                }
+            }, 3000);
+        };
+
+        // Start the image test
+        img.src = url;
     }
 
     function closeDocumentViewer() {
