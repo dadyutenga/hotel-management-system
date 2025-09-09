@@ -12,27 +12,52 @@ use Illuminate\Support\Facades\Storage;
 class SuperadminController extends Controller
 {
     /**
-     * Show pending tenant registrations for verification
+     * Show tenant registrations for verification (pending and rejected)
      */
-    public function verifyAccounts()
+    public function verifyAccounts(Request $request)
     {
         $superadmin = Auth::guard('superadmin')->user();
         
-        // Get all pending tenants with their admin users (DIRECTOR role)
-        $pendingTenants = Tenant::with(['users' => function($query) {
+        // Get status filter from request, default to 'pending'
+        $status = $request->get('status', 'pending');
+        $allowedStatuses = ['pending', 'rejected', 'all'];
+        
+        if (!in_array($status, $allowedStatuses)) {
+            $status = 'pending';
+        }
+        
+        // Build query based on status filter
+        $query = Tenant::with(['users' => function($query) {
             $query->whereHas('role', function($roleQuery) {
                 $roleQuery->where('name', 'DIRECTOR');
             });
-        }])
-        ->where('status', Tenant::STATUS_PENDING)
-        ->orderBy('created_at', 'desc')
-        ->paginate(10);
-
-        return view('Superadmin.VerifyAcc', compact('pendingTenants'));
+        }]);
+        
+        if ($status === 'pending') {
+            $query->where('status', Tenant::STATUS_PENDING);
+        } elseif ($status === 'rejected') {
+            $query->where('status', Tenant::STATUS_REJECTED);
+        }
+        // For 'all', we don't add any status filter
+        
+        $tenants = $query->orderBy('created_at', 'desc')->paginate(10);
+        
+        // Get counts for stats
+        $pendingCount = Tenant::where('status', Tenant::STATUS_PENDING)->count();
+        $rejectedCount = Tenant::where('status', Tenant::STATUS_REJECTED)->count();
+        $verifiedCount = Tenant::where('status', Tenant::STATUS_VERIFIED)->count();
+        
+        return view('Superadmin.VerifyAcc', compact(
+            'tenants', 
+            'status', 
+            'pendingCount',
+            'rejectedCount',
+            'verifiedCount'
+        ));
     }
 
     /**
-     * Show all tenant accounts
+     * Show all tenant accounts (for ViewAcc page)
      */
     public function viewAccounts()
     {
@@ -55,28 +80,57 @@ class SuperadminController extends Controller
      */
     public function showTenantDetails($tenantId)
     {
-        $superadmin = Auth::guard('superadmin')->user();
-        
-        $tenant = Tenant::with(['users' => function($query) {
-            $query->whereHas('role', function($roleQuery) {
-                $roleQuery->where('name', 'DIRECTOR');
-            });
-        }])->findOrFail($tenantId);
+        try {
+            $superadmin = Auth::guard('superadmin')->user();
+            
+            $tenant = Tenant::with(['users' => function($query) {
+                $query->whereHas('role', function($roleQuery) {
+                    $roleQuery->where('name', 'DIRECTOR');
+                });
+            }])->findOrFail($tenantId);
 
-        return response()->json([
-            'tenant' => $tenant,
-            'admin_user' => $tenant->users->first(),
-            'documents' => [
-                'business_license' => $tenant->business_license ? Storage::url($tenant->business_license) : null,
-                'tax_certificate' => $tenant->tax_certificate ? Storage::url($tenant->tax_certificate) : null,
-                'owner_id' => $tenant->owner_id ? Storage::url($tenant->owner_id) : null,
-                'registration_certificate' => $tenant->registration_certificate ? Storage::url($tenant->registration_certificate) : null,
-            ]
-        ]);
+            $adminUser = $tenant->users->first();
+
+            return response()->json([
+                'success' => true,
+                'tenant' => [
+                    'id' => $tenant->id,
+                    'name' => $tenant->name,
+                    'business_type' => $tenant->business_type,
+                    'contact_email' => $tenant->contact_email,
+                    'contact_phone' => $tenant->contact_phone,
+                    'address' => $tenant->address,
+                    'city' => $tenant->city,
+                    'country' => $tenant->country,
+                    'certification_type' => $tenant->certification_type,
+                    'tin_vat_number' => $tenant->tin_vat_number,
+                    'status' => $tenant->status,
+                    'created_at' => $tenant->created_at->format('M d, Y H:i'),
+                ],
+                'admin_user' => $adminUser ? [
+                    'name' => $adminUser->name,
+                    'username' => $adminUser->username,
+                    'email' => $adminUser->email,
+                    'phone' => $adminUser->phone,
+                ] : null,
+                'documents' => [
+                    'business_license' => $tenant->business_license,
+                    'tax_certificate' => $tenant->tax_certificate,
+                    'owner_id' => $tenant->owner_id,
+                    'registration_certificate' => $tenant->registration_certificate,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching tenant details: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error loading tenant details: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
-     * Approve a tenant registration
+     * Approve a tenant registration (works for both pending and rejected)
      */
     public function approveTenant(Request $request, $tenantId)
     {
@@ -84,9 +138,12 @@ class SuperadminController extends Controller
         
         $tenant = Tenant::findOrFail($tenantId);
         
-        if ($tenant->status !== Tenant::STATUS_PENDING) {
-            return response()->json(['error' => 'Tenant is not in pending status'], 400);
+        // Allow approval for both pending and rejected tenants
+        if (!in_array($tenant->status, [Tenant::STATUS_PENDING, Tenant::STATUS_REJECTED])) {
+            return response()->json(['error' => 'Tenant cannot be approved in current status'], 400);
         }
+
+        $wasRejected = $tenant->status === Tenant::STATUS_REJECTED;
 
         // Update tenant status
         $tenant->update([
@@ -104,19 +161,23 @@ class SuperadminController extends Controller
         }
 
         // Create notification for the tenant
+        $notificationMessage = $wasRejected 
+            ? 'Your business registration has been re-approved after review. You can now access the full system.'
+            : 'Your business registration has been approved. You can now access the full system.';
+
         Notification::create([
             'id' => \Illuminate\Support\Str::uuid(),
             'tenant_id' => $tenant->id,
             'superadmin_id' => $superadmin->id,
-            'type' => 'account_approved',
-            'title' => 'Account Approved',
-            'message' => 'Your business registration has been approved. You can now access the full system.',
+            'type' => $wasRejected ? 'account_reapproved' : 'account_approved',
+            'title' => $wasRejected ? 'Account Re-approved' : 'Account Approved',
+            'message' => $notificationMessage,
             'is_read' => false,
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Tenant approved successfully'
+            'message' => $wasRejected ? 'Tenant re-approved successfully' : 'Tenant approved successfully'
         ]);
     }
 
@@ -134,7 +195,7 @@ class SuperadminController extends Controller
         $tenant = Tenant::findOrFail($tenantId);
         
         if ($tenant->status !== Tenant::STATUS_PENDING) {
-            return response()->json(['error' => 'Tenant is not in pending status'], 400);
+            return response()->json(['error' => 'Only pending tenants can be rejected'], 400);
         }
 
         // Update tenant status

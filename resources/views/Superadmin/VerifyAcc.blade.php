@@ -397,6 +397,47 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Add these styles to your existing CSS */
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0;
+        }
+
+        .filter-tab {
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #6b7280;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-tab:hover {
+            color: #374151;
+            background: #f9fafb;
+        }
+
+        .filter-tab.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .status-rejected {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
+        .status-verified {
+            background: #bbf7d0;
+            color: #065f46;
+        }
     </style>
 </head>
 <body>
@@ -409,14 +450,38 @@
             <!-- Page Header -->
             <div class="page-header">
                 <h1 class="page-title">Verify Accounts</h1>
-                <p class="page-subtitle">Review and approve pending business registrations</p>
+                <p class="page-subtitle">Review and manage business registrations</p>
+            </div>
+
+            <!-- Status Filter Tabs -->
+            <div class="filter-tabs" style="margin-bottom: 30px;">
+                <a href="{{ route('superadmin.verify-accounts', ['status' => 'pending']) }}" 
+                   class="filter-tab {{ $status === 'pending' ? 'active' : '' }}">
+                    <i class="fas fa-clock"></i> Pending ({{ $pendingCount }})
+                </a>
+                <a href="{{ route('superadmin.verify-accounts', ['status' => 'rejected']) }}" 
+                   class="filter-tab {{ $status === 'rejected' ? 'active' : '' }}">
+                    <i class="fas fa-times-circle"></i> Rejected ({{ $rejectedCount }})
+                </a>
+                <a href="{{ route('superadmin.verify-accounts', ['status' => 'all']) }}" 
+                   class="filter-tab {{ $status === 'all' ? 'active' : '' }}">
+                    <i class="fas fa-list"></i> All Registrations
+                </a>
             </div>
 
             <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value">{{ $pendingTenants->total() }}</div>
+                    <div class="stat-value">{{ $pendingCount }}</div>
                     <div class="stat-label">Pending Registrations</div>
+                </div>
+                <div class="stat-card" style="border-left-color: #ef4444;">
+                    <div class="stat-value">{{ $rejectedCount }}</div>
+                    <div class="stat-label">Rejected Registrations</div>
+                </div>
+                <div class="stat-card" style="border-left-color: #10b981;">
+                    <div class="stat-value">{{ $verifiedCount }}</div>
+                    <div class="stat-label">Verified Registrations</div>
                 </div>
             </div>
 
@@ -435,10 +500,18 @@
             <!-- Tenants List -->
             <div class="tenants-section">
                 <div class="section-header">
-                    <h2 class="section-title">Pending Registrations</h2>
+                    <h2 class="section-title">
+                        @if($status === 'pending')
+                            Pending Registrations
+                        @elseif($status === 'rejected')
+                            Rejected Registrations
+                        @else
+                            All Registrations
+                        @endif
+                    </h2>
                 </div>
 
-                @if($pendingTenants->count() > 0)
+                @if($tenants->count() > 0)
                 <table class="tenants-table">
                     <thead>
                         <tr>
@@ -451,7 +524,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($pendingTenants as $tenant)
+                        @foreach($tenants as $tenant)
                         <tr>
                             <td>
                                 <div>
@@ -467,7 +540,11 @@
                             </td>
                             <td>{{ $tenant->created_at->format('M d, Y') }}</td>
                             <td>
-                                <span class="status-badge status-pending">
+                                <span class="status-badge 
+                                    @if($tenant->status === 'pending') status-pending
+                                    @elseif($tenant->status === 'rejected') status-rejected
+                                    @else status-verified
+                                    @endif">
                                     {{ ucfirst($tenant->status) }}
                                 </span>
                             </td>
@@ -483,13 +560,21 @@
 
                 <!-- Pagination -->
                 <div class="pagination">
-                    {{ $pendingTenants->links() }}
+                    {{ $tenants->appends(['status' => $status])->links() }}
                 </div>
                 @else
                 <div style="text-align: center; padding: 50px; color: #6b7280;">
                     <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
-                    <h3>No Pending Registrations</h3>
-                    <p>All business registrations have been processed.</p>
+                    <h3>No {{ ucfirst($status) }} Registrations</h3>
+                    <p>
+                        @if($status === 'pending')
+                            All business registrations have been processed.
+                        @elseif($status === 'rejected')
+                            No rejected registrations found.
+                        @else
+                            No registrations found.
+                        @endif
+                    </p>
                 </div>
                 @endif
             </div>
@@ -538,18 +623,34 @@
 
     <script>
         let currentTenantId = null;
+        let currentTenantStatus = null;
 
         function viewTenantDetails(tenantId) {
+            console.log('Fetching details for tenant:', tenantId);
+            
             fetch(`/superadmin/tenants/${tenantId}/details`)
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    displayTenantDetails(data);
-                    currentTenantId = tenantId;
-                    document.getElementById('tenantModal').style.display = 'block';
+                    console.log('Received data:', data);
+                    
+                    if (data.success) {
+                        displayTenantDetails(data);
+                        currentTenantId = tenantId;
+                        currentTenantStatus = data.tenant.status;
+                        document.getElementById('tenantModal').style.display = 'block';
+                    } else {
+                        throw new Error(data.message || 'Unknown error occurred');
+                    }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error loading tenant details');
+                    alert('Error loading tenant details: ' + error.message);
                 });
         }
 
@@ -557,6 +658,8 @@
             const tenant = data.tenant;
             const adminUser = data.admin_user;
             const documents = data.documents;
+            const isRejected = tenant.status === 'rejected';
+            const isPending = tenant.status === 'pending';
 
             const modalBody = document.getElementById('tenantModalBody');
             
@@ -566,31 +669,51 @@
                     <div class="detail-grid">
                         <div class="detail-item">
                             <span class="detail-label">Business Name</span>
-                            <span class="detail-value">${tenant.name}</span>
+                            <span class="detail-value">${tenant.name || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Business Type</span>
-                            <span class="detail-value">${tenant.business_type}</span>
+                            <span class="detail-value">${tenant.business_type || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Contact Email</span>
-                            <span class="detail-value">${tenant.contact_email}</span>
+                            <span class="detail-value">${tenant.contact_email || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Contact Phone</span>
-                            <span class="detail-value">${tenant.contact_phone}</span>
+                            <span class="detail-value">${tenant.contact_phone || 'N/A'}</span>
                         </div>
                         <div class="detail-item" style="grid-column: 1 / -1;">
                             <span class="detail-label">Address</span>
-                            <span class="detail-value">${tenant.address}</span>
+                            <span class="detail-value">${tenant.address || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">City</span>
+                            <span class="detail-value">${tenant.city || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Country</span>
+                            <span class="detail-value">${tenant.country || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Certification Type</span>
-                            <span class="detail-value">${tenant.certification_type}</span>
+                            <span class="detail-value">${tenant.certification_type || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">TIN/VAT Number</span>
                             <span class="detail-value">${tenant.tin_vat_number || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Registration Date</span>
+                            <span class="detail-value">${tenant.created_at || 'N/A'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Current Status</span>
+                            <span class="detail-value">
+                                <span class="status-badge ${getStatusClass(tenant.status)}">
+                                    ${tenant.status ? tenant.status.charAt(0).toUpperCase() + tenant.status.slice(1) : 'Unknown'}
+                                </span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -601,15 +724,15 @@
                     <div class="detail-grid">
                         <div class="detail-item">
                             <span class="detail-label">Full Name</span>
-                            <span class="detail-value">${adminUser.name}</span>
+                            <span class="detail-value">${adminUser.name || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Username</span>
-                            <span class="detail-value">${adminUser.username}</span>
+                            <span class="detail-value">${adminUser.username || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Email</span>
-                            <span class="detail-value">${adminUser.email}</span>
+                            <span class="detail-value">${adminUser.email || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Phone</span>
@@ -617,7 +740,7 @@
                         </div>
                     </div>
                 </div>
-                ` : ''}
+                ` : '<p style="color: #6b7280; padding: 20px; text-align: center;">No admin user information available</p>'}
 
                 <div class="detail-section">
                     <h4><i class="fas fa-file-alt"></i> Uploaded Documents</h4>
@@ -631,64 +754,90 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeTenantModal()">Close</button>
-                    <button type="button" class="btn btn-danger" onclick="showRejectionModal()">
-                        <i class="fas fa-times"></i> Reject
-                    </button>
-                    <button type="button" class="btn btn-success" onclick="approveTenant()">
-                        <i class="fas fa-check"></i> Approve
-                    </button>
+                    ${isPending ? `
+                        <button type="button" class="btn btn-danger" onclick="showRejectionModal()">
+                            <i class="fas fa-times"></i> Reject
+                        </button>
+                    ` : ''}
+                    ${(isPending || isRejected) ? `
+                        <button type="button" class="btn btn-success" onclick="approveTenant()">
+                            <i class="fas fa-check"></i> ${isRejected ? 'Re-approve' : 'Approve'}
+                        </button>
+                    ` : ''}
                 </div>
             `;
         }
 
-        function generateDocumentCard(name, url, tenantId, type) {
-            if (url) {
-                const downloadUrl = `/superadmin/tenants/${tenantId}/documents/${type}/download`;
-                return `
-                    <div class="document-card">
-                        <div class="document-icon">
-                            <i class="fas fa-file-pdf"></i>
-                        </div>
-                        <div class="document-name">${name}</div>
-                        <button class="btn btn-primary btn-sm" onclick="openDocumentViewer('${url}', '${name}', '${downloadUrl}')">
+        function generateDocumentCard(name, filePath, tenantId, documentType) {
+            const hasDocument = filePath && filePath.trim() !== '';
+            
+            return `
+                <div class="document-card">
+                    <div class="document-icon">
+                        <i class="fas ${getDocumentIcon(documentType)}"></i>
+                    </div>
+                    <div class="document-name">${name}</div>
+                    ${hasDocument ? `
+                        <button class="btn btn-primary btn-sm" onclick="viewDocument('${tenantId}', '${documentType}', '${name}')">
                             <i class="fas fa-eye"></i> View
                         </button>
-                        <a href="${downloadUrl}" class="btn btn-secondary btn-sm">
+                        <button class="btn btn-secondary btn-sm" onclick="downloadDocument('${tenantId}', '${documentType}')">
                             <i class="fas fa-download"></i> Download
-                        </a>
-                    </div>
-                `;
-            } else {
-                return `
-                    <div class="document-card" style="opacity: 0.5;">
-                        <div class="document-icon">
-                            <i class="fas fa-file-times"></i>
-                        </div>
-                        <div class="document-name">${name}</div>
-                        <span style="color: #6b7280; font-size: 12px;">Not uploaded</span>
-                    </div>
-                `;
+                        </button>
+                    ` : `
+                        <span style="color: #ef4444; font-size: 12px;">Not uploaded</span>
+                    `}
+                </div>
+            `;
+        }
+
+        function getDocumentIcon(documentType) {
+            switch(documentType) {
+                case 'business_license': return 'fa-certificate';
+                case 'tax_certificate': return 'fa-file-invoice';
+                case 'owner_id': return 'fa-id-card';
+                case 'registration_certificate': return 'fa-file-contract';
+                default: return 'fa-file-alt';
             }
         }
 
-        function closeTenantModal() {
-            document.getElementById('tenantModal').style.display = 'none';
-            currentTenantId = null;
+        function getStatusClass(status) {
+            switch(status) {
+                case 'pending': return 'status-pending';
+                case 'rejected': return 'status-rejected';
+                case 'verified': return 'status-verified';
+                default: return 'status-pending';
+            }
         }
 
-        function showRejectionModal() {
-            document.getElementById('rejectionModal').style.display = 'block';
+        function viewDocument(tenantId, documentType, documentName) {
+            // Construct the document URL and download URL
+            const documentUrl = `/superadmin/tenants/${tenantId}/documents/${documentType}`;
+            const downloadUrl = `/superadmin/tenants/${tenantId}/documents/${documentType}/download`;
+            
+            // Use the document viewer component function
+            openDocumentViewer(documentUrl, documentName, downloadUrl);
         }
 
-        function closeRejectionModal() {
-            document.getElementById('rejectionModal').style.display = 'none';
-            document.getElementById('rejectionForm').reset();
+        function downloadDocument(tenantId, documentType) {
+            const downloadUrl = `/superadmin/tenants/${tenantId}/documents/${documentType}/download`;
+            
+            // Create a temporary link and click it to trigger download
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function approveTenant() {
             if (!currentTenantId) return;
 
-            if (confirm('Are you sure you want to approve this business registration?')) {
+            const action = currentTenantStatus === 'rejected' ? 're-approve' : 'approve';
+            const confirmMessage = `Are you sure you want to ${action} this business registration?`;
+
+            if (confirm(confirmMessage)) {
                 fetch(`/superadmin/tenants/${currentTenantId}/approve`, {
                     method: 'POST',
                     headers: {
@@ -699,7 +848,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Tenant approved successfully!');
+                        alert(data.message);
                         location.reload();
                     } else {
                         alert('Error: ' + (data.message || 'Unknown error'));
@@ -707,9 +856,29 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error approving tenant');
+                    alert('Error processing request');
                 });
             }
+        }
+
+        function showRejectionModal() {
+            document.getElementById('rejectionModal').style.display = 'block';
+        }
+
+        function closeTenantModal() {
+            document.getElementById('tenantModal').style.display = 'none';
+            currentTenantId = null;
+            currentTenantStatus = null;
+        }
+
+        function closeRejectionModal() {
+            document.getElementById('rejectionModal').style.display = 'none';
+            document.getElementById('rejectionForm').reset();
+        }
+
+        function closeDocumentModal() {
+            document.getElementById('documentModal').style.display = 'none';
+            document.getElementById('documentViewer').src = '';
         }
 
         // Handle rejection form submission
@@ -735,6 +904,7 @@
             .then(data => {
                 if (data.success) {
                     alert('Tenant rejected successfully!');
+                    closeRejectionModal();
                     location.reload();
                 } else {
                     alert('Error: ' + (data.message || 'Unknown error'));
@@ -750,12 +920,16 @@
         window.addEventListener('click', function(event) {
             const tenantModal = document.getElementById('tenantModal');
             const rejectionModal = document.getElementById('rejectionModal');
+            const documentModal = document.getElementById('documentModal');
             
             if (event.target === tenantModal) {
                 closeTenantModal();
             }
             if (event.target === rejectionModal) {
                 closeRejectionModal();
+            }
+            if (event.target === documentModal) {
+                closeDocumentModal();
             }
         });
     </script>

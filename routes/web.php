@@ -39,7 +39,7 @@ Route::group(['prefix' => 'superadmin'], function () {
         Route::post('/logout', [SuperAdminAuthController::class, 'logout'])->name('superadmin.logout');
         
         // Tenant management routes
-        Route::get('/verify-accounts', [SuperadminController::class, 'verifyAccounts'])->name('superadmin.verify');
+        Route::get('/verify-accounts', [SuperadminController::class, 'verifyAccounts'])->name('superadmin.verify-accounts');
         Route::get('/view-accounts', [SuperadminController::class, 'viewAccounts'])->name('superadmin.view');
         
         // Tenant actions
