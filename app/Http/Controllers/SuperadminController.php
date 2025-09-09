@@ -59,18 +59,35 @@ class SuperadminController extends Controller
     /**
      * Show all tenant accounts (for ViewAcc page)
      */
-    public function viewAccounts()
+    public function viewAccounts(Request $request)
     {
         $superadmin = Auth::guard('superadmin')->user();
         
-        // Get all tenants with their admin users (DIRECTOR role)
-        $tenants = Tenant::with(['users' => function($query) {
+        // Build query with filters
+        $query = Tenant::with(['users' => function($query) {
             $query->whereHas('role', function($roleQuery) {
                 $roleQuery->where('name', 'DIRECTOR');
             });
-        }])
-        ->orderBy('created_at', 'desc')
-        ->paginate(15);
+        }]);
+        
+        // Apply filters
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+        
+        if ($request->filled('business_type')) {
+            $query->where('business_type', $request->business_type);
+        }
+        
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('contact_email', 'like', "%{$search}%");
+            });
+        }
+        
+        $tenants = $query->orderBy('created_at', 'desc')->paginate(15);
 
         return view('Superadmin.ViewAcc', compact('tenants'));
     }
@@ -105,13 +122,16 @@ class SuperadminController extends Controller
                     'certification_type' => $tenant->certification_type,
                     'tin_vat_number' => $tenant->tin_vat_number,
                     'status' => $tenant->status,
+                    'is_active' => $tenant->is_active,
                     'created_at' => $tenant->created_at->format('M d, Y H:i'),
                 ],
                 'admin_user' => $adminUser ? [
-                    'name' => $adminUser->name,
+                    'name' => $adminUser->full_name,  // Changed from 'name' to 'full_name'
+                    'full_name' => $adminUser->full_name,  // Added this for clarity
                     'username' => $adminUser->username,
                     'email' => $adminUser->email,
                     'phone' => $adminUser->phone,
+                    'is_active' => $adminUser->is_active,
                 ] : null,
                 'documents' => [
                     'business_license' => $tenant->business_license,

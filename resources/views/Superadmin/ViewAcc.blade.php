@@ -620,27 +620,27 @@
                     <div class="detail-grid">
                         <div class="detail-item">
                             <span class="detail-label">Business Name</span>
-                            <span class="detail-value">${tenant.name}</span>
+                            <span class="detail-value">${tenant.name || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Business Type</span>
-                            <span class="detail-value">${tenant.business_type}</span>
+                            <span class="detail-value">${tenant.business_type || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Contact Email</span>
-                            <span class="detail-value">${tenant.contact_email}</span>
+                            <span class="detail-value">${tenant.contact_email || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Contact Phone</span>
-                            <span class="detail-value">${tenant.contact_phone}</span>
+                            <span class="detail-value">${tenant.contact_phone || 'N/A'}</span>
                         </div>
                         <div class="detail-item" style="grid-column: 1 / -1;">
                             <span class="detail-label">Address</span>
-                            <span class="detail-value">${tenant.address}</span>
+                            <span class="detail-value">${tenant.address || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Certification Type</span>
-                            <span class="detail-value">${tenant.certification_type}</span>
+                            <span class="detail-value">${tenant.certification_type || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">TIN/VAT Number</span>
@@ -649,7 +649,7 @@
                         <div class="detail-item">
                             <span class="detail-label">Status</span>
                             <span class="detail-value">
-                                <span class="status-badge status-${tenant.status}">${tenant.status.charAt(0).toUpperCase() + tenant.status.slice(1)}</span>
+                                <span class="status-badge status-${tenant.status}">${tenant.status ? tenant.status.charAt(0).toUpperCase() + tenant.status.slice(1) : 'Unknown'}</span>
                             </span>
                         </div>
                         <div class="detail-item">
@@ -669,15 +669,15 @@
                     <div class="detail-grid">
                         <div class="detail-item">
                             <span class="detail-label">Full Name</span>
-                            <span class="detail-value">${adminUser.name}</span>
+                            <span class="detail-value">${adminUser.name || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Username</span>
-                            <span class="detail-value">${adminUser.username}</span>
+                            <span class="detail-value">${adminUser.username || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Email</span>
-                            <span class="detail-value">${adminUser.email}</span>
+                            <span class="detail-value">${adminUser.email || 'N/A'}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Phone</span>
@@ -685,7 +685,7 @@
                         </div>
                     </div>
                 </div>
-                ` : ''}
+                ` : '<p style="color: #6b7280; padding: 20px; text-align: center;">No admin user information available</p>'}
 
                 <div class="detail-section">
                     <h4><i class="fas fa-file-alt"></i> Uploaded Documents</h4>
