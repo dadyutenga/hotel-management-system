@@ -150,9 +150,9 @@ class AuthController extends Controller
         // Find user by email
         $user = User::where('email', $credentials['email'])->first();
 
-        if (!$user || !$user->is_active) {
+        if (!$user) {
             throw ValidationException::withMessages([
-                'email' => ['Account not found or inactive.'],
+                'email' => ['Account not found.'],
             ]);
         }
 
@@ -163,21 +163,34 @@ class AuthController extends Controller
             ]);
         }
 
+        // Check tenant status first
+        $tenant = $user->tenant;
+        
+        // Allow login for rejected users so they can see rejection page
+        if ($tenant->status === Tenant::STATUS_REJECTED) {
+            Auth::login($user);
+            $user->update(['last_login_at' => now()]);
+            return redirect()->route('dashboard.rejected');
+        }
+        
+        // For other statuses, check if user is active
+        if (!$user->is_active) {
+            throw ValidationException::withMessages([
+                'email' => ['Your account is inactive. Please contact support.'],
+            ]);
+        }
+
         // Login successful
         Auth::login($user);
         
         // Update last login timestamp
         $user->update(['last_login_at' => now()]);
 
-        // Check tenant status and redirect accordingly
-        $tenant = $user->tenant;
-        
+        // Redirect based on tenant status
         if ($tenant->status === Tenant::STATUS_VERIFIED) {
             return redirect()->intended(route('dashboard'));
         } elseif ($tenant->status === Tenant::STATUS_PENDING) {
             return redirect()->route('dashboard.pending');
-        } elseif ($tenant->status === Tenant::STATUS_REJECTED) {
-            return redirect()->route('dashboard.rejected');
         }
 
         // Fallback to pending if status is unknown
@@ -276,6 +289,6 @@ class AuthController extends Controller
             ->orderBy('created_at', 'desc')
             ->first();
 
-        return view('Users.Rejected', compact('tenant', 'rejectionNotification'));
+        return view('Users.Retry', compact('tenant', 'rejectionNotification'));
     }
 }

@@ -16,7 +16,7 @@
         
         body {
             font-family: 'Figtree', sans-serif;
-            background: linear-gradient(135deg, #d32f2f 0%, #f44336 100%);
+            background: linear-gradient(135deg, #a73939 0%, #9e453f 100%);
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
@@ -282,17 +282,6 @@
             gap: 8px;
         }
         
-        .btn-primary {
-            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 152, 0, 0.3);
-        }
-        
         .btn-secondary {
             background: #e0e0e0;
             color: #666;
@@ -301,17 +290,6 @@
         .btn-secondary:hover {
             background: #d0d0d0;
             transform: translateY(-2px);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(244, 67, 54, 0.3);
         }
         
         @media (max-width: 768px) {
@@ -326,13 +304,6 @@
             .container {
                 padding: 20px 15px;
             }
-        }
-        
-        .notification-id {
-            font-size: 12px;
-            color: #666;
-            margin-top: 10px;
-            font-family: monospace;
         }
     </style>
 </head>
@@ -415,9 +386,6 @@
                         <div class="rejection-reason">
                             {{ $rejectionNotification->message }}
                         </div>
-                        <div class="notification-id">
-                            Reference ID: {{ $rejectionNotification->id }}
-                        </div>
                     @else
                         <div class="rejection-reason">
                             Your business registration has been rejected. Please contact our support team for detailed information about the rejection reasons.
@@ -464,7 +432,7 @@
                     </div>
                     
                     <p style="margin-top: 15px; color: #666; font-size: 14px;">
-                        <strong>Please include your reference ID when contacting support for faster assistance.</strong>
+                        <strong>Please mention your business name when contacting support for faster assistance.</strong>
                     </p>
                 </div>
                 
@@ -476,14 +444,6 @@
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </button>
                     </form>
-                    
-                    <a href="mailto:support@hotelpro.com?subject=Registration Rejection Inquiry - {{ $tenant->name }}&body=Hello, I would like to inquire about my rejected business registration for {{ $tenant->name }}. Reference ID: {{ $rejectionNotification->id ?? 'N/A' }}" class="btn btn-primary">
-                        <i class="fas fa-envelope"></i> Email Support
-                    </a>
-                    
-                    <a href="/register" class="btn btn-danger">
-                        <i class="fas fa-redo"></i> Register Again
-                    </a>
                 </div>
             </div>
         </div>

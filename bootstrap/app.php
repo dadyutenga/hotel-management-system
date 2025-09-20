@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Register your custom middleware here
+        $middleware->alias([
+            'check.tenant.status' => \App\Http\Middleware\CheckTenantStatus::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
