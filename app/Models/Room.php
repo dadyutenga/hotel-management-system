@@ -17,7 +17,7 @@ class Room extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
-    protected $table = 'core.rooms';
+    protected $table = 'rooms';
 
     protected $fillable = [
         'property_id',

@@ -17,7 +17,7 @@ class Building extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
-    protected $table = 'core.buildings';
+    protected $table = 'buildings';
 
     protected $fillable = [
         'property_id',
