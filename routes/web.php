@@ -4,6 +4,8 @@ use App\Http\Controllers\SuperAdminAuthController;
 use App\Http\Controllers\SuperadminController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 // Welcome page
 Route::get('/', function () {
@@ -57,3 +59,17 @@ Route::group(['prefix' => 'superadmin'], function () {
         Route::get('/tenants/{tenant}/documents/{documentType}/download', [SuperadminController::class, 'downloadDocument'])->name('superadmin.tenant.download');
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Tenant Routes
+|--------------------------------------------------------------------------
+|
+| Tenant routes are handled by the tenant.php file and are automatically
+| loaded when a tenant domain is accessed. These routes are isolated
+| per tenant using the stancl/tenancy package.
+|
+*/
+
+// The tenant routes are defined in routes/tenant.php
+// They are automatically loaded by the tenancy package when accessing tenant domains
