@@ -48,7 +48,12 @@ return [
     ],
 
     'features' => [
-        // Add features as needed
+        // \Stancl\Tenancy\Features\UserImpersonation::class,
+        // \Stancl\Tenancy\Features\TelescopeTags::class,
+        // \Stancl\Tenancy\Features\UniversalRoutes::class,
+        // \Stancl\Tenancy\Features\TenantConfig::class,
+        // \Stancl\Tenancy\Features\CrossDomainRedirect::class,
+        // \Stancl\Tenancy\Features\ViteBundler::class,
     ],
 
     'storage_drivers' => [
@@ -59,8 +64,8 @@ return [
         'resolvers' => [
             \Stancl\Tenancy\Resolvers\DomainTenantResolver::class => [
                 \Stancl\Tenancy\Middleware\InitializeTenancyByDomain::class,
-                \Stancl\Tenancy\Middleware\InitializeTenancyBySubdomain::class,
             ],
+            // Remove subdomain resolver for now
         ],
     ],
 ];

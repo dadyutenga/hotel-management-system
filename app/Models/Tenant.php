@@ -6,12 +6,10 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Stancl\Tenancy\Database\Concerns\CentralConnection;
-
 
 class Tenant extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes, CentralConnection;
+    use HasFactory, HasUuids, SoftDeletes;
 
     protected $table = 'tenants';
 
@@ -87,6 +85,11 @@ class Tenant extends Model
         return $this->hasMany(User::class, 'tenant_id');
     }
 
+    public function roomTypes()
+    {
+        return $this->hasMany(RoomType::class, 'tenant_id');
+    }
+
     public function roomFeatures()
     {
         return $this->hasMany(RoomFeature::class, 'tenant_id');
@@ -135,20 +138,5 @@ class Tenant extends Model
     public function vendors()
     {
         return $this->hasMany(Vendor::class, 'tenant_id');
-    }
-
-    public function auditLogs()
-    {
-        return $this->hasMany(AuditLog::class, 'tenant_id');
-    }
-
-    public function systemSettings()
-    {
-        return $this->hasMany(SystemSetting::class, 'tenant_id');
-    }
-
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class, 'tenant_id');
     }
 }

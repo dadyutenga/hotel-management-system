@@ -3,9 +3,8 @@
 use App\Http\Controllers\SuperAdminAuthController;
 use App\Http\Controllers\SuperadminController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Tenant\PropertyController;
 use Illuminate\Support\Facades\Route;
-use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
-use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 // Welcome page
 Route::get('/', function () {
@@ -25,6 +24,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/pending', [AuthController::class, 'showPendingDashboard'])->name('dashboard.pending');
     Route::get('/dashboard', [AuthController::class, 'showDashboard'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    
+    // Property management routes (WITHOUT TENANCY FOR NOW)
+    Route::prefix('properties')->name('tenant.properties.')->group(function () {
+        Route::get('/', [PropertyController::class, 'index'])->name('index');
+        Route::get('/create', [PropertyController::class, 'create'])->name('create');
+        Route::post('/', [PropertyController::class, 'store'])->name('store');
+        Route::get('/{property}', [PropertyController::class, 'show'])->name('show');
+        Route::get('/{property}/edit', [PropertyController::class, 'edit'])->name('edit');
+        Route::put('/{property}', [PropertyController::class, 'update'])->name('update');
+        Route::delete('/{property}', [PropertyController::class, 'destroy'])->name('destroy');
+        
+        // AJAX routes
+        Route::post('/{property}/toggle-status', [PropertyController::class, 'toggleStatus'])->name('toggle-status');
+        Route::get('/{property}/stats', [PropertyController::class, 'getStats'])->name('stats');
+        Route::post('/{property}/assign-user', [PropertyController::class, 'assignUser'])->name('assign-user');
+        Route::post('/{property}/remove-user', [PropertyController::class, 'removeUser'])->name('remove-user');
+    });
 });
 
 // Add this route for the rejected dashboard
