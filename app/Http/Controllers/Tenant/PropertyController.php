@@ -30,11 +30,12 @@ class PropertyController extends Controller
         $user = Auth::user();
         
         // Get properties for the current tenant
-        $properties = Property::withCount(['buildings', 'rooms', 'users'])
+        $properties = Property::where('tenant_id', $user->tenant_id)
+            ->withCount(['buildings', 'rooms', 'users'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('tenant.properties.index', compact('properties'));
+        return view('Users.tenant.properties.index', compact('properties'));
     }
 
     /**
@@ -60,7 +61,7 @@ class PropertyController extends Controller
             'Africa/Bujumbura' => 'Central Africa Time - Bujumbura',
         ];
 
-        return view('tenant.properties.create', compact('timezones'));
+        return view('Users.tenant.properties.create', compact('timezones'));
     }
 
     /**
@@ -89,9 +90,9 @@ class PropertyController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create the property - tenant_id will be set automatically by tenancy
+            // Create the property - use user's tenant_id
             $property = Property::create([
-                'tenant_id' => tenant('id'), // Get current tenant ID from tenancy context
+                'tenant_id' => $user->tenant_id,
                 'name' => $validated['name'],
                 'address' => $validated['address'],
                 'contact_phone' => $validated['contact_phone'],
@@ -118,6 +119,13 @@ class PropertyController extends Controller
      */
     public function show(Property $property)
     {
+        $user = Auth::user();
+        
+        // Ensure property belongs to the authenticated tenant
+        if ($property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to property.');
+        }
+
         // Load relationships with counts
         $property->load([
             'buildings.floors.rooms',
@@ -141,7 +149,7 @@ class PropertyController extends Controller
             ->take(10)
             ->get();
 
-        return view('tenant.properties.show', compact('property', 'stats', 'recentActivity'));
+        return view('Users.tenant.properties.show', compact('property', 'stats', 'recentActivity'));
     }
 
     /**
@@ -150,6 +158,11 @@ class PropertyController extends Controller
     public function edit(Property $property)
     {
         $user = Auth::user();
+        
+        // Ensure property belongs to the authenticated tenant
+        if ($property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to property.');
+        }
         
         // Only DIRECTOR and MANAGER roles can edit properties
         if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
@@ -167,7 +180,7 @@ class PropertyController extends Controller
             'Africa/Bujumbura' => 'Central Africa Time - Bujumbura',
         ];
 
-        return view('tenant.properties.edit', compact('property', 'timezones'));
+        return view('Users.tenant.properties.edit', compact('property', 'timezones'));
     }
 
     /**
@@ -176,6 +189,11 @@ class PropertyController extends Controller
     public function update(Request $request, Property $property)
     {
         $user = Auth::user();
+        
+        // Ensure property belongs to the authenticated tenant
+        if ($property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to property.');
+        }
         
         // Only DIRECTOR and MANAGER roles can edit properties
         if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
@@ -225,6 +243,11 @@ class PropertyController extends Controller
     {
         $user = Auth::user();
         
+        // Ensure property belongs to the authenticated tenant
+        if ($property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to property.');
+        }
+        
         // Only DIRECTOR role can delete properties
         if ($user->role->name !== 'DIRECTOR') {
             return redirect()->route('tenant.properties.show', $property->id)
@@ -273,6 +296,14 @@ class PropertyController extends Controller
     {
         $user = Auth::user();
         
+        // Ensure property belongs to the authenticated tenant
+        if ($property->tenant_id !== $user->tenant_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to property.'
+            ], 403);
+        }
+        
         // Only DIRECTOR and MANAGER roles can toggle status
         if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
             return response()->json([
@@ -303,6 +334,13 @@ class PropertyController extends Controller
      */
     public function getStats(Property $property)
     {
+        $user = Auth::user();
+        
+        // Ensure property belongs to the authenticated tenant
+        if ($property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to property.');
+        }
+
         $stats = [
             'buildings' => $property->buildings()->count(),
             'floors' => $property->buildings()->withCount('floors')->get()->sum('floors_count'),
@@ -327,6 +365,14 @@ class PropertyController extends Controller
     {
         $user = Auth::user();
         
+        // Ensure property belongs to the authenticated tenant
+        if ($property->tenant_id !== $user->tenant_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to property.'
+            ], 403);
+        }
+        
         // Only DIRECTOR and MANAGER roles can assign users
         if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
             return response()->json([
@@ -341,7 +387,9 @@ class PropertyController extends Controller
 
         try {
             // Get user within current tenant context
-            $targetUser = User::findOrFail($validated['user_id']);
+            $targetUser = User::where('id', $validated['user_id'])
+                ->where('tenant_id', $user->tenant_id)
+                ->firstOrFail();
 
             $targetUser->update(['property_id' => $property->id]);
 
@@ -365,6 +413,14 @@ class PropertyController extends Controller
     {
         $user = Auth::user();
         
+        // Ensure property belongs to the authenticated tenant
+        if ($property->tenant_id !== $user->tenant_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to property.'
+            ], 403);
+        }
+        
         // Only DIRECTOR and MANAGER roles can remove users
         if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
             return response()->json([
@@ -379,6 +435,7 @@ class PropertyController extends Controller
 
         try {
             $targetUser = User::where('id', $validated['user_id'])
+                ->where('tenant_id', $user->tenant_id)
                 ->where('property_id', $property->id)
                 ->firstOrFail();
 

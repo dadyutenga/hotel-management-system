@@ -11,7 +11,7 @@ return [
     'central_domains' => [
         '127.0.0.1',
         'localhost',
-        'hotel-management-system.test', // your central domain
+        'hotel-management-system.test',
     ],
 
     'bootstrappers' => [
@@ -23,12 +23,9 @@ return [
 
     'database' => [
         'central_connection' => env('DB_CONNECTION', 'mysql'),
-        
         'template_tenant_connection' => null,
-
         'prefix_base' => 'tenant',
         'suffix_base' => '',
-
         'managers' => [
             'mysql' => \Stancl\Tenancy\Database\DatabaseManager::class,
         ],
@@ -51,12 +48,7 @@ return [
     ],
 
     'features' => [
-        // \Stancl\Tenancy\Features\UserImpersonation::class,
-        // \Stancl\Tenancy\Features\TelescopeTags::class,
-        // \Stancl\Tenancy\Features\UniversalRoutes::class,
-        // \Stancl\Tenancy\Features\TenantConfig::class,
-        // \Stancl\Tenancy\Features\CrossDomainRedirect::class,
-        // \Stancl\Tenancy\Features\ViteBundler::class,
+        // Add features as needed
     ],
 
     'storage_drivers' => [
