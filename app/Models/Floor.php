@@ -17,7 +17,7 @@ class Floor extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
-    protected $table = 'core.floors';
+    protected $table = 'floors';
 
     protected $fillable = [
         'building_id',

@@ -16,7 +16,7 @@ class RoomInspection extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'ops.room_inspections';
+    protected $table = 'room_inspections';
     
     public $timestamps = false;
 

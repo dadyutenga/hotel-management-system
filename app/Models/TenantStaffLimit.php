@@ -16,7 +16,7 @@ class TenantStaffLimit extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'core.tenant_staff_limits';
+    protected $table = 'tenant_staff_limits';
     
     public $timestamps = false;
 

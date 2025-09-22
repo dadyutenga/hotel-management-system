@@ -16,7 +16,7 @@ class RoomFeature extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'core.room_features';
+    protected $table = 'room_features';
     
     public $timestamps = false;
 

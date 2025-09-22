@@ -16,7 +16,7 @@ class SeasonalRate extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'core.seasonal_rates';
+    protected $table = 'seasonal_rates';
     
     public $timestamps = false;
 
