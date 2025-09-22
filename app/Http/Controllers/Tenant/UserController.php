@@ -391,6 +391,11 @@ class UserController extends Controller
         // Load user with relationships
         $user->load(['role', 'property.tenant']);
 
+        // Directors should use the main dashboard instead
+        if ($user->role->name === 'DIRECTOR') {
+            return redirect()->route('dashboard');
+        }
+
         // Get dashboard data based on user role
         $dashboardData = $this->getDashboardData($user);
 
@@ -476,7 +481,7 @@ class UserController extends Controller
     private function getDashboardView($roleName)
     {
         $viewMapping = [
-            'DIRECTOR' => 'Users.tenant.users.dashboards.director',
+            'DIRECTOR' => 'Users.Dashboard', // Use main dashboard for directors
             'MANAGER' => 'Users.tenant.users.dashboards.manager',
             'SUPERVISOR' => 'Users.tenant.users.dashboards.supervisor',
             'ACCOUNTANT' => 'Users.tenant.users.dashboards.accountant',
