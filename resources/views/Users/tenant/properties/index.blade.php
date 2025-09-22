@@ -438,62 +438,8 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="brand-logo">HotelPro</div>
-                <div class="brand-subtitle">Property Management</div>
-            </div>
-            
-            <nav class="sidebar-nav">
-                <div class="nav-item">
-                    <a href="{{ route('dashboard') }}" class="nav-link">
-                        <i class="fas fa-tachometer-alt"></i>
-                        Dashboard
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="{{ route('tenant.properties.index') }}" class="nav-link active">
-                        <i class="fas fa-building"></i>
-                        Properties
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-door-open"></i>
-                        Rooms
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-calendar-alt"></i>
-                        Reservations
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-users"></i>
-                        Users
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="fas fa-chart-bar"></i>
-                        Reports
-                    </a>
-                </div>
-                
-                <div class="logout-section">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="logout-btn">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Logout
-                        </button>
-                    </form>
-                </div>
-            </nav>
-        </div>
+        <!-- Include Shared Sidebar -->
+        @include('Users.shared.sidebar')
 
         <!-- Main Content -->
         <div class="main-content">
