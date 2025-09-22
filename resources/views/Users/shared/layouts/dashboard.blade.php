@@ -65,6 +65,25 @@
             gap: 15px;
         }
         
+        .tenant-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-right: 10px;
+        }
+        
+        .tenant-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
         .header-logout-btn {
             background: #dc3545;
             color: white;
@@ -319,6 +338,10 @@
                     <p>@yield('page-subtitle')</p>
                 </div>
                 <div class="header-actions">
+                    <div class="tenant-info">
+                        <span class="tenant-name">{{ Auth::user()->tenant->name ?? 'Unknown Tenant' }}</span>
+                        <span class="user-role">{{ Auth::user()->role->name ?? 'No Role' }}</span>
+                    </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="header-logout-btn">

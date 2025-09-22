@@ -223,6 +223,12 @@ class AuthController extends Controller
         $user = Auth::user();
         $tenant = $user->tenant;
 
+        // Ensure user has a valid tenant
+        if (!$user->tenant_id || !$tenant) {
+            Auth::logout();
+            return redirect()->route('login')->withErrors(['error' => 'Invalid tenant access. Please contact support.']);
+        }
+
         // Ensure tenant is verified, redirect to appropriate status page
         if ($tenant->status === Tenant::STATUS_PENDING) {
             return redirect()->route('dashboard.pending');
@@ -232,8 +238,14 @@ class AuthController extends Controller
             return redirect()->route('dashboard.pending');
         }
 
-        // Load user with relationships
+        // Load user with relationships and validate tenant consistency
         $user->load(['role', 'property.tenant']);
+
+        // Additional validation: ensure property belongs to user's tenant
+        if ($user->property && $user->property->tenant_id !== $user->tenant_id) {
+            Auth::logout();
+            return redirect()->route('login')->withErrors(['error' => 'Data integrity issue detected. Please contact support.']);
+        }
 
         // Route to role-specific dashboard for non-director users
         if ($user->role && $user->role->name !== 'DIRECTOR') {

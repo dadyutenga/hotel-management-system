@@ -391,6 +391,11 @@ class UserController extends Controller
         // Load user with relationships
         $user->load(['role', 'property.tenant']);
 
+        // Ensure user has a valid tenant
+        if (!$user->tenant_id) {
+            abort(403, 'User not associated with any tenant.');
+        }
+
         // Directors should use the main dashboard instead
         if ($user->role->name === 'DIRECTOR') {
             return redirect()->route('dashboard');
@@ -411,6 +416,12 @@ class UserController extends Controller
     public function getDashboardStats()
     {
         $user = Auth::user();
+        
+        // Ensure user has a valid tenant
+        if (!$user->tenant_id) {
+            return response()->json(['error' => 'Unauthorized access'], 403);
+        }
+        
         $user->load(['role', 'property.tenant']);
 
         $dashboardData = $this->getDashboardData($user);
@@ -459,77 +470,95 @@ class UserController extends Controller
     {
         $data = [];
 
+        // Ensure all queries are tenant-aware
+        $tenantId = $user->tenant_id;
+
         switch ($user->role->name) {
             case 'DIRECTOR':
                 $data = [
-                    'total_properties' => Property::where('tenant_id', $user->tenant_id)->count(),
-                    'total_users' => User::where('tenant_id', $user->tenant_id)->count(),
-                    'active_users' => User::where('tenant_id', $user->tenant_id)->where('is_active', true)->count(),
+                    'total_properties' => Property::where('tenant_id', $tenantId)->count(),
+                    'total_users' => User::where('tenant_id', $tenantId)->count(),
+                    'active_users' => User::where('tenant_id', $tenantId)->where('is_active', true)->count(),
                     'total_buildings' => $user->property ? $user->property->buildings()->count() : 0,
                 ];
                 break;
 
             case 'MANAGER':
+                // Ensure property belongs to user's tenant
+                $propertyUsers = User::where('tenant_id', $tenantId)
+                    ->where('property_id', $user->property_id)
+                    ->count();
+                    
+                $activeUsers = User::where('tenant_id', $tenantId)
+                    ->where('property_id', $user->property_id)
+                    ->where('is_active', true)
+                    ->count();
+                    
                 $data = [
-                    'property_users' => User::where('property_id', $user->property_id)->count(),
-                    'active_users' => User::where('property_id', $user->property_id)->where('is_active', true)->count(),
-                    'buildings' => $user->property ? $user->property->buildings()->count() : 0,
+                    'property_users' => $propertyUsers,
+                    'active_users' => $activeUsers,
+                    'buildings' => $user->property && $user->property->tenant_id === $tenantId ? $user->property->buildings()->count() : 0,
                     'total_rooms' => 0, // TODO: Implement when Room model is ready
                 ];
                 break;
 
             case 'SUPERVISOR':
+                // Only count team members from same tenant and property
+                $teamMembers = User::where('tenant_id', $tenantId)
+                    ->where('property_id', $user->property_id)
+                    ->whereHas('role', function($q) {
+                        $q->whereIn('name', ['BAR_TENDER', 'RECEPTIONIST', 'HOUSEKEEPER']);
+                    })->count();
+                    
                 $data = [
-                    'team_members' => User::where('property_id', $user->property_id)
-                        ->whereHas('role', function($q) {
-                            $q->whereIn('name', ['BAR_TENDER', 'RECEPTIONIST', 'HOUSEKEEPER']);
-                        })->count(),
-                    'daily_tasks' => 12, // TODO: Implement task system
-                    'completed_tasks' => 9, // TODO: Implement task system
-                    'active_shifts' => 6, // TODO: Implement shift system
+                    'team_members' => $teamMembers,
+                    'daily_tasks' => 12, // TODO: Implement task system with tenant filtering
+                    'completed_tasks' => 9, // TODO: Implement task system with tenant filtering
+                    'active_shifts' => 6, // TODO: Implement shift system with tenant filtering
                 ];
                 break;
 
             case 'ACCOUNTANT':
                 $data = [
-                    'daily_revenue' => 2450, // TODO: Implement from actual transactions
-                    'monthly_revenue' => 68200, // TODO: Implement from actual transactions
-                    'outstanding_bills' => 24, // TODO: Implement from Invoice model
-                    'monthly_expenses' => 15800, // TODO: Implement from expense tracking
+                    'daily_revenue' => 2450, // TODO: Implement from actual transactions with tenant filtering
+                    'monthly_revenue' => 68200, // TODO: Implement from actual transactions with tenant filtering
+                    'outstanding_bills' => 24, // TODO: Implement from Invoice model with tenant filtering
+                    'monthly_expenses' => 15800, // TODO: Implement from expense tracking with tenant filtering
                 ];
                 break;
 
             case 'BAR_TENDER':
                 $data = [
-                    'daily_orders' => 47, // TODO: Implement from POS system
-                    'daily_revenue' => 685, // TODO: Implement from POS system
-                    'active_tables' => 8, // TODO: Implement table management
-                    'low_stock_items' => 3, // TODO: Implement inventory system
+                    'daily_orders' => 47, // TODO: Implement from POS system with tenant filtering
+                    'daily_revenue' => 685, // TODO: Implement from POS system with tenant filtering
+                    'active_tables' => 8, // TODO: Implement table management with tenant filtering
+                    'low_stock_items' => 3, // TODO: Implement inventory system with tenant filtering
                 ];
                 break;
 
             case 'RECEPTIONIST':
                 $data = [
-                    'todays_arrivals' => 12, // TODO: Implement from reservations
-                    'todays_departures' => 8, // TODO: Implement from reservations
-                    'current_occupancy' => 85, // TODO: Implement from room management
-                    'guest_requests' => 5, // TODO: Implement request system
+                    'todays_arrivals' => 12, // TODO: Implement from reservations with tenant filtering
+                    'todays_departures' => 8, // TODO: Implement from reservations with tenant filtering
+                    'current_occupancy' => 85, // TODO: Implement from room management with tenant filtering
+                    'guest_requests' => 5, // TODO: Implement request system with tenant filtering
                 ];
                 break;
 
             case 'HOUSEKEEPER':
                 $data = [
-                    'rooms_to_clean' => 18, // TODO: Implement from housekeeping schedule
-                    'completed_rooms' => 12, // TODO: Implement from housekeeping schedule
-                    'pending_inspections' => 3, // TODO: Implement inspection system
-                    'maintenance_issues' => 2, // TODO: Implement maintenance system
+                    'rooms_to_clean' => 18, // TODO: Implement from housekeeping schedule with tenant filtering
+                    'completed_rooms' => 12, // TODO: Implement from housekeeping schedule with tenant filtering
+                    'pending_inspections' => 3, // TODO: Implement inspection system with tenant filtering
+                    'maintenance_issues' => 2, // TODO: Implement maintenance system with tenant filtering
                 ];
                 break;
 
             default:
                 $data = [
-                    'property_name' => $user->property ? $user->property->name : 'No Property Assigned',
+                    'property_name' => ($user->property && $user->property->tenant_id === $tenantId) ? $user->property->name : 'No Property Assigned',
                     'role' => $user->role->name,
+                    'tenant_name' => $user->tenant ? $user->tenant->name : 'Unknown Tenant',
                 ];
                 break;
         }
