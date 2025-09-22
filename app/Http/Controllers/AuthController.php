@@ -232,6 +232,15 @@ class AuthController extends Controller
             return redirect()->route('dashboard.pending');
         }
 
+        // Load user with relationships
+        $user->load(['role', 'property.tenant']);
+
+        // Route to role-specific dashboard for non-director users
+        if ($user->role && $user->role->name !== 'DIRECTOR') {
+            return redirect()->route('user.dashboard');
+        }
+
+        // Directors use the main dashboard
         return view('Users.Dashboard', compact('user', 'tenant'));
     }
 

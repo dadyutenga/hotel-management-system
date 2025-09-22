@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manager Dashboard - HotelPro</title>
+    <title>Receptionist Dashboard - HotelPro</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -41,7 +41,7 @@
         .header h1 {
             font-size: 28px;
             font-weight: 600;
-            color: #1a237e;
+            color: #e91e63;
             margin-bottom: 5px;
         }
         
@@ -55,7 +55,7 @@
         }
         
         .welcome-card {
-            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+            background: linear-gradient(135deg, #e91e63 0%, #f06292 100%);
             color: white;
             border-radius: 15px;
             padding: 30px;
@@ -86,27 +86,11 @@
             padding: 25px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
             transition: transform 0.3s ease;
-            border-left: 5px solid transparent;
+            border-left: 5px solid #e91e63;
         }
         
         .stat-card:hover {
             transform: translateY(-5px);
-        }
-        
-        .stat-card.primary {
-            border-left-color: #1a237e;
-        }
-        
-        .stat-card.success {
-            border-left-color: #4caf50;
-        }
-        
-        .stat-card.warning {
-            border-left-color: #ff9800;
-        }
-        
-        .stat-card.info {
-            border-left-color: #2196f3;
         }
         
         .stat-header {
@@ -131,26 +115,8 @@
             align-items: center;
             justify-content: center;
             font-size: 20px;
-        }
-        
-        .stat-icon.primary {
-            background: rgba(26, 35, 126, 0.1);
-            color: #1a237e;
-        }
-        
-        .stat-icon.success {
-            background: rgba(76, 175, 80, 0.1);
-            color: #4caf50;
-        }
-        
-        .stat-icon.warning {
-            background: rgba(255, 152, 0, 0.1);
-            color: #ff9800;
-        }
-        
-        .stat-icon.info {
-            background: rgba(33, 150, 243, 0.1);
-            color: #2196f3;
+            background: rgba(233, 30, 99, 0.1);
+            color: #e91e63;
         }
         
         .stat-value {
@@ -158,6 +124,11 @@
             font-weight: 700;
             color: #333;
             margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
         }
         
         .quick-actions {
@@ -169,7 +140,7 @@
         }
         
         .card-header {
-            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+            background: linear-gradient(135deg, #e91e63 0%, #f06292 100%);
             color: white;
             padding: 20px 25px;
             font-size: 18px;
@@ -199,9 +170,9 @@
         }
         
         .action-item:hover {
-            border-color: #4caf50;
+            border-color: #e91e63;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.1);
+            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.1);
         }
         
         .action-icon {
@@ -211,7 +182,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #4caf50;
+            background: #e91e63;
             color: white;
             font-size: 20px;
         }
@@ -227,48 +198,65 @@
             color: #666;
         }
         
-        .property-info {
+        .upcoming-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .arrivals-card, .departures-card {
             background: white;
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
             overflow: hidden;
-            margin-bottom: 30px;
         }
         
-        .property-header {
-            background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+        .arrivals-header {
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
             color: white;
             padding: 20px 25px;
             font-size: 18px;
             font-weight: 600;
         }
         
-        .property-content {
+        .departures-header {
+            background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+            color: white;
+            padding: 20px 25px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .guest-list {
             padding: 25px;
         }
         
-        .property-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+        .guest-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #e9ecef;
         }
         
-        .property-detail {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
+        .guest-item:last-child {
+            border-bottom: none;
         }
         
-        .property-detail h4 {
+        .guest-info h5 {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .guest-info p {
             font-size: 14px;
             color: #666;
-            margin-bottom: 10px;
-            text-transform: uppercase;
         }
         
-        .property-detail p {
-            font-size: 18px;
+        .room-number {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
             font-weight: 600;
             color: #333;
         }
@@ -290,7 +278,7 @@
                 grid-template-columns: 1fr;
             }
             
-            .property-details {
+            .upcoming-section {
                 grid-template-columns: 1fr;
             }
         }
@@ -298,99 +286,67 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Include Manager-Specific Sidebar -->
-        @include('Users.shared.sidebars.manager')
+        <!-- Include Receptionist-Specific Sidebar -->
+        @include('Users.shared.sidebars.receptionist')
 
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
-                <h1>Manager Dashboard</h1>
-                <p>Welcome back, {{ $user->full_name }}! Manage your property operations efficiently.</p>
+                <h1>Receptionist Dashboard</h1>
+                <p>Welcome back, {{ $user->full_name }}! Provide excellent guest service and manage front desk operations.</p>
             </div>
             
             <div class="content">
                 <!-- Welcome Card -->
                 <div class="welcome-card">
-                    <h2><i class="fas fa-user-tie"></i> Property Manager Control Panel</h2>
-                    <p>Oversee daily operations, manage staff, and ensure excellent service delivery at your property.</p>
+                    <h2><i class="fas fa-concierge-bell"></i> Front Desk Command Center</h2>
+                    <p>Manage guest arrivals, departures, and provide exceptional customer service.</p>
                 </div>
 
-                <!-- Property Information -->
-                @if($user->property)
-                    <div class="property-info">
-                        <div class="property-header">
-                            <i class="fas fa-building"></i>
-                            Property: {{ $user->property->name }}
-                        </div>
-                        
-                        <div class="property-content">
-                            <div class="property-details">
-                                <div class="property-detail">
-                                    <h4>Address</h4>
-                                    <p>{{ $user->property->address }}</p>
-                                </div>
-                                
-                                <div class="property-detail">
-                                    <h4>Phone</h4>
-                                    <p>{{ $user->property->contact_phone }}</p>
-                                </div>
-                                
-                                <div class="property-detail">
-                                    <h4>Email</h4>
-                                    <p>{{ $user->property->email }}</p>
-                                </div>
-                                
-                                <div class="property-detail">
-                                    <h4>Status</h4>
-                                    <p style="color: {{ $user->property->is_active ? '#4caf50' : '#f44336' }};">
-                                        {{ $user->property->is_active ? 'Active' : 'Inactive' }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Statistics -->
+                <!-- Reception Statistics -->
                 <div class="stats-grid">
-                    <div class="stat-card primary">
+                    <div class="stat-card">
                         <div class="stat-header">
-                            <div class="stat-title">Property Staff</div>
-                            <div class="stat-icon primary">
-                                <i class="fas fa-users"></i>
+                            <div class="stat-title">Today's Arrivals</div>
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-check"></i>
                             </div>
                         </div>
-                        <div class="stat-value">{{ $dashboardData['property_users'] ?? 0 }}</div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Expected guests</div>
                     </div>
                     
-                    <div class="stat-card success">
+                    <div class="stat-card">
                         <div class="stat-header">
-                            <div class="stat-title">Active Staff</div>
-                            <div class="stat-icon success">
-                                <i class="fas fa-user-check"></i>
+                            <div class="stat-title">Today's Departures</div>
+                            <div class="stat-icon">
+                                <i class="fas fa-sign-out-alt"></i>
                             </div>
                         </div>
-                        <div class="stat-value">{{ $dashboardData['active_users'] ?? 0 }}</div>
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">Check-outs pending</div>
                     </div>
                     
-                    <div class="stat-card warning">
+                    <div class="stat-card">
                         <div class="stat-header">
-                            <div class="stat-title">Buildings</div>
-                            <div class="stat-icon warning">
-                                <i class="fas fa-building"></i>
+                            <div class="stat-title">Current Occupancy</div>
+                            <div class="stat-icon">
+                                <i class="fas fa-bed"></i>
                             </div>
                         </div>
-                        <div class="stat-value">{{ $dashboardData['buildings'] ?? 0 }}</div>
+                        <div class="stat-value">85%</div>
+                        <div class="stat-label">68 of 80 rooms</div>
                     </div>
                     
-                    <div class="stat-card info">
+                    <div class="stat-card">
                         <div class="stat-header">
-                            <div class="stat-title">Tasks Today</div>
-                            <div class="stat-icon info">
-                                <i class="fas fa-tasks"></i>
+                            <div class="stat-title">Guest Requests</div>
+                            <div class="stat-icon">
+                                <i class="fas fa-bell"></i>
                             </div>
                         </div>
-                        <div class="stat-value">0</div>
+                        <div class="stat-value">5</div>
+                        <div class="stat-label">Pending requests</div>
                     </div>
                 </div>
 
@@ -398,50 +354,48 @@
                 <div class="quick-actions">
                     <div class="card-header">
                         <i class="fas fa-bolt"></i>
-                        Quick Actions
+                        Front Desk Operations
                     </div>
                     
                     <div class="card-content">
                         <div class="actions-grid">
-                            @if($user->property)
-                                <a href="{{ route('tenant.properties.show', $user->property->id) }}" class="action-item">
-                                    <div class="action-icon">
-                                        <i class="fas fa-building"></i>
-                                    </div>
-                                    <div class="action-info">
-                                        <h4>Property Details</h4>
-                                        <p>View property information</p>
-                                    </div>
-                                </a>
-                                
-                                <a href="{{ route('tenant.properties.edit', $user->property->id) }}" class="action-item">
-                                    <div class="action-icon">
-                                        <i class="fas fa-edit"></i>
-                                    </div>
-                                    <div class="action-info">
-                                        <h4>Edit Property</h4>
-                                        <p>Update property details</p>
-                                    </div>
-                                </a>
-                            @endif
+                            <a href="#" class="action-item">
+                                <div class="action-icon">
+                                    <i class="fas fa-key"></i>
+                                </div>
+                                <div class="action-info">
+                                    <h4>Check-in Guest</h4>
+                                    <p>Process arrivals</p>
+                                </div>
+                            </a>
                             
-                            <a href="{{ route('tenant.users.index') }}" class="action-item">
+                            <a href="#" class="action-item">
+                                <div class="action-icon">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                </div>
+                                <div class="action-info">
+                                    <h4>Check-out Guest</h4>
+                                    <p>Process departures</p>
+                                </div>
+                            </a>
+                            
+                            <a href="#" class="action-item">
+                                <div class="action-icon">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="action-info">
+                                    <h4>New Reservation</h4>
+                                    <p>Create booking</p>
+                                </div>
+                            </a>
+                            
+                            <a href="#" class="action-item">
                                 <div class="action-icon">
                                     <i class="fas fa-users"></i>
                                 </div>
                                 <div class="action-info">
-                                    <h4>Manage Staff</h4>
-                                    <p>View and manage staff</p>
-                                </div>
-                            </a>
-                            
-                            <a href="{{ route('tenant.users.create') }}" class="action-item">
-                                <div class="action-icon">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <div class="action-info">
-                                    <h4>Add Staff</h4>
-                                    <p>Create new staff account</p>
+                                    <h4>Guest Directory</h4>
+                                    <p>View guest information</p>
                                 </div>
                             </a>
                             
@@ -450,40 +404,91 @@
                                     <i class="fas fa-door-open"></i>
                                 </div>
                                 <div class="action-info">
-                                    <h4>Room Management</h4>
-                                    <p>Manage rooms and availability</p>
+                                    <h4>Room Status</h4>
+                                    <p>Check availability</p>
                                 </div>
                             </a>
                             
                             <a href="#" class="action-item">
                                 <div class="action-icon">
-                                    <i class="fas fa-calendar-check"></i>
+                                    <i class="fas fa-file-invoice"></i>
                                 </div>
                                 <div class="action-info">
-                                    <h4>Reservations</h4>
-                                    <p>View and manage bookings</p>
+                                    <h4>Guest Billing</h4>
+                                    <p>Manage folios</p>
                                 </div>
                             </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Schedule -->
+                <div class="upcoming-section">
+                    <!-- Arrivals -->
+                    <div class="arrivals-card">
+                        <div class="arrivals-header">
+                            <i class="fas fa-calendar-check"></i>
+                            Today's Arrivals
+                        </div>
+                        
+                        <div class="guest-list">
+                            <div class="guest-item">
+                                <div class="guest-info">
+                                    <h5>John Smith</h5>
+                                    <p>Expected: 2:00 PM</p>
+                                </div>
+                                <div class="room-number">205</div>
+                            </div>
                             
-                            <a href="#" class="action-item">
-                                <div class="action-icon">
-                                    <i class="fas fa-chart-line"></i>
+                            <div class="guest-item">
+                                <div class="guest-info">
+                                    <h5>Maria Garcia</h5>
+                                    <p>Expected: 3:30 PM</p>
                                 </div>
-                                <div class="action-info">
-                                    <h4>Property Reports</h4>
-                                    <p>View performance analytics</p>
-                                </div>
-                            </a>
+                                <div class="room-number">312</div>
+                            </div>
                             
-                            <a href="#" class="action-item">
-                                <div class="action-icon">
-                                    <i class="fas fa-broom"></i>
+                            <div class="guest-item">
+                                <div class="guest-info">
+                                    <h5>David Johnson</h5>
+                                    <p>Expected: 4:15 PM</p>
                                 </div>
-                                <div class="action-info">
-                                    <h4>Housekeeping</h4>
-                                    <p>Manage cleaning tasks</p>
+                                <div class="room-number">108</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Departures -->
+                    <div class="departures-card">
+                        <div class="departures-header">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Today's Departures
+                        </div>
+                        
+                        <div class="guest-list">
+                            <div class="guest-item">
+                                <div class="guest-info">
+                                    <h5>Sarah Wilson</h5>
+                                    <p>Check-out: 11:00 AM</p>
                                 </div>
-                            </a>
+                                <div class="room-number">401</div>
+                            </div>
+                            
+                            <div class="guest-item">
+                                <div class="guest-info">
+                                    <h5>Robert Brown</h5>
+                                    <p>Check-out: 12:00 PM</p>
+                                </div>
+                                <div class="room-number">215</div>
+                            </div>
+                            
+                            <div class="guest-item">
+                                <div class="guest-info">
+                                    <h5>Lisa Davis</h5>
+                                    <p>Check-out: 1:30 PM</p>
+                                </div>
+                                <div class="room-number">320</div>
+                            </div>
                         </div>
                     </div>
                 </div>

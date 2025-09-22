@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
 
     // User dashboard route
     Route::get('/user-dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+    Route::get('/user-dashboard/stats', [UserController::class, 'getDashboardStats'])->name('user.dashboard.stats');
 });
 
 // Add this route for the rejected dashboard
