@@ -17,7 +17,7 @@ class Reservation extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
-    protected $table = 'res.reservations';
+    protected $table = 'reservations';
 
     protected $fillable = [
         'property_id',
