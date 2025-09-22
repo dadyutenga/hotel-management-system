@@ -155,13 +155,22 @@
                         </div>
                         
                         <!-- Add Staff Action -->
-                        <div class="action-card" onclick="showComingSoonAlert('Staff management')">
+                        <a href="{{ route('tenant.users.create') }}" class="action-card" style="text-decoration: none; color: inherit;">
                             <div class="action-icon">
                                 <i class="fas fa-user-plus"></i>
                             </div>
                             <div class="action-title">Add Staff</div>
                             <div class="action-description">Invite team members to the system</div>
-                        </div>
+                        </a>
+                        
+                        <!-- Manage Staff Action -->
+                        <a href="{{ route('tenant.users.index') }}" class="action-card" style="text-decoration: none; color: inherit;">
+                            <div class="action-icon">
+                                <i class="fas fa-users-cog"></i>
+                            </div>
+                            <div class="action-title">Manage Staff</div>
+                            <div class="action-description">View and manage existing team members</div>
+                        </a>
                         
                         <!-- Payment Methods Action -->
                         <div class="action-card" onclick="showComingSoonAlert('Payment setup')">
@@ -180,6 +189,15 @@
                             <div class="action-title">Set Room Rates</div>
                             <div class="action-description">Define pricing for different seasons</div>
                         </div>
+                        
+                        <!-- User Dashboard Action -->
+                        <a href="{{ route('user.dashboard') }}" class="action-card" style="text-decoration: none; color: inherit;">
+                            <div class="action-icon">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <div class="action-title">Role Dashboard</div>
+                            <div class="action-description">Access your role-specific dashboard</div>
+                        </a>
                         
                         <!-- System Settings Action -->
                         <div class="action-card" onclick="showComingSoonAlert('System settings')">
