@@ -5,6 +5,7 @@ use App\Http\Controllers\SuperadminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Tenant\PropertyController;
 use App\Http\Controllers\Tenant\BuildingController;
+use App\Http\Controllers\Tenant\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Welcome page
@@ -49,6 +50,24 @@ Route::middleware('auth')->group(function () {
         Route::put('/{building}', [BuildingController::class, 'update'])->name('update');
         Route::delete('/{building}', [BuildingController::class, 'destroy'])->name('destroy');
     });
+
+    // User management routes  
+    Route::prefix('users')->name('tenant.users.')->group(function () {
+        // Main CRUD routes
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/create', [UserController::class, 'create'])->name('create');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('/{user}', [UserController::class, 'show'])->name('show');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('/{user}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        
+        // AJAX routes
+        Route::post('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
+    });
+
+    // User dashboard route
+    Route::get('/user-dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
 });
 
 // Add this route for the rejected dashboard
