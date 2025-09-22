@@ -502,6 +502,120 @@
             transform: translateX(26px);
         }
         
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+        
+        .close:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: 'Figtree', sans-serif;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #1a237e;
+            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
+        }
+        
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-cancel:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+        
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
@@ -529,6 +643,11 @@
             
             .contact-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
             }
         }
     </style>
@@ -700,13 +819,21 @@
                 </div>
 
                 <!-- Buildings and Structure -->
-                @if($property->buildings->count() > 0)
-                    <div class="data-table">
-                        <div class="table-header">
+                <div class="data-table">
+                    <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>
                             <i class="fas fa-building"></i>
                             Buildings & Structure ({{ $property->buildings->count() }})
-                        </div>
-                        
+                        </span>
+                        @if(in_array(Auth::user()->role->name, ['DIRECTOR', 'MANAGER']))
+                            <button class="btn btn-primary btn-sm" onclick="showAddBuildingModal()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);">
+                                <i class="fas fa-plus"></i>
+                                Add Building
+                            </button>
+                        @endif
+                    </div>
+                    
+                    @if($property->buildings->count() > 0)
                         <div class="table-content">
                             <table class="table">
                                 <thead>
@@ -718,9 +845,9 @@
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="buildings-table-body">
                                     @foreach($property->buildings as $building)
-                                        <tr>
+                                        <tr data-building-id="{{ $building->id }}">
                                             <td>
                                                 <strong>{{ $building->name }}</strong>
                                             </td>
@@ -736,37 +863,38 @@
                                             </td>
                                             <td>{{ $building->description ?: 'No description' }}</td>
                                             <td>
-                                                <a href="#" class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-eye"></i>
-                                                    View
-                                                </a>
+                                                <button class="btn btn-primary btn-sm" onclick="editBuilding('{{ $building->id }}', '{{ $building->name }}', '{{ $building->description }}')">
+                                                    <i class="fas fa-edit"></i>
+                                                    Edit
+                                                </button>
+                                                @if(Auth::user()->role->name === 'DIRECTOR')
+                                                    <button class="btn btn-danger btn-sm" onclick="deleteBuilding('{{ $building->id }}', '{{ $building->name }}')">
+                                                        <i class="fas fa-trash"></i>
+                                                        Delete
+                                                    </button>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                @else
-                    <div class="data-table">
-                        <div class="table-header">
-                            <i class="fas fa-building"></i>
-                            Buildings & Structure
-                        </div>
-                        
-                        <div class="empty-state">
+                    @else
+                        <div class="empty-state" id="empty-buildings-state">
                             <i class="fas fa-building"></i>
                             <h3>No Buildings Found</h3>
                             <p>This property doesn't have any buildings yet.</p>
-                            <div style="margin-top: 20px;">
-                                <a href="#" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i>
-                                    Add Building
-                                </a>
-                            </div>
+                            @if(in_array(Auth::user()->role->name, ['DIRECTOR', 'MANAGER']))
+                                <div style="margin-top: 20px;">
+                                    <button class="btn btn-primary" onclick="showAddBuildingModal()">
+                                        <i class="fas fa-plus"></i>
+                                        Add Building
+                                    </button>
+                                </div>
+                            @endif
                         </div>
-                    </div>
-                @endif
+                    @endif
+                </div>
 
                 <!-- Staff Members -->
                 @if($property->users->count() > 0)
@@ -891,7 +1019,301 @@
         </div>
     </div>
 
+    <!-- Building Modal -->
+    <div id="buildingModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Add Building</h2>
+                <button type="button" class="close" onclick="closeBuildingModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="buildingForm">
+                <div class="modal-body">
+                    <input type="hidden" id="buildingId" name="building_id">
+                    <input type="hidden" name="property_id" value="{{ $property->id }}">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="buildingName">
+                            <i class="fas fa-building"></i>
+                            Building Name *
+                        </label>
+                        <input type="text" 
+                               id="buildingName" 
+                               name="name" 
+                               class="form-control" 
+                               placeholder="Enter building name" 
+                               required 
+                               maxlength="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="buildingDescription">
+                            <i class="fas fa-file-text"></i>
+                            Description
+                        </label>
+                        <textarea id="buildingDescription" 
+                                  name="description" 
+                                  class="form-control" 
+                                  placeholder="Enter building description (optional)" 
+                                  rows="3" 
+                                  maxlength="500"></textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" onclick="closeBuildingModal()">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-save"></i>
+                        Save Building
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        // Building management functions
+        let currentBuildingId = null;
+        
+        function showAddBuildingModal() {
+            currentBuildingId = null;
+            document.getElementById('modalTitle').textContent = 'Add Building';
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Save Building';
+            document.getElementById('buildingForm').reset();
+            document.getElementById('buildingId').value = '';
+            document.getElementById('buildingModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function editBuilding(buildingId, name, description) {
+            currentBuildingId = buildingId;
+            document.getElementById('modalTitle').textContent = 'Edit Building';
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-save"></i> Update Building';
+            document.getElementById('buildingId').value = buildingId;
+            document.getElementById('buildingName').value = name;
+            document.getElementById('buildingDescription').value = description || '';
+            document.getElementById('buildingModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeBuildingModal() {
+            document.getElementById('buildingModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            currentBuildingId = null;
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('buildingModal');
+            if (event.target === modal) {
+                closeBuildingModal();
+            }
+        }
+        
+        // Handle building form submission
+        document.getElementById('buildingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                property_id: formData.get('property_id'),
+                name: formData.get('name'),
+                description: formData.get('description')
+            };
+            
+            const isEdit = currentBuildingId !== null;
+            const url = isEdit ? `/buildings/${currentBuildingId}` : '/buildings';
+            const method = isEdit ? 'PUT' : 'POST';
+            
+            // Disable submit button
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
+            
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    closeBuildingModal();
+                    
+                    if (isEdit) {
+                        updateBuildingRow(data.building);
+                    } else {
+                        addBuildingRow(data.building);
+                        updateBuildingStats();
+                    }
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while saving the building.', 'error');
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+        
+        function deleteBuilding(buildingId, buildingName) {
+            if (confirm(`Are you sure you want to delete "${buildingName}"?\\n\\nThis action cannot be undone.`)) {
+                fetch(`/buildings/${buildingId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert(data.message, 'success');
+                        removeBuildingRow(buildingId);
+                        updateBuildingStats();
+                    } else {
+                        showAlert(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('An error occurred while deleting the building.', 'error');
+                });
+            }
+        }
+        
+        function addBuildingRow(building) {
+            const tableBody = document.getElementById('buildings-table-body');
+            const emptyState = document.getElementById('empty-buildings-state');
+            
+            // Hide empty state if it exists
+            if (emptyState) {
+                emptyState.style.display = 'none';
+                
+                // Create table structure if it doesn't exist
+                const tableContainer = emptyState.parentElement;
+                tableContainer.innerHTML = `
+                    <div class="table-content">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Building Name</th>
+                                    <th>Floors</th>
+                                    <th>Rooms</th>
+                                    <th>Description</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="buildings-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+            
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-building-id', building.id);
+            newRow.innerHTML = `
+                <td><strong>${building.name}</strong></td>
+                <td><span class="badge badge-success">0 Floors</span></td>
+                <td><span class="badge badge-warning">0 Rooms</span></td>
+                <td>${building.description || 'No description'}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm" onclick="editBuilding('${building.id}', '${building.name}', '${building.description || ''}')">
+                        <i class="fas fa-edit"></i>
+                        Edit
+                    </button>
+                    @if(Auth::user()->role->name === 'DIRECTOR')
+                        <button class="btn btn-danger btn-sm" onclick="deleteBuilding('${building.id}', '${building.name}')">
+                            <i class="fas fa-trash"></i>
+                            Delete
+                        </button>
+                    @endif
+                </td>
+            `;
+            
+            document.getElementById('buildings-table-body').appendChild(newRow);
+        }
+        
+        function updateBuildingRow(building) {
+            const row = document.querySelector(`tr[data-building-id="${building.id}"]`);
+            if (row) {
+                const cells = row.getElementsByTagName('td');
+                cells[0].innerHTML = `<strong>${building.name}</strong>`;
+                cells[3].textContent = building.description || 'No description';
+                
+                // Update action buttons
+                const editBtn = row.querySelector('.btn-primary');
+                editBtn.setAttribute('onclick', `editBuilding('${building.id}', '${building.name}', '${building.description || ''}')`);
+                
+                const deleteBtn = row.querySelector('.btn-danger');
+                if (deleteBtn) {
+                    deleteBtn.setAttribute('onclick', `deleteBuilding('${building.id}', '${building.name}')`);
+                }
+            }
+        }
+        
+        function removeBuildingRow(buildingId) {
+            const row = document.querySelector(`tr[data-building-id="${buildingId}"]`);
+            if (row) {
+                row.remove();
+                
+                // Show empty state if no buildings left
+                const tableBody = document.getElementById('buildings-table-body');
+                if (tableBody && tableBody.children.length === 0) {
+                    const tableContainer = tableBody.closest('.table-content').parentElement;
+                    tableContainer.innerHTML = `
+                        <div class="empty-state" id="empty-buildings-state">
+                            <i class="fas fa-building"></i>
+                            <h3>No Buildings Found</h3>
+                            <p>This property doesn't have any buildings yet.</p>
+                            @if(in_array(Auth::user()->role->name, ['DIRECTOR', 'MANAGER']))
+                                <div style="margin-top: 20px;">
+                                    <button class="btn btn-primary" onclick="showAddBuildingModal()">
+                                        <i class="fas fa-plus"></i>
+                                        Add Building
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        function updateBuildingStats() {
+            // Update the building count in the header
+            const tableHeader = document.querySelector('.data-table .table-header span');
+            const currentCount = document.getElementById('buildings-table-body') ? 
+                document.getElementById('buildings-table-body').children.length : 0;
+            
+            if (tableHeader) {
+                tableHeader.innerHTML = `
+                    <i class="fas fa-building"></i>
+                    Buildings & Structure (${currentCount})
+                `;
+            }
+            
+            // Update the stats card
+            const buildingStatValue = document.querySelector('.stat-card.primary .stat-value');
+            if (buildingStatValue) {
+                buildingStatValue.textContent = currentCount;
+            }
+        }
+
         // Toggle property status
         function togglePropertyStatus(propertyId, toggle) {
             fetch(`/properties/${propertyId}/toggle-status`, {

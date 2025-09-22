@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Tenant\PropertyController;
+use App\Http\Controllers\Tenant\BuildingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -35,6 +36,13 @@ Route::middleware(['auth', 'check.tenant.status'])->group(function () {
         Route::get('/{property}/stats', [PropertyController::class, 'getStats'])->name('stats');
         Route::post('/{property}/assign-user', [PropertyController::class, 'assignUser'])->name('assign-user');
         Route::post('/{property}/remove-user', [PropertyController::class, 'removeUser'])->name('remove-user');
+    });
+    
+    // Building management routes (AJAX endpoints)
+    Route::prefix('buildings')->name('tenant.buildings.')->group(function () {
+        Route::post('/', [BuildingController::class, 'store'])->name('store');
+        Route::put('/{building}', [BuildingController::class, 'update'])->name('update');
+        Route::delete('/{building}', [BuildingController::class, 'destroy'])->name('destroy');
     });
     
     // Add other tenant routes here as they're implemented...
