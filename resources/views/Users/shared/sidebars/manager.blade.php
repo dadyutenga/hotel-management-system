@@ -140,6 +140,13 @@
                     <div class="user-property">{{ Auth::user()->property->name }}</div>
                 @endif
             </div>
+            <form method="POST" action="{{ route('logout') }}" style="margin-top: 10px;">
+                @csrf
+                <button type="submit" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -271,6 +278,29 @@
     font-size: 11px;
     opacity: 0.7;
     margin-top: 2px;
+}
+
+/* Logout Button Styles */
+.logout-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
 }
 
 @media (max-width: 768px) {

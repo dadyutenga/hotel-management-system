@@ -39,6 +39,13 @@
             background: white;
             padding: 20px 30px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-content {
+            flex: 1;
         }
         
         .header h1 {
@@ -50,6 +57,33 @@
         .header p {
             color: #666;
             font-size: 16px;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .header-logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        
+        .header-logout-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
         }
         
         .content {
@@ -247,6 +281,29 @@
             color: #856404;
             border: 1px solid #ffeaa7;
         }
+        
+        /* Logout Button Styles */
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -257,8 +314,19 @@
         <!-- Main Content -->
         <div class="main-content">
             <div class="header">
-                <h1 style="color: @yield('theme-color', '#333');">@yield('page-title')</h1>
-                <p>@yield('page-subtitle')</p>
+                <div class="header-content">
+                    <h1 style="color: @yield('theme-color', '#333');">@yield('page-title')</h1>
+                    <p>@yield('page-subtitle')</p>
+                </div>
+                <div class="header-actions">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="header-logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
+                    </form>
+                </div>
             </div>
             
             <div class="content">
@@ -325,6 +393,14 @@
             $('[data-confirm]').on('click', function(e) {
                 const message = $(this).data('confirm');
                 if (!confirm(message)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+            
+            // Logout confirmation
+            $('.logout-btn, .header-logout-btn').on('click', function(e) {
+                if (!confirm('Are you sure you want to logout?')) {
                     e.preventDefault();
                     return false;
                 }
