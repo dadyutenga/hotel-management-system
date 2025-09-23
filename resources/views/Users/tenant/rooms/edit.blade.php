@@ -22,6 +22,17 @@
             line-height: 1.6;
         }
         
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            min-height: 100vh;
+        }
+        
         .container {
             max-width: 1000px;
             margin: 0 auto;
@@ -286,6 +297,10 @@
                 padding: 15px;
             }
             
+            .main-content {
+                margin-left: 0;
+            }
+            
             .form-grid {
                 grid-template-columns: 1fr;
             }
@@ -297,7 +312,13 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="dashboard-container">
+        <!-- Include Manager-Specific Sidebar -->
+        @include('Users.shared.sidebars.manager')
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="container">
         <!-- Header -->
         <div class="header">
             <h1><i class="fas fa-edit"></i> Edit Room {{ $room->room_number }}</h1>
@@ -495,6 +516,8 @@
             <div class="loading" id="loading">
                 <div class="spinner"></div>
                 <p>Updating room...</p>
+            </div>
+        </div>
             </div>
         </div>
     </div>

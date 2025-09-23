@@ -21,6 +21,17 @@
             line-height: 1.6;
         }
         
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            min-height: 100vh;
+        }
+        
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -360,7 +371,13 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="dashboard-container">
+        <!-- Include Manager-Specific Sidebar -->
+        @include('Users.shared.sidebars.manager')
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="container">
         <!-- Header -->
         <div class="header">
             <div class="header-content">
@@ -518,6 +535,8 @@
                 </a>
             </div>
         @endif
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
