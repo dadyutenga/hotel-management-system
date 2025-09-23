@@ -35,6 +35,13 @@
         </div>
         
         <div class="nav-item">
+            <a href="{{ route('tenant.floors.index') }}" class="nav-link {{ request()->routeIs('tenant.floors.*') ? 'active' : '' }}">
+                <i class="fas fa-layer-group"></i>
+                <span>Floor Management</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
             <a href="{{ route('tenant.room-types.index') }}" class="nav-link {{ request()->routeIs('tenant.room-types.*') ? 'active' : '' }}">
                 <i class="fas fa-bed"></i>
                 <span>Room Types</span>

@@ -96,6 +96,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/property/{property}/room-types', [RoomsController::class, 'getRoomTypes'])->name('room-types');
     });
 
+    // Floor management routes
+    Route::prefix('floors')->name('tenant.floors.')->group(function () {
+        Route::get('/', [RoomsController::class, 'floorsIndex'])->name('index');
+        Route::get('/create', [RoomsController::class, 'floorsCreate'])->name('create');
+        Route::post('/', [RoomsController::class, 'floorsStore'])->name('store');
+        Route::get('/{floor}', [RoomsController::class, 'floorsShow'])->name('show');
+        Route::get('/{floor}/edit', [RoomsController::class, 'floorsEdit'])->name('edit');
+        Route::put('/{floor}', [RoomsController::class, 'floorsUpdate'])->name('update');
+        Route::delete('/{floor}', [RoomsController::class, 'floorsDestroy'])->name('destroy');
+    });
+
     // User dashboard route
     Route::get('/user-dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/user-dashboard/stats', [UserController::class, 'getDashboardStats'])->name('user.dashboard.stats');

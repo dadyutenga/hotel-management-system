@@ -465,6 +465,16 @@
                                 </div>
                             </a>
                             
+                            <a href="{{ route('tenant.floors.index') }}" class="action-item">
+                                <div class="action-icon">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                                <div class="action-info">
+                                    <h4>Floor Management</h4>
+                                    <p>Manage building floors</p>
+                                </div>
+                            </a>
+                            
                             <a href="{{ route('tenant.rooms.create') }}" class="action-item">
                                 <div class="action-icon">
                                     <i class="fas fa-plus-circle"></i>

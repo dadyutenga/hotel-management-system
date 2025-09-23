@@ -531,4 +531,400 @@ class RoomsController extends Controller
 
         return false;
     }
+
+    // ===============================
+    // FLOOR MANAGEMENT METHODS
+    // ===============================
+
+    /**
+     * Display a listing of floors
+     */
+    public function floorsIndex(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Only MANAGER and DIRECTOR roles can access floor management
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
+            return redirect()->route('user.dashboard')
+                ->with('error', 'You do not have permission to access floor management.');
+        }
+
+        $propertyId = $request->get('property_id');
+        $buildingId = $request->get('building_id');
+        $search = $request->get('search');
+
+        // Get properties for the current user
+        $properties = $this->getUserProperties($user);
+
+        // Build query for floors
+        $floorsQuery = Floor::with(['building.property'])
+            ->whereHas('building.property', function ($query) use ($user) {
+                $query->where('tenant_id', $user->tenant_id);
+            });
+
+        // If user is MANAGER, only show floors from their property
+        if ($user->role->name === 'MANAGER' && $user->property) {
+            $floorsQuery->whereHas('building', function ($query) use ($user) {
+                $query->where('property_id', $user->property_id);
+            });
+        }
+
+        // Apply filters
+        if ($propertyId) {
+            $floorsQuery->whereHas('building', function ($query) use ($propertyId) {
+                $query->where('property_id', $propertyId);
+            });
+        }
+
+        if ($buildingId) {
+            $floorsQuery->where('building_id', $buildingId);
+        }
+
+        if ($search) {
+            $floorsQuery->where(function ($query) use ($search) {
+                $query->where('number', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $floors = $floorsQuery->orderBy('number')->paginate(15);
+
+        // Get buildings for filtering
+        $buildings = collect();
+        if ($propertyId) {
+            $property = Property::where('id', $propertyId)
+                ->where('tenant_id', $user->tenant_id)
+                ->first();
+            if ($property) {
+                $buildings = $property->buildings()->get();
+            }
+        }
+
+        return view('Users.tenant.floor.index', compact(
+            'floors', 'properties', 'buildings', 'propertyId', 'buildingId', 'search'
+        ));
+    }
+
+    /**
+     * Show the form for creating a new floor
+     */
+    public function floorsCreate(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Only MANAGER and DIRECTOR roles can create floors
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
+            return redirect()->route('tenant.floors.index')
+                ->with('error', 'You do not have permission to create floors.');
+        }
+
+        $propertyId = $request->get('property_id');
+        $buildingId = $request->get('building_id');
+        
+        // Get properties for the current user
+        $properties = $this->getUserProperties($user);
+
+        $buildings = collect();
+        $selectedProperty = null;
+        $selectedBuilding = null;
+
+        if ($propertyId) {
+            $selectedProperty = Property::where('id', $propertyId)
+                ->where('tenant_id', $user->tenant_id)
+                ->first();
+                
+            if ($selectedProperty) {
+                $buildings = $selectedProperty->buildings()->get();
+                
+                if ($buildingId) {
+                    $selectedBuilding = $buildings->firstWhere('id', $buildingId);
+                }
+            }
+        }
+
+        return view('Users.tenant.floor.create', compact(
+            'properties', 'buildings', 'selectedProperty', 'selectedBuilding'
+        ));
+    }
+
+    /**
+     * Store a newly created floor
+     */
+    public function floorsStore(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Only MANAGER and DIRECTOR roles can create floors
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
+            return redirect()->route('tenant.floors.index')
+                ->with('error', 'You do not have permission to create floors.');
+        }
+
+        $validated = $request->validate([
+            'building_id' => 'required|uuid|exists:buildings,id',
+            'number' => 'required|integer|min:1|max:999',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Verify building belongs to user's tenant
+            $building = Building::whereHas('property', function ($query) use ($user) {
+                $query->where('tenant_id', $user->tenant_id);
+            })->where('id', $validated['building_id'])->first();
+
+            if (!$building) {
+                throw ValidationException::withMessages([
+                    'building_id' => ['Building not found or access denied.']
+                ]);
+            }
+
+            // If user is MANAGER, they can only create floors for their property
+            if ($user->role->name === 'MANAGER' && $building->property_id !== $user->property_id) {
+                throw ValidationException::withMessages([
+                    'building_id' => ['You can only create floors for your assigned property.']
+                ]);
+            }
+
+            // Check if floor number already exists in this building
+            $existingFloor = Floor::where('building_id', $validated['building_id'])
+                ->where('number', $validated['number'])
+                ->first();
+
+            if ($existingFloor) {
+                throw ValidationException::withMessages([
+                    'number' => ['Floor number already exists in this building.']
+                ]);
+            }
+
+            // Create the floor
+            $floor = Floor::create([
+                'building_id' => $validated['building_id'],
+                'number' => $validated['number'],
+                'description' => $validated['description'],
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('tenant.floors.show', $floor->id)
+                ->with('success', 'Floor created successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Failed to create floor. Please try again.'])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Display the specified floor
+     */
+    public function floorsShow(Floor $floor)
+    {
+        $user = Auth::user();
+        
+        // Verify floor belongs to user's tenant
+        if (!$floor->building || !$floor->building->property || 
+            $floor->building->property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to floor.');
+        }
+
+        // If MANAGER, only show floors from their property
+        if ($user->role->name === 'MANAGER' && $floor->building->property_id !== $user->property_id) {
+            abort(403, 'Unauthorized access to floor.');
+        }
+
+        // Load relationships and rooms count
+        $floor->load(['building.property', 'rooms.roomType']);
+
+        return view('Users.tenant.floor.show', compact('floor'));
+    }
+
+    /**
+     * Show the form for editing the specified floor
+     */
+    public function floorsEdit(Floor $floor)
+    {
+        $user = Auth::user();
+        
+        // Verify floor belongs to user's tenant
+        if (!$floor->building || !$floor->building->property || 
+            $floor->building->property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to floor.');
+        }
+
+        // Permission checks
+        if (!$this->canEditFloor($user, $floor)) {
+            return redirect()->route('tenant.floors.show', $floor->id)
+                ->with('error', 'You do not have permission to edit this floor.');
+        }
+
+        // Get properties and buildings for form
+        $properties = $this->getUserProperties($user);
+        $buildings = $floor->building->property->buildings()->get();
+
+        // Load relationships
+        $floor->load('building.property');
+
+        return view('Users.tenant.floor.edit', compact('floor', 'properties', 'buildings'));
+    }
+
+    /**
+     * Update the specified floor
+     */
+    public function floorsUpdate(Request $request, Floor $floor)
+    {
+        $user = Auth::user();
+        
+        // Verify floor belongs to user's tenant
+        if (!$floor->building || !$floor->building->property || 
+            $floor->building->property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to floor.');
+        }
+
+        // Permission checks
+        if (!$this->canEditFloor($user, $floor)) {
+            return redirect()->route('tenant.floors.show', $floor->id)
+                ->with('error', 'You do not have permission to edit this floor.');
+        }
+
+        $validated = $request->validate([
+            'building_id' => 'required|uuid|exists:buildings,id',
+            'number' => 'required|integer|min:1|max:999',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Verify new building belongs to user's tenant and property
+            $building = Building::whereHas('property', function ($query) use ($user) {
+                $query->where('tenant_id', $user->tenant_id);
+            })->where('id', $validated['building_id'])->first();
+
+            if (!$building) {
+                throw ValidationException::withMessages([
+                    'building_id' => ['Building not found or access denied.']
+                ]);
+            }
+
+            // If user is MANAGER, they can only update floors for their property
+            if ($user->role->name === 'MANAGER' && $building->property_id !== $user->property_id) {
+                throw ValidationException::withMessages([
+                    'building_id' => ['You can only update floors for your assigned property.']
+                ]);
+            }
+
+            // Check if floor number already exists in this building (excluding current floor)
+            $existingFloor = Floor::where('building_id', $validated['building_id'])
+                ->where('number', $validated['number'])
+                ->where('id', '!=', $floor->id)
+                ->first();
+
+            if ($existingFloor) {
+                throw ValidationException::withMessages([
+                    'number' => ['Floor number already exists in this building.']
+                ]);
+            }
+
+            // Update the floor
+            $floor->update([
+                'building_id' => $validated['building_id'],
+                'number' => $validated['number'],
+                'description' => $validated['description'],
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('tenant.floors.show', $floor->id)
+                ->with('success', 'Floor updated successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => 'Failed to update floor. Please try again.'])
+                ->withInput();
+        }
+    }
+
+    /**
+     * Remove the specified floor
+     */
+    public function floorsDestroy(Floor $floor)
+    {
+        $user = Auth::user();
+        
+        // Verify floor belongs to user's tenant
+        if (!$floor->building || !$floor->building->property || 
+            $floor->building->property->tenant_id !== $user->tenant_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to floor.'
+            ], 403);
+        }
+
+        // Only DIRECTOR and MANAGER can delete floors
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have permission to delete floors.'
+            ], 403);
+        }
+
+        // If MANAGER, can only delete floors from their property
+        if ($user->role->name === 'MANAGER' && $floor->building->property_id !== $user->property_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You can only delete floors from your assigned property.'
+            ], 403);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Check if floor has rooms
+            $roomsCount = $floor->rooms()->count();
+            if ($roomsCount > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Cannot delete floor with {$roomsCount} room(s). Remove all rooms first."
+                ], 400);
+            }
+
+            // Delete the floor
+            $floor->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Floor deleted successfully!'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete floor. Please try again.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Check if current user can edit the floor
+     */
+    private function canEditFloor($currentUser, $floor)
+    {
+        // DIRECTOR can edit any floor in their tenant
+        if ($currentUser->role->name === 'DIRECTOR') {
+            return true;
+        }
+
+        // MANAGER can edit floors in their property
+        if ($currentUser->role->name === 'MANAGER') {
+            return $floor->building->property_id === $currentUser->property_id;
+        }
+
+        return false;
+    }
 }
