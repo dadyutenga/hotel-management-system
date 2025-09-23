@@ -4,6 +4,8 @@ use App\Http\Controllers\SuperAdminAuthController;
 use App\Http\Controllers\SuperadminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Tenant\PropertyController;
+use App\Http\Controllers\Tenant\RoomsController;
+use App\Http\Controllers\Tenant\RoomTypesController;
 use App\Http\Controllers\Tenant\BuildingController;
 use App\Http\Controllers\Tenant\UserController;
 use Illuminate\Support\Facades\Route;
@@ -68,30 +70,30 @@ Route::middleware('auth')->group(function () {
 
     // Room Types management routes
     Route::prefix('room-types')->name('tenant.room-types.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Users\Tenant\RoomTypesController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\Users\Tenant\RoomTypesController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\Users\Tenant\RoomTypesController::class, 'store'])->name('store');
-        Route::get('/{roomType}', [\App\Http\Controllers\Users\Tenant\RoomTypesController::class, 'show'])->name('show');
-        Route::get('/{roomType}/edit', [\App\Http\Controllers\Users\Tenant\RoomTypesController::class, 'edit'])->name('edit');
-        Route::put('/{roomType}', [\App\Http\Controllers\Users\Tenant\RoomTypesController::class, 'update'])->name('update');
-        Route::delete('/{roomType}', [\App\Http\Controllers\Users\Tenant\RoomTypesController::class, 'destroy'])->name('destroy');
-        Route::put('/{roomType}/status', [\App\Http\Controllers\Users\Tenant\RoomTypesController::class, 'updateStatus'])->name('update-status');
-        Route::get('/property/{property}/types', [\App\Http\Controllers\Users\Tenant\RoomTypesController::class, 'getRoomTypesByProperty'])->name('by-property');
+        Route::get('/', [RoomTypesController::class, 'index'])->name('index');
+        Route::get('/create', [RoomTypesController::class, 'create'])->name('create');
+        Route::post('/', [RoomTypesController::class, 'store'])->name('store');
+        Route::get('/{roomType}', [RoomTypesController::class, 'show'])->name('show');
+        Route::get('/{roomType}/edit', [RoomTypesController::class, 'edit'])->name('edit');
+        Route::put('/{roomType}', [RoomTypesController::class, 'update'])->name('update');
+        Route::delete('/{roomType}', [RoomTypesController::class, 'destroy'])->name('destroy');
+        Route::put('/{roomType}/status', [RoomTypesController::class, 'updateStatus'])->name('update-status');
+        Route::get('/property/{property}/types', [RoomTypesController::class, 'getRoomTypesByProperty'])->name('by-property');
     });
     
     // Rooms management routes
     Route::prefix('rooms')->name('tenant.rooms.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Users\Tenant\RoomsController::class, 'index'])->name('index');
-        Route::get('/create', [\App\Http\Controllers\Users\Tenant\RoomsController::class, 'create'])->name('create');
-        Route::post('/', [\App\Http\Controllers\Users\Tenant\RoomsController::class, 'store'])->name('store');
-        Route::get('/{room}', [\App\Http\Controllers\Users\Tenant\RoomsController::class, 'show'])->name('show');
-        Route::get('/{room}/edit', [\App\Http\Controllers\Users\Tenant\RoomsController::class, 'edit'])->name('edit');
-        Route::put('/{room}', [\App\Http\Controllers\Users\Tenant\RoomsController::class, 'update'])->name('update');
-        Route::delete('/{room}', [\App\Http\Controllers\Users\Tenant\RoomsController::class, 'destroy'])->name('destroy');
-        Route::put('/{room}/status', [\App\Http\Controllers\Users\Tenant\RoomsController::class, 'updateStatus'])->name('update-status');
-        Route::get('/property/{property}/buildings', [\App\Http\Controllers\Users\Tenant\RoomsController::class, 'getBuildings'])->name('buildings');
-        Route::get('/building/{building}/floors', [\App\Http\Controllers\Users\Tenant\RoomsController::class, 'getFloors'])->name('floors');
-        Route::get('/property/{property}/room-types', [\App\Http\Controllers\Users\Tenant\RoomsController::class, 'getRoomTypes'])->name('room-types');
+        Route::get('/', [RoomsController::class, 'index'])->name('index');
+        Route::get('/create', [RoomsController::class, 'create'])->name('create');
+        Route::post('/', [RoomsController::class, 'store'])->name('store');
+        Route::get('/{room}', [RoomsController::class, 'show'])->name('show');
+        Route::get('/{room}/edit', [RoomsController::class, 'edit'])->name('edit');
+        Route::put('/{room}', [RoomsController::class, 'update'])->name('update');
+        Route::delete('/{room}', [RoomsController::class, 'destroy'])->name('destroy');
+        Route::put('/{room}/status', [RoomsController::class, 'updateStatus'])->name('update-status');
+        Route::get('/property/{property}/buildings', [RoomsController::class, 'getBuildings'])->name('buildings');
+        Route::get('/building/{building}/floors', [RoomsController::class, 'getFloors'])->name('floors');
+        Route::get('/property/{property}/room-types', [RoomsController::class, 'getRoomTypes'])->name('room-types');
     });
 
     // User dashboard route
