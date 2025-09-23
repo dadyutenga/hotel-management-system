@@ -28,9 +28,16 @@
         @endif
         
         <div class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('tenant.rooms.index') }}" class="nav-link {{ request()->routeIs('tenant.rooms.*') ? 'active' : '' }}">
                 <i class="fas fa-door-open"></i>
-                <span>Room Status</span>
+                <span>Room Management</span>
+            </a>
+        </div>
+        
+        <div class="nav-item">
+            <a href="{{ route('tenant.room-types.index') }}" class="nav-link {{ request()->routeIs('tenant.room-types.*') ? 'active' : '' }}">
+                <i class="fas fa-bed"></i>
+                <span>Room Types</span>
             </a>
         </div>
         

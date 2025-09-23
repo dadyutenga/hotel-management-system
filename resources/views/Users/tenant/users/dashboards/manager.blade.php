@@ -445,13 +445,33 @@
                                 </div>
                             </a>
                             
-                            <a href="#" class="action-item">
+                            <a href="{{ route('tenant.rooms.index') }}" class="action-item">
                                 <div class="action-icon">
                                     <i class="fas fa-door-open"></i>
                                 </div>
                                 <div class="action-info">
                                     <h4>Room Management</h4>
                                     <p>Manage rooms and availability</p>
+                                </div>
+                            </a>
+                            
+                            <a href="{{ route('tenant.room-types.index') }}" class="action-item">
+                                <div class="action-icon">
+                                    <i class="fas fa-bed"></i>
+                                </div>
+                                <div class="action-info">
+                                    <h4>Room Types</h4>
+                                    <p>Configure room categories</p>
+                                </div>
+                            </a>
+                            
+                            <a href="{{ route('tenant.rooms.create') }}" class="action-item">
+                                <div class="action-icon">
+                                    <i class="fas fa-plus-circle"></i>
+                                </div>
+                                <div class="action-info">
+                                    <h4>Add New Room</h4>
+                                    <p>Create new room entry</p>
                                 </div>
                             </a>
                             
