@@ -18,8 +18,6 @@ class RoomTypesController extends Controller
     public function __construct(TenantSecurityService $tenantSecurity)
     {
         $this->tenantSecurity = $tenantSecurity;
-        // Fix: Remove the middleware call - it's handled in routes
-        // $this->middleware(['auth', 'verified']);
     }
 
     /**
@@ -35,7 +33,6 @@ class RoomTypesController extends Controller
 
         $propertyId = $request->get('property_id');
         $search = $request->get('search');
-        $status = $request->get('status');
 
         // Get properties for the current tenant
         $properties = Property::where('tenant_id', $user->tenant_id)
@@ -117,14 +114,13 @@ class RoomTypesController extends Controller
             abort(403, 'Unauthorized access to room types management');
         }
 
+        // Fix: Validate only fields that exist in the model
         $validated = $request->validate([
             'property_id' => 'required|uuid|exists:properties,id',
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
             'base_rate' => 'required|numeric|min:0|max:999999.99',
-            'max_occupancy' => 'required|integer|min:1|max:20',
-            'size_sqm' => 'nullable|numeric|min:0|max:9999.99',
-            'is_active' => 'boolean'
+            'capacity' => 'required|integer|min:1|max:20'  // Fixed: was max_occupancy
         ]);
 
         // Validate property belongs to current tenant
@@ -150,12 +146,13 @@ class RoomTypesController extends Controller
         try {
             DB::beginTransaction();
 
+            // Fix: Create with only model fillable fields
             $roomType = RoomType::create([
                 'property_id' => $validated['property_id'],
                 'name' => $validated['name'],
                 'description' => $validated['description'],
                 'base_rate' => $validated['base_rate'],
-                'capacity' => $validated['capacity']
+                'capacity' => $validated['capacity']  // Fixed: matches the model field
             ]);
 
             DB::commit();
@@ -342,8 +339,6 @@ class RoomTypesController extends Controller
             return response()->json(['success' => false, 'message' => 'Failed to delete room type'], 500);
         }
     }
-
-
 
     /**
      * Get room types for a specific property (AJAX)

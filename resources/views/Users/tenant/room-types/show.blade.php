@@ -9,7 +9,7 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Same styles as create view but optimized for show page */
+        /* Same styles as before */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Figtree', sans-serif; background-color: #f8f9fa; color: #333; line-height: 1.6; }
         .dashboard-container { display: flex; min-height: 100vh; }
@@ -45,13 +45,6 @@
         .text-danger { color: #dc3545 !important; }
         .text-muted { color: #6c757d !important; }
         .font-weight-bold { font-weight: bold !important; }
-        .custom-control { position: relative; display: block; min-height: 1.5rem; padding-left: 2.25rem; }
-        .custom-control-input { position: absolute; z-index: -1; opacity: 0; }
-        .custom-control-label { position: relative; margin-bottom: 0; cursor: pointer; }
-        .custom-switch .custom-control-label::before { left: -2.25rem; width: 1.75rem; pointer-events: all; border-radius: 0.5rem; position: absolute; top: 0.25rem; display: block; height: 1rem; content: ""; background-color: #fff; border: 1px solid #adb5bd; }
-        .custom-switch .custom-control-label::after { top: calc(0.25rem + 2px); left: calc(-2.25rem + 2px); width: calc(1rem - 4px); height: calc(1rem - 4px); background-color: #adb5bd; border-radius: 0.5rem; transition: all 0.15s ease-in-out; position: absolute; display: block; content: ""; }
-        .custom-switch .custom-control-input:checked ~ .custom-control-label::after { background-color: #fff; transform: translateX(0.75rem); }
-        .custom-switch .custom-control-input:checked ~ .custom-control-label::before { color: #fff; border-color: #007bff; background-color: #007bff; }
         .info-box { display: flex; align-items: center; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .info-box-icon { width: 60px; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: white; font-size: 1.5rem; }
         .bg-info { background-color: #17a2b8; }
@@ -104,292 +97,214 @@
         
         <div class="main-content">
             <div class="container">
-
-<div class="content-wrapper">
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Room Type Details</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('tenant.room-types.index') }}">Room Types</a></li>
-                        <li class="breadcrumb-item active">{{ $roomType->name }}</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <section class="content">
-        <div class="container-fluid">
-            
-            <!-- Action Buttons -->
-            <div class="row mb-3">
-                <div class="col-12">
-                    <a href="{{ route('tenant.room-types.edit', $roomType->id) }}" class="btn btn-warning">
-                        <i class="fas fa-edit"></i> Edit Room Type
-                    </a>
-                    <a href="{{ route('tenant.room-types.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to List
-                    </a>
-                    <button type="button" class="btn btn-danger float-right" 
-                            onclick="deleteRoomType('{{ $roomType->id }}', '{{ $roomType->name }}')">
-                        <i class="fas fa-trash"></i> Delete Room Type
-                    </button>
-                </div>
-            </div>
-
-            <div class="row">
-                <!-- Room Type Information -->
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-bed"></i> {{ $roomType->name }}
-                            </h3>
-                            <div class="card-tools">
-                                <span class="badge badge-{{ $roomType->is_active ? 'success' : 'secondary' }} badge-lg">
-                                    {{ $roomType->is_active ? 'Active' : 'Inactive' }}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <table class="table table-bordered">
-                                        <tr>
-                                            <th style="width: 40%">Property</th>
-                                            <td>{{ $roomType->property->name }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Base Rate</th>
-                                            <td class="text-success font-weight-bold">{{ number_format($roomType->base_rate, 2) }} Tzs</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Maximum Occupancy</th>
-                                            <td><i class="fas fa-users text-info"></i> {{ $roomType->capacity }} guests</td>
-                                        </tr>
-                                        @if($roomType->size_sqm)
-                                        <tr>
-                                            <th>Size</th>
-                                            <td><i class="fas fa-expand-arrows-alt text-warning"></i> {{ $roomType->size_sqm }} sq.m</td>
-                                        </tr>
-                                        @endif
-                                        <tr>
-                                            <th>Status</th>
-                                            <td>
-                                                <div class="custom-control custom-switch">
-                                                    <input type="checkbox" class="custom-control-input status-toggle" 
-                                                           id="status-toggle" 
-                                                           data-room-type-id="{{ $roomType->id }}"
-                                                           {{ $roomType->is_active ? 'checked' : '' }}>
-                                                    <label class="custom-control-label" for="status-toggle">
-                                                        <span id="status-text">{{ $roomType->is_active ? 'Active' : 'Inactive' }}</span>
-                                                    </label>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
+                <div class="content-wrapper">
+                    <div class="content-header">
+                        <div class="container-fluid">
+                            <div class="row mb-2">
+                                <div class="col-sm-6">
+                                    <h1 class="m-0">Room Type Details</h1>
                                 </div>
-                                
-                                <div class="col-md-6">
-                                    @if($roomType->description)
-                                        <h5>Description</h5>
-                                        <p class="text-muted">{{ $roomType->description }}</p>
-                                    @else
-                                        <div class="text-center text-muted py-4">
-                                            <i class="fas fa-file-alt fa-2x mb-2"></i>
-                                            <p>No description provided</p>
-                                        </div>
-                                    @endif
+                                <div class="col-sm-6">
+                                    <ol class="breadcrumb float-sm-right">
+                                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                                        <li class="breadcrumb-item"><a href="{{ route('tenant.room-types.index') }}">Room Types</a></li>
+                                        <li class="breadcrumb-item active">{{ $roomType->name }}</li>
+                                    </ol>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Statistics & Quick Info -->
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-chart-bar"></i> Statistics
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="info-box mb-3">
-                                <span class="info-box-icon bg-info">
-                                    <i class="fas fa-door-open"></i>
-                                </span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Total Rooms</span>
-                                    <span class="info-box-number">{{ $roomType->rooms->count() }}</span>
-                                </div>
-                            </div>
-
-                            @if($roomType->rooms->count() > 0)
-                                <div class="info-box mb-3">
-                                    <span class="info-box-icon bg-success">
-                                        <i class="fas fa-check-circle"></i>
-                                    </span>
-                                    <div class="info-box-content">
-                                        <span class="info-box-text">Available Rooms</span>
-                                        <span class="info-box-number">{{ $roomType->rooms->where('status', 'available')->count() }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="info-box mb-3">
-                                    <span class="info-box-icon bg-warning">
-                                        <i class="fas fa-tools"></i>
-                                    </span>
-                                    <div class="info-box-content">
-                                        <span class="info-box-text">Under Maintenance</span>
-                                        <span class="info-box-number">{{ $roomType->rooms->where('status', 'maintenance')->count() }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="info-box">
-                                    <span class="info-box-icon bg-danger">
-                                        <i class="fas fa-ban"></i>
-                                    </span>
-                                    <div class="info-box-content">
-                                        <span class="info-box-text">Out of Order</span>
-                                        <span class="info-box-number">{{ $roomType->rooms->where('status', 'out_of_order')->count() }}</span>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- Audit Information -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-history"></i> Audit Information
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <small class="text-muted">
-                                <strong>Created:</strong><br>
-                                {{ $roomType->created_at->format('M j, Y \a\t g:i A') }}
-                            </small>
+                    <section class="content">
+                        <div class="container-fluid">
                             
-                            @if($roomType->updated_at && $roomType->updated_at != $roomType->created_at)
-                                <br><br>
-                                <small class="text-muted">
-                                    <strong>Last Updated:</strong><br>
-                                    {{ $roomType->updated_at->format('M j, Y \a\t g:i A') }}
-                                </small>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rooms Using This Type -->
-            @if($roomType->rooms->count() > 0)
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="fas fa-list"></i> Rooms Using This Type ({{ $roomType->rooms->count() }})
-                                </h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Room Number</th>
-                                                <th>Building</th>
-                                                <th>Floor</th>
-                                                <th>Status</th>
-                                                <th>Last Cleaned</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($roomType->rooms as $room)
-                                                <tr>
-                                                    <td>
-                                                        <strong>{{ $room->room_number }}</strong>
-                                                    </td>
-                                                    <td>{{ $room->floor->building->name }}</td>
-                                                    <td>{{ $room->floor->name }}</td>
-                                                    <td>
-                                                        <span class="badge badge-{{ 
-                                                            $room->status == 'available' ? 'success' : 
-                                                            ($room->status == 'occupied' ? 'primary' : 
-                                                            ($room->status == 'maintenance' ? 'warning' : 'danger')) 
-                                                        }}">
-                                                            {{ ucfirst(str_replace('_', ' ', $room->status)) }}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        @if($room->last_cleaned)
-                                                            {{ \Carbon\Carbon::parse($room->last_cleaned)->format('M j, Y') }}
-                                                        @else
-                                                            <span class="text-muted">Never</span>
-                                                        @endif
-                                                    </td>
-                                                    <td>
-                                                        <a href="{{ route('tenant.rooms.show', $room->id) }}" 
-                                                           class="btn btn-sm btn-info">
-                                                            <i class="fas fa-eye"></i> View
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
+                            <!-- Action Buttons -->
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <a href="{{ route('tenant.room-types.edit', $roomType->id) }}" class="btn btn-warning">
+                                        <i class="fas fa-edit"></i> Edit Room Type
+                                    </a>
+                                    <a href="{{ route('tenant.room-types.index') }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Back to List
+                                    </a>
+                                    <button type="button" class="btn btn-danger float-right" 
+                                            onclick="deleteRoomType('{{ $roomType->id }}', '{{ $roomType->name }}')">
+                                        <i class="fas fa-trash"></i> Delete Room Type
+                                    </button>
                                 </div>
                             </div>
+
+                            <div class="row">
+                                <!-- Room Type Information -->
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <i class="fas fa-bed"></i> {{ $roomType->name }}
+                                            </h3>
+                                            <div class="card-tools">
+                                                <span class="badge badge-success badge-lg">
+                                                    Active
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <table class="table table-bordered">
+                                                        <tr>
+                                                            <th>Property</th>
+                                                            <td><i class="fas fa-building text-info"></i> {{ $roomType->property->name }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Base Rate</th>
+                                                            <td><i class="fas fa-money-bill text-success"></i> Tzs {{ number_format($roomType->base_rate, 2) }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>Max Capacity</th>
+                                                            <td><i class="fas fa-users text-primary"></i> {{ $roomType->capacity }} {{ $roomType->capacity == 1 ? 'guest' : 'guests' }}</td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                                
+                                                <div class="col-md-6">
+                                                    @if($roomType->description)
+                                                        <h5>Description</h5>
+                                                        <p class="text-muted">{{ $roomType->description }}</p>
+                                                    @else
+                                                        <p class="text-muted">No description provided.</p>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Statistics & Quick Info -->
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <i class="fas fa-chart-bar"></i> Statistics
+                                            </h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="info-box mb-3">
+                                                <span class="info-box-icon bg-info">
+                                                    <i class="fas fa-door-open"></i>
+                                                </span>
+                                                <div class="info-box-content">
+                                                    <span class="info-box-text">Total Rooms</span>
+                                                    <span class="info-box-number">{{ $roomType->rooms->count() }}</span>
+                                                </div>
+                                            </div>
+
+                                            @if($roomType->rooms->count() > 0)
+                                                <div class="info-box mb-3">
+                                                    <span class="info-box-icon bg-success">
+                                                        <i class="fas fa-check-circle"></i>
+                                                    </span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">Rooms Created</span>
+                                                        <span class="info-box-number">{{ $roomType->rooms->count() }}</span>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    <!-- Audit Information -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <i class="fas fa-history"></i> Audit Information
+                                            </h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <small class="text-muted">
+                                                <strong>Created:</strong><br>
+                                                {{ $roomType->created_at->format('M j, Y \a\t g:i A') }}
+                                            </small>
+                                            
+                                            @if($roomType->updated_at && $roomType->updated_at != $roomType->created_at)
+                                                <br><br>
+                                                <small class="text-muted">
+                                                    <strong>Last Updated:</strong><br>
+                                                    {{ $roomType->updated_at->format('M j, Y \a\t g:i A') }}
+                                                </small>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rooms Using This Type -->
+                            @if($roomType->rooms->count() > 0)
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h3 class="card-title">
+                                                    <i class="fas fa-list"></i> Rooms Using This Type ({{ $roomType->rooms->count() }})
+                                                </h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered table-striped">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Room Number</th>
+                                                                <th>Building</th>
+                                                                <th>Floor</th>
+                                                                <th>Created</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach($roomType->rooms as $room)
+                                                                <tr>
+                                                                    <td>
+                                                                        <strong>{{ $room->room_number }}</strong>
+                                                                    </td>
+                                                                    <td>
+                                                                        @if($room->floor && $room->floor->building)
+                                                                            {{ $room->floor->building->name }}
+                                                                        @else
+                                                                            <span class="text-muted">N/A</span>
+                                                                        @endif
+                                                                    </td>
+                                                                    <td>
+                                                                        @if($room->floor)
+                                                                            Floor {{ $room->floor->floor_number }}
+                                                                        @else
+                                                                            <span class="text-muted">N/A</span>
+                                                                        @endif
+                                                                    </td>
+                                                                    <td>
+                                                                        <small class="text-muted">
+                                                                            {{ $room->created_at->format('M j, Y') }}
+                                                                        </small>
+                                                                    </td>
+                                                                    <td>
+                                                                        <a href="{{ route('tenant.rooms.show', $room->id) }}" class="btn btn-info btn-sm">
+                                                                            <i class="fas fa-eye"></i> View
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
                         </div>
-                    </div>
+                    </section>
                 </div>
-            @endif
-
-        </div>
-    </section>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Delete</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the room type "<span id="deleteRoomTypeName"></span>"?</p>
-                @if($roomType->rooms->count() > 0)
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <strong>Warning:</strong> This room type has {{ $roomType->rooms->count() }} associated rooms. 
-                        You cannot delete it until all rooms are reassigned to other room types.
-                    </div>
-                @else
-                    <p class="text-danger"><small>This action cannot be undone.</small></p>
-                @endif
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                @if($roomType->rooms->count() == 0)
-                    <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
-                @endif
-            </div>
-        </div>
-    </div>
-</div>
-
             </div>
         </div>
     </div>
@@ -430,49 +345,6 @@
         // Modal functionality
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('show');
-        }
-
-        // Status toggle functionality
-        const statusToggle = document.querySelector('.status-toggle');
-        if (statusToggle) {
-            statusToggle.addEventListener('change', function() {
-                const roomTypeId = this.getAttribute('data-room-type-id');
-                const isActive = this.checked;
-                
-                fetch(`/room-types/${roomTypeId}/status`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        is_active: isActive
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update the status text and badge
-                        const statusText = document.getElementById('status-text');
-                        const badge = document.querySelector('.badge-lg');
-                        if (statusText) {
-                            statusText.textContent = isActive ? 'Active' : 'Inactive';
-                        }
-                        if (badge) {
-                            badge.className = isActive ? 'badge badge-success badge-lg' : 'badge badge-secondary badge-lg';
-                            badge.textContent = isActive ? 'Active' : 'Inactive';
-                        }
-                        console.log(data.message);
-                    } else {
-                        console.error(data.message);
-                        this.checked = !isActive;
-                    }
-                })
-                .catch(error => {
-                    console.error('Failed to update status');
-                    this.checked = !isActive;
-                });
-            });
         }
 
         // Delete room type functionality
