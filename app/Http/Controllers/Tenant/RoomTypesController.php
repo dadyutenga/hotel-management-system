@@ -18,7 +18,8 @@ class RoomTypesController extends Controller
     public function __construct(TenantSecurityService $tenantSecurity)
     {
         $this->tenantSecurity = $tenantSecurity;
-        $this->middleware(['auth', 'verified']);
+        // Fix: Remove the middleware call - it's handled in routes
+        // $this->middleware(['auth', 'verified']);
     }
 
     /**
@@ -198,7 +199,7 @@ class RoomTypesController extends Controller
         }
 
         // Validate tenant security
-        if (!$this->tenantSecurity->validatePropertyAccess($roomType->property)) {
+        if ($roomType->property->tenant_id !== $user->tenant_id) {
             abort(403, 'Unauthorized access to this room type');
         }
 
@@ -211,7 +212,8 @@ class RoomTypesController extends Controller
     public function edit($id)
     {
         // Ensure user has proper permissions
-        if (!Auth::user()->hasRole(['DIRECTOR', 'MANAGER'])) {
+        $user = Auth::user();
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
             abort(403, 'Unauthorized access to room types management');
         }
 
@@ -224,7 +226,7 @@ class RoomTypesController extends Controller
         }
 
         // Validate tenant security
-        if (!$this->tenantSecurity->validatePropertyAccess($roomType->property)) {
+        if ($roomType->property->tenant_id !== $user->tenant_id) {
             abort(403, 'Unauthorized access to this room type');
         }
 
@@ -242,7 +244,8 @@ class RoomTypesController extends Controller
     public function update(Request $request, $id)
     {
         // Ensure user has proper permissions
-        if (!Auth::user()->hasRole(['DIRECTOR', 'MANAGER'])) {
+        $user = Auth::user();
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
             abort(403, 'Unauthorized access to room types management');
         }
 
@@ -253,7 +256,7 @@ class RoomTypesController extends Controller
         }
 
         // Validate tenant security
-        if (!$this->tenantSecurity->validatePropertyAccess($roomType->property)) {
+        if ($roomType->property->tenant_id !== $user->tenant_id) {
             abort(403, 'Unauthorized access to this room type');
         }
 
@@ -299,7 +302,7 @@ class RoomTypesController extends Controller
                 'max_occupancy' => $validated['max_occupancy'],
                 'size_sqm' => $validated['size_sqm'],
                 'is_active' => $validated['is_active'] ?? true,
-                'updated_by' => Auth::id()
+                'updated_by' => $user->id
             ]);
 
             DB::commit();
@@ -321,7 +324,8 @@ class RoomTypesController extends Controller
     public function destroy($id)
     {
         // Ensure user has proper permissions
-        if (!Auth::user()->hasRole(['DIRECTOR', 'MANAGER'])) {
+        $user = Auth::user();
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -332,7 +336,7 @@ class RoomTypesController extends Controller
         }
 
         // Validate tenant security
-        if (!$this->tenantSecurity->validatePropertyAccess($roomType->property)) {
+        if ($roomType->property->tenant_id !== $user->tenant_id) {
             return response()->json(['success' => false, 'message' => 'Unauthorized access'], 403);
         }
 
@@ -358,7 +362,8 @@ class RoomTypesController extends Controller
     public function updateStatus(Request $request, $id)
     {
         // Ensure user has proper permissions
-        if (!Auth::user()->hasRole(['DIRECTOR', 'MANAGER'])) {
+        $user = Auth::user();
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
@@ -369,7 +374,7 @@ class RoomTypesController extends Controller
         }
 
         // Validate tenant security
-        if (!$this->tenantSecurity->validatePropertyAccess($roomType->property)) {
+        if ($roomType->property->tenant_id !== $user->tenant_id) {
             return response()->json(['success' => false, 'message' => 'Unauthorized access'], 403);
         }
 
@@ -400,8 +405,9 @@ class RoomTypesController extends Controller
     public function getRoomTypesByProperty($propertyId)
     {
         // Validate property belongs to current tenant
+        $user = Auth::user();
         $property = Property::where('id', $propertyId)
-            ->where('tenant_id', Auth::user()->tenant_id)
+            ->where('tenant_id', $user->tenant_id)
             ->first();
 
         if (!$property) {

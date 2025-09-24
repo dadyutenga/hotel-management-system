@@ -1,9 +1,97 @@
-@extends('layouts.app')
-
-@section('title', 'Edit Room Type')
-
-@section('content')
-@include('Users.shared.sidebars.manager')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Room Type - HotelPro</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Same comprehensive styles as create view */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Figtree', sans-serif; background-color: #f8f9fa; color: #333; line-height: 1.6; }
+        .dashboard-container { display: flex; min-height: 100vh; }
+        .main-content { margin-left: 280px; flex: 1; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); }
+        .page-title { font-size: 2rem; font-weight: 600; color: #2c3e50; margin: 0; }
+        .breadcrumb { display: flex; align-items: center; gap: 10px; color: #666; font-size: 0.9rem; margin-top: 10px; }
+        .breadcrumb a { color: #007bff; text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .card { background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); margin-bottom: 30px; overflow: hidden; }
+        .card-header { padding: 20px 30px; background: #f8f9fa; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center; }
+        .card-title { font-size: 1.3rem; font-weight: 600; color: #2c3e50; margin: 0; }
+        .card-body { padding: 30px; }
+        .card-footer { padding: 20px 30px; background: #f8f9fa; border-top: 1px solid #e9ecef; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #2c3e50; }
+        .required::after { content: " *"; color: red; }
+        .form-control { width: 100%; padding: 12px 15px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; transition: all 0.3s ease; }
+        .form-control:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); }
+        .invalid-feedback { display: block; width: 100%; margin-top: 0.25rem; font-size: 0.875rem; color: #dc3545; }
+        .is-invalid { border-color: #dc3545; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s ease; margin-right: 10px; margin-bottom: 10px; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #1e7e34; transform: translateY(-1px); }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #545b62; transform: translateY(-1px); }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; transform: translateY(-1px); }
+        .btn-outline-secondary { background: transparent; color: #6c757d; border: 1px solid #6c757d; }
+        .btn-outline-secondary:hover { background: #6c757d; color: white; transform: translateY(-1px); }
+        .input-group { position: relative; display: flex; align-items: stretch; width: 100%; }
+        .input-group-prepend, .input-group-append { display: flex; }
+        .input-group-text { display: flex; align-items: center; padding: 12px 15px; background-color: #e9ecef; border: 2px solid #e9ecef; border-radius: 8px; }
+        .input-group-prepend .input-group-text { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+        .input-group-append .input-group-text { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+        .input-group-prepend + .form-control { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+        .form-control + .input-group-append .input-group-text { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+        .custom-control { position: relative; display: block; min-height: 1.5rem; padding-left: 2.25rem; }
+        .custom-control-input { position: absolute; z-index: -1; opacity: 0; }
+        .custom-control-label { position: relative; margin-bottom: 0; cursor: pointer; }
+        .custom-switch .custom-control-label::before { left: -2.25rem; width: 1.75rem; pointer-events: all; border-radius: 0.5rem; position: absolute; top: 0.25rem; display: block; height: 1rem; content: ""; background-color: #fff; border: 1px solid #adb5bd; }
+        .custom-switch .custom-control-label::after { top: calc(0.25rem + 2px); left: calc(-2.25rem + 2px); width: calc(1rem - 4px); height: calc(1rem - 4px); background-color: #adb5bd; border-radius: 0.5rem; transition: all 0.15s ease-in-out; position: absolute; display: block; content: ""; }
+        .custom-switch .custom-control-input:checked ~ .custom-control-label::after { background-color: #fff; transform: translateX(0.75rem); }
+        .custom-switch .custom-control-input:checked ~ .custom-control-label::before { color: #fff; border-color: #007bff; background-color: #007bff; }
+        .form-text { display: block; margin-top: 0.25rem; font-size: 0.875rem; color: #6c757d; }
+        .text-warning { color: #ffc107 !important; }
+        .text-right { text-align: right !important; }
+        .row { display: flex; flex-wrap: wrap; margin: -15px; }
+        .col-md-6 { flex: 0 0 50%; max-width: 50%; padding: 15px; }
+        .col-md-8 { flex: 0 0 66.666667%; max-width: 66.666667%; padding: 15px; }
+        .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; padding: 15px; }
+        .ml-2 { margin-left: 0.5rem !important; }
+        .mt-4 { margin-top: 1.5rem !important; }
+        .badge { padding: 5px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-secondary { background: #e2e3e5; color: #383d41; }
+        .small-box { border-radius: 0.25rem; box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2); display: block; margin-bottom: 20px; position: relative; background: #f8f9fa; }
+        .small-box .inner { padding: 15px; }
+        .small-box .small-box-footer { background: rgba(0,0,0,.1); color: #007bff; display: block; padding: 8px 0; text-align: center; text-decoration: none; }
+        .small-box .icon { color: rgba(0,0,0,.15); position: absolute; right: 15px; top: 15px; font-size: 2rem; }
+        .alert { padding: 0.75rem 1.25rem; margin-bottom: 1rem; border: 1px solid transparent; border-radius: 0.25rem; }
+        .alert-info { color: #0c5460; background-color: #d1ecf1; border-color: #bee5eb; }
+        .alert-warning { color: #856404; background-color: #fff3cd; border-color: #ffeaa7; }
+        @media (max-width: 768px) {
+            .main-content { margin-left: 0; }
+            .container { padding: 15px; }
+            .header { padding: 20px; }
+            .card-body { padding: 20px; }
+            .card-footer { padding: 15px 20px; }
+            .row { margin: 0; }
+            .col-md-6, .col-md-8, .col-md-4 { flex: 0 0 100%; max-width: 100%; padding: 10px; }
+            .text-right { text-align: left !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        @include('Users.shared.sidebars.manager')
+        
+        <div class="main-content">
+            <div class="container">
 
 <div class="content-wrapper">
     <div class="content-header">
@@ -252,156 +340,116 @@
         </div>
     </section>
 </div>
-@endsection
+            </div>
+        </div>
+    </div>
 
-@section('scripts')
-<script>
-$(document).ready(function() {
-    // Character count for description
-    $('#description').on('input', function() {
-        const count = $(this).val().length;
-        $('#descriptionCount').text(count);
+    <script>
+        // Character count for description
+        const descriptionField = document.getElementById('description');
+        const descriptionCount = document.getElementById('descriptionCount');
         
-        if (count > 450) {
-            $('#descriptionCount').addClass('text-warning');
-        } else {
-            $('#descriptionCount').removeClass('text-warning');
+        if (descriptionField && descriptionCount) {
+            descriptionField.addEventListener('input', function() {
+                const count = this.value.length;
+                descriptionCount.textContent = count;
+                
+                if (count > 450) {
+                    descriptionCount.style.color = '#ffc107';
+                } else {
+                    descriptionCount.style.color = '#6c757d';
+                }
+            });
+
+            // Trigger initial count
+            descriptionField.dispatchEvent(new Event('input'));
         }
-    });
 
-    // Trigger initial count
-    $('#description').trigger('input');
+        // Form validation
+        const roomTypeForm = document.getElementById('roomTypeForm');
+        if (roomTypeForm) {
+            roomTypeForm.addEventListener('submit', function(e) {
+                let isValid = true;
+                
+                // Validate required fields
+                const requiredFields = ['property_id', 'name', 'base_rate', 'max_occupancy'];
+                requiredFields.forEach(function(field) {
+                    const input = document.getElementById(field);
+                    if (!input.value) {
+                        input.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
 
-    // Form validation
-    $('#roomTypeForm').on('submit', function(e) {
-        let isValid = true;
-        
-        // Validate required fields
-        const requiredFields = ['property_id', 'name', 'base_rate', 'max_occupancy'];
-        requiredFields.forEach(function(field) {
-            const input = $(`#${field}`);
-            if (!input.val()) {
-                input.addClass('is-invalid');
-                isValid = false;
-            } else {
-                input.removeClass('is-invalid');
-            }
+                // Validate base rate
+                const baseRate = parseFloat(document.getElementById('base_rate').value);
+                if (baseRate < 0) {
+                    document.getElementById('base_rate').classList.add('is-invalid');
+                    alert('Base rate must be a positive number');
+                    isValid = false;
+                }
+
+                // Validate max occupancy
+                const maxOccupancy = parseInt(document.getElementById('max_occupancy').value);
+                if (maxOccupancy < 1 || maxOccupancy > 20) {
+                    document.getElementById('max_occupancy').classList.add('is-invalid');
+                    alert('Maximum occupancy must be between 1 and 20');
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Please fix the errors and try again');
+                }
+            });
+        }
+
+        // Remove validation classes on input
+        document.querySelectorAll('.form-control').forEach(function(input) {
+            input.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+            });
+            input.addEventListener('change', function() {
+                this.classList.remove('is-invalid');
+            });
         });
 
-        // Validate base rate
-        const baseRate = parseFloat($('#base_rate').val());
-        if (baseRate < 0) {
-            $('#base_rate').addClass('is-invalid');
-            toastr.error('Base rate must be a positive number');
-            isValid = false;
+        // Warn about property change if rooms exist
+        const originalPropertyId = '{{ $roomType->property_id }}';
+        const propertySelect = document.getElementById('property_id');
+        if (propertySelect) {
+            propertySelect.addEventListener('change', function() {
+                const newPropertyId = this.value;
+                const roomCount = {{ $roomType->rooms->count() }};
+                
+                if (roomCount > 0 && newPropertyId !== originalPropertyId && newPropertyId !== '') {
+                    alert(`This will affect ${roomCount} associated room(s). Please ensure this change is intentional.`);
+                }
+            });
         }
 
-        // Validate max occupancy
-        const maxOccupancy = parseInt($('#max_occupancy').val());
-        if (maxOccupancy < 1 || maxOccupancy > 20) {
-            $('#max_occupancy').addClass('is-invalid');
-            toastr.error('Maximum occupancy must be between 1 and 20');
-            isValid = false;
+        function resetForm() {
+            if (roomTypeForm) {
+                // Reset to original values
+                document.getElementById('property_id').value = '{{ old("property_id", $roomType->property_id) }}';
+                document.getElementById('name').value = '{{ old("name", $roomType->name) }}';
+                document.getElementById('base_rate').value = '{{ old("base_rate", $roomType->base_rate) }}';
+                document.getElementById('description').value = '{{ old("description", $roomType->description) }}';
+                document.getElementById('max_occupancy').value = '{{ old("max_occupancy", $roomType->max_occupancy) }}';
+                document.getElementById('size_sqm').value = '{{ old("size_sqm", $roomType->size_sqm) }}';
+                document.getElementById('is_active').checked = {{ old('is_active', $roomType->is_active) ? 'true' : 'false' }};
+                
+                document.querySelectorAll('.form-control').forEach(function(input) {
+                    input.classList.remove('is-invalid');
+                });
+                
+                if (descriptionField) {
+                    descriptionField.dispatchEvent(new Event('input'));
+                }
+            }
         }
-
-        if (!isValid) {
-            e.preventDefault();
-            toastr.error('Please fix the errors and try again');
-        }
-    });
-
-    // Remove validation classes on input
-    $('.form-control').on('input change', function() {
-        $(this).removeClass('is-invalid');
-    });
-
-    // Warn about property change if rooms exist
-    const originalPropertyId = '{{ $roomType->property_id }}';
-    $('#property_id').on('change', function() {
-        const newPropertyId = $(this).val();
-        const roomCount = {{ $roomType->rooms->count() }};
-        
-        if (roomCount > 0 && newPropertyId !== originalPropertyId && newPropertyId !== '') {
-            toastr.warning(`This will affect ${roomCount} associated room(s). Please ensure this change is intentional.`);
-        }
-    });
-});
-
-function resetForm() {
-    // Reset to original values
-    $('#property_id').val('{{ old("property_id", $roomType->property_id) }}');
-    $('#name').val('{{ old("name", $roomType->name) }}');
-    $('#base_rate').val('{{ old("base_rate", $roomType->base_rate) }}');
-    $('#description').val('{{ old("description", $roomType->description) }}');
-    $('#max_occupancy').val('{{ old("max_occupancy", $roomType->max_occupancy) }}');
-    $('#size_sqm').val('{{ old("size_sqm", $roomType->size_sqm) }}');
-    $('#is_active').prop('checked', {{ old('is_active', $roomType->is_active) ? 'true' : 'false' }});
-    
-    $('.form-control').removeClass('is-invalid');
-    $('#description').trigger('input');
-}
-</script>
-@endsection
-
-@section('styles')
-<style>
-.required::after {
-    content: " *";
-    color: red;
-}
-
-.card {
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-
-.form-control:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
-}
-
-.custom-control-label {
-    cursor: pointer;
-}
-
-.input-group-text {
-    background-color: #f8f9fa;
-    border-color: #ced4da;
-}
-
-.small-box {
-    border-radius: 0.25rem;
-    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
-    display: block;
-    margin-bottom: 20px;
-    position: relative;
-}
-
-.small-box>.inner {
-    padding: 10px;
-}
-
-.small-box>.small-box-footer {
-    background: rgba(0,0,0,.1);
-    color: rgba(255,255,255,.8);
-    display: block;
-    padding: 3px 0;
-    position: relative;
-    text-align: center;
-    text-decoration: none;
-    z-index: 10;
-}
-
-.small-box .icon {
-    color: rgba(0,0,0,.15);
-    z-index: 0;
-}
-
-.small-box .icon>i {
-    font-size: 70px;
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    transition: all .3s linear;
-}
-</style>
-@endsection
+    </script>
+</body>
+</html>
