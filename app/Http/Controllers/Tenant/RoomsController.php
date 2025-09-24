@@ -9,7 +9,6 @@ use App\Models\Building;
 use App\Models\Floor;
 use App\Models\RoomType;
 use App\Models\RoomFeature;
-use App\Services\TenantSecurityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -116,24 +115,41 @@ class RoomsController extends Controller
             // Verify property belongs to user's tenant
             $property = Property::where('id', $validated['property_id'])
                 ->where('tenant_id', $user->tenant_id)
-                ->firstOrFail();
+                ->first();
+
+            if (!$property) {
+                abort(403, 'Unauthorized access to this property');
+            }
 
             // If user is MANAGER, they can only create rooms for their property
-            if ($user->role->name === 'MANAGER' && $validated['property_id'] !== $user->property_id) {
-                throw ValidationException::withMessages([
-                    'property_id' => ['You can only create rooms for your assigned property.']
-                ]);
+            if ($user->role->name === 'MANAGER') {
+                // Check if user has a property assigned and if it matches
+                if (!$user->property_id || $validated['property_id'] !== $user->property_id) {
+                    abort(403, 'You can only create rooms for your assigned property');
+                }
             }
 
             // Verify floor belongs to property
             $floor = Floor::whereHas('building', function($q) use ($validated) {
                 $q->where('property_id', $validated['property_id']);
-            })->where('id', $validated['floor_id'])->firstOrFail();
+            })->where('id', $validated['floor_id'])->first();
+
+            if (!$floor) {
+                return back()->withErrors([
+                    'floor_id' => ['Selected floor does not belong to the selected property.']
+                ])->withInput();
+            }
 
             // Verify room type belongs to property
             $roomType = RoomType::where('id', $validated['room_type_id'])
                 ->where('property_id', $validated['property_id'])
-                ->firstOrFail();
+                ->first();
+
+            if (!$roomType) {
+                return back()->withErrors([
+                    'room_type_id' => ['Selected room type does not belong to the selected property.']
+                ])->withInput();
+            }
 
             // Check if room number already exists for this property
             $existingRoom = Room::where('property_id', $validated['property_id'])
@@ -141,9 +157,9 @@ class RoomsController extends Controller
                 ->first();
 
             if ($existingRoom) {
-                throw ValidationException::withMessages([
+                return back()->withErrors([
                     'room_number' => ['Room number already exists for this property.']
-                ]);
+                ])->withInput();
             }
 
             // Create the room
@@ -188,7 +204,9 @@ class RoomsController extends Controller
         $user = Auth::user();
         
         // Verify room belongs to user's tenant
-        TenantSecurityService::abortUnlessOwner($room->property, 'tenant_id');
+        if ($room->property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to room');
+        }
 
         // If not DIRECTOR, only show rooms from same property
         if ($user->role->name !== 'DIRECTOR' && $room->property_id !== $user->property_id) {
@@ -209,7 +227,9 @@ class RoomsController extends Controller
         $user = Auth::user();
         
         // Verify room belongs to user's tenant
-        TenantSecurityService::abortUnlessOwner($room->property, 'tenant_id');
+        if ($room->property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to room');
+        }
 
         // Permission checks
         if (!$this->canEditRoom($user, $room)) {
@@ -240,7 +260,9 @@ class RoomsController extends Controller
         $user = Auth::user();
         
         // Verify room belongs to user's tenant
-        TenantSecurityService::abortUnlessOwner($room->property, 'tenant_id');
+        if ($room->property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to room');
+        }
 
         // Permission checks
         if (!$this->canEditRoom($user, $room)) {
@@ -265,12 +287,24 @@ class RoomsController extends Controller
             // Verify floor belongs to same property
             $floor = Floor::whereHas('building', function($q) use ($room) {
                 $q->where('property_id', $room->property_id);
-            })->where('id', $validated['floor_id'])->firstOrFail();
+            })->where('id', $validated['floor_id'])->first();
+
+            if (!$floor) {
+                return back()->withErrors([
+                    'floor_id' => ['Selected floor does not belong to this room\'s property.']
+                ])->withInput();
+            }
 
             // Verify room type belongs to same property
             $roomType = RoomType::where('id', $validated['room_type_id'])
                 ->where('property_id', $room->property_id)
-                ->firstOrFail();
+                ->first();
+
+            if (!$roomType) {
+                return back()->withErrors([
+                    'room_type_id' => ['Selected room type does not belong to this room\'s property.']
+                ])->withInput();
+            }
 
             // Check if room number already exists for this property (excluding current room)
             $existingRoom = Room::where('property_id', $room->property_id)
@@ -279,9 +313,9 @@ class RoomsController extends Controller
                 ->first();
 
             if ($existingRoom) {
-                throw ValidationException::withMessages([
+                return back()->withErrors([
                     'room_number' => ['Room number already exists for this property.']
-                ]);
+                ])->withInput();
             }
 
             // Update the room
@@ -326,7 +360,12 @@ class RoomsController extends Controller
         $user = Auth::user();
         
         // Verify room belongs to user's tenant
-        TenantSecurityService::abortUnlessOwner($room->property, 'tenant_id');
+        if ($room->property->tenant_id !== $user->tenant_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to room'
+            ], 403);
+        }
 
         // Only DIRECTOR and MANAGER can delete rooms
         if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
@@ -469,7 +508,12 @@ class RoomsController extends Controller
         $user = Auth::user();
         
         // Verify room belongs to user's tenant
-        TenantSecurityService::abortUnlessOwner($room->property, 'tenant_id');
+        if ($room->property->tenant_id !== $user->tenant_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized access to room'
+            ], 403);
+        }
 
         // Permission checks
         if (!$this->canEditRoom($user, $room)) {

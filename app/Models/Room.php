@@ -65,7 +65,7 @@ class Room extends Model
 
     public function features()
     {
-        return $this->belongsToMany(RoomFeature::class, 'core.room_features_map', 'room_id', 'feature_id');
+        return $this->belongsToMany(RoomFeature::class, 'room_features_map', 'room_id', 'feature_id');
     }
 
     public function reservationRooms()
