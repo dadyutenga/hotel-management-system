@@ -1,14 +1,344 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room Types Management - HotelPro</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
+@extends('layouts.app')
+
+@section('title', 'Room Types')
+
+@section('content')
+@include('Users.shared.sidebars.manager')
+
+<div class="content-wrapper">
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Room Types Management</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                        <li class="breadcrumb-item active">Room Types</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            
+            <!-- Filter Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">Filter Room Types</h3>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ route('tenant.room-types.index') }}" class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="property_id">Property</label>
+                                <select name="property_id" id="property_id" class="form-control">
+                                    <option value="">All Properties</option>
+                                    @foreach($properties as $property)
+                                        <option value="{{ $property->id }}" {{ $propertyId == $property->id ? 'selected' : '' }}>
+                                            {{ $property->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="search">Search</label>
+                                <input type="text" name="search" id="search" class="form-control" 
+                                       placeholder="Search by name or description..." value="{{ $search }}">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="status">Status</label>
+                                <select name="status" id="status" class="form-control">
+                                    <option value="">All Status</option>
+                                    <option value="active" {{ $status == 'active' ? 'selected' : '' }}>Active</option>
+                                    <option value="inactive" {{ $status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i> Filter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div>
+                                    <a href="{{ route('tenant.room-types.index') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Clear
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <a href="{{ route('tenant.room-types.create') }}" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Add New Room Type
+                    </a>
+                </div>
+            </div>
+
+            <!-- Room Types Grid -->
+            <div class="row">
+                @forelse($roomTypes as $roomType)
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100 room-type-card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{ $roomType->name }}</h5>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                            type="button" data-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item" href="{{ route('tenant.room-types.show', $roomType->id) }}">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </a>
+                                        <a class="dropdown-item" href="{{ route('tenant.room-types.edit', $roomType->id) }}">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <button type="button" class="dropdown-item text-danger" 
+                                                onclick="deleteRoomType('{{ $roomType->id }}', '{{ $roomType->name }}')">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <strong>Property:</strong>
+                                    <span class="text-muted">{{ $roomType->property->name }}</span>
+                                </div>
+                                
+                                @if($roomType->description)
+                                    <div class="mb-3">
+                                        <strong>Description:</strong>
+                                        <p class="text-muted mb-0">{{ Str::limit($roomType->description, 100) }}</p>
+                                    </div>
+                                @endif
+                                
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <strong>Base Rate:</strong>
+                                        <div class="text-success font-weight-bold">${{ number_format($roomType->base_rate, 2) }}</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>Max Occupancy:</strong>
+                                        <div class="text-info">{{ $roomType->max_occupancy }} guests</div>
+                                    </div>
+                                </div>
+                                
+                                @if($roomType->size_sqm)
+                                    <div class="mb-3">
+                                        <strong>Size:</strong>
+                                        <span class="text-muted">{{ $roomType->size_sqm }} sq.m</span>
+                                    </div>
+                                @endif
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge badge-{{ $roomType->is_active ? 'success' : 'secondary' }}">
+                                            {{ $roomType->is_active ? 'Active' : 'Inactive' }}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input status-toggle" 
+                                                   id="status-{{ $roomType->id }}" 
+                                                   data-room-type-id="{{ $roomType->id }}"
+                                                   {{ $roomType->is_active ? 'checked' : '' }}>
+                                            <label class="custom-control-label" for="status-{{ $roomType->id }}"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer text-center">
+                                <a href="{{ route('tenant.room-types.show', $roomType->id) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                                <a href="{{ route('tenant.room-types.edit', $roomType->id) }}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-bed fa-3x text-muted mb-3"></i>
+                                <h4 class="text-muted">No Room Types Found</h4>
+                                <p class="text-muted">You haven't created any room types yet.</p>
+                                <a href="{{ route('tenant.room-types.create') }}" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> Create Your First Room Type
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- Pagination -->
+            @if($roomTypes->hasPages())
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-center">
+                            {{ $roomTypes->appends(request()->query())->links() }}
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+        </div>
+    </section>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the room type "<span id="deleteRoomTypeName"></span>"?</p>
+                <p class="text-danger"><small>This action cannot be undone.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@endsection
+
+@section('scripts')
+<script>
+$(document).ready(function() {
+    // Status toggle functionality
+    $('.status-toggle').change(function() {
+        const roomTypeId = $(this).data('room-type-id');
+        const isActive = $(this).is(':checked');
+        
+        $.ajax({
+            url: `/room-types/${roomTypeId}/status`,
+            method: 'PUT',
+            data: {
+                _token: '{{ csrf_token() }}',
+                is_active: isActive
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    // Update the badge
+                    const badge = $(`.badge:contains('${isActive ? 'Inactive' : 'Active'}')`);
+                    if (badge.length) {
+                        badge.removeClass(isActive ? 'badge-secondary' : 'badge-success')
+                             .addClass(isActive ? 'badge-success' : 'badge-secondary')
+                             .text(isActive ? 'Active' : 'Inactive');
+                    }
+                } else {
+                    toastr.error(response.message);
+                    // Revert the toggle
+                    $(this).prop('checked', !isActive);
+                }
+            },
+            error: function() {
+                toastr.error('Failed to update status');
+                // Revert the toggle
+                $(this).prop('checked', !isActive);
+            }
+        });
+    });
+});
+
+// Delete room type functionality
+let roomTypeToDelete = null;
+
+function deleteRoomType(roomTypeId, roomTypeName) {
+    roomTypeToDelete = roomTypeId;
+    $('#deleteRoomTypeName').text(roomTypeName);
+    $('#deleteModal').modal('show');
+}
+
+$('#confirmDelete').click(function() {
+    if (roomTypeToDelete) {
+        $.ajax({
+            url: `/room-types/${roomTypeToDelete}`,
+            method: 'DELETE',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(response.message);
+                    // Remove the card from the grid
+                    $(`[data-room-type-id="${roomTypeToDelete}"]`).closest('.col-lg-4').fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                } else {
+                    toastr.error(response.message);
+                }
+                $('#deleteModal').modal('hide');
+                roomTypeToDelete = null;
+            },
+            error: function(xhr) {
+                const response = xhr.responseJSON;
+                toastr.error(response ? response.message : 'Failed to delete room type');
+                $('#deleteModal').modal('hide');
+                roomTypeToDelete = null;
+            }
+        });
+    }
+});
+</script>
+@endsection
+
+@section('styles')
+<style>
+.room-type-card {
+    transition: transform 0.2s;
+}
+
+.room-type-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.status-toggle {
+    cursor: pointer;
+}
+
+.custom-control-label {
+    cursor: pointer;
+}
+</style>
+@endsection
         * {
             margin: 0;
             padding: 0;

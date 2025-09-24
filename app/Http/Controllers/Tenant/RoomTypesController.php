@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Users\Tenant;
+namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Models\Property;
@@ -27,7 +27,8 @@ class RoomTypesController extends Controller
     public function index(Request $request)
     {
         // Ensure user has proper permissions
-        if (!Auth::user()->hasRole(['DIRECTOR', 'MANAGER'])) {
+        $user = Auth::user();
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
             abort(403, 'Unauthorized access to room types management');
         }
 
@@ -36,21 +37,21 @@ class RoomTypesController extends Controller
         $status = $request->get('status');
 
         // Get properties for the current tenant
-        $properties = Property::where('tenant_id', tenant('id'))
+        $properties = Property::where('tenant_id', $user->tenant_id)
             ->orderBy('name')
             ->get();
 
         // Build query for room types
         $roomTypesQuery = RoomType::with(['property'])
-            ->whereHas('property', function ($query) {
-                $query->where('tenant_id', tenant('id'));
+            ->whereHas('property', function ($query) use ($user) {
+                $query->where('tenant_id', $user->tenant_id);
             });
 
         // Apply filters
         if ($propertyId) {
             // Validate property belongs to current tenant
             $property = Property::where('id', $propertyId)
-                ->where('tenant_id', tenant('id'))
+                ->where('tenant_id', $user->tenant_id)
                 ->first();
             
             if (!$property) {
@@ -82,21 +83,22 @@ class RoomTypesController extends Controller
     public function create(Request $request)
     {
         // Ensure user has proper permissions
-        if (!Auth::user()->hasRole(['DIRECTOR', 'MANAGER'])) {
+        $user = Auth::user();
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
             abort(403, 'Unauthorized access to room types management');
         }
 
         $propertyId = $request->get('property_id');
         
         // Get properties for the current tenant
-        $properties = Property::where('tenant_id', tenant('id'))
+        $properties = Property::where('tenant_id', $user->tenant_id)
             ->orderBy('name')
             ->get();
 
         $selectedProperty = null;
         if ($propertyId) {
             $selectedProperty = Property::where('id', $propertyId)
-                ->where('tenant_id', tenant('id'))
+                ->where('tenant_id', $user->tenant_id)
                 ->first();
                 
             if (!$selectedProperty) {
@@ -113,7 +115,8 @@ class RoomTypesController extends Controller
     public function store(Request $request)
     {
         // Ensure user has proper permissions
-        if (!Auth::user()->hasRole(['DIRECTOR', 'MANAGER'])) {
+        $user = Auth::user();
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
             abort(403, 'Unauthorized access to room types management');
         }
 
@@ -129,7 +132,7 @@ class RoomTypesController extends Controller
 
         // Validate property belongs to current tenant
         $property = Property::where('id', $validated['property_id'])
-            ->where('tenant_id', tenant('id'))
+            ->where('tenant_id', $user->tenant_id)
             ->first();
 
         if (!$property) {
@@ -159,7 +162,7 @@ class RoomTypesController extends Controller
                 'max_occupancy' => $validated['max_occupancy'],
                 'size_sqm' => $validated['size_sqm'],
                 'is_active' => $validated['is_active'] ?? true,
-                'created_by' => Auth::id()
+                'created_by' => $user->id
             ]);
 
             DB::commit();
@@ -181,7 +184,8 @@ class RoomTypesController extends Controller
     public function show($id)
     {
         // Ensure user has proper permissions
-        if (!Auth::user()->hasRole(['DIRECTOR', 'MANAGER'])) {
+        $user = Auth::user();
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
             abort(403, 'Unauthorized access to room types management');
         }
 
@@ -225,7 +229,7 @@ class RoomTypesController extends Controller
         }
 
         // Get properties for the current tenant
-        $properties = Property::where('tenant_id', tenant('id'))
+        $properties = Property::where('tenant_id', $user->tenant_id)
             ->orderBy('name')
             ->get();
 
@@ -265,7 +269,7 @@ class RoomTypesController extends Controller
 
         // Validate new property belongs to current tenant
         $property = Property::where('id', $validated['property_id'])
-            ->where('tenant_id', tenant('id'))
+            ->where('tenant_id', $user->tenant_id)
             ->first();
 
         if (!$property) {
@@ -376,7 +380,7 @@ class RoomTypesController extends Controller
         try {
             $roomType->update([
                 'is_active' => $validated['is_active'],
-                'updated_by' => Auth::id()
+                'updated_by' => $user->id
             ]);
 
             $status = $validated['is_active'] ? 'activated' : 'deactivated';
@@ -397,7 +401,7 @@ class RoomTypesController extends Controller
     {
         // Validate property belongs to current tenant
         $property = Property::where('id', $propertyId)
-            ->where('tenant_id', tenant('id'))
+            ->where('tenant_id', Auth::user()->tenant_id)
             ->first();
 
         if (!$property) {
