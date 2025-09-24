@@ -167,7 +167,7 @@
                                         </tr>
                                         <tr>
                                             <th>Base Rate</th>
-                                            <td class="text-success font-weight-bold">${{ number_format($roomType->base_rate, 2) }}</td>
+                                            <td class="text-success font-weight-bold">{{ number_format($roomType->base_rate, 2) }} Tzs</td>
                                         </tr>
                                         <tr>
                                             <th>Maximum Occupancy</th>

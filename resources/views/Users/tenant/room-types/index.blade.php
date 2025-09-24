@@ -653,7 +653,7 @@
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                                         <div>
                                             <strong>Base Rate:</strong>
-                                            <div class="text-success font-weight-bold">${{ number_format($roomType->base_rate, 2) }}</div>
+                                            <div class="text-success font-weight-bold">{{ number_format($roomType->base_rate, 2) }} Tzs</div>
                                         </div>
                                         <div>
                                             <strong>Max Occupancy:</strong>

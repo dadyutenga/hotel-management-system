@@ -446,7 +446,7 @@
                     
                     <div class="info-item">
                         <div class="info-label">Base Rate</div>
-                        <div class="info-value">${{ number_format($room->roomType->base_rate ?? 0, 2) }}</div>
+                        <div class="info-value">{{ number_format($room->roomType->base_rate ?? 0, 2) }}</div>
                     </div>
                     
                     <div class="info-item">

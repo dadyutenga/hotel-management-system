@@ -176,10 +176,10 @@
                                     <!-- Base Rate -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="base_rate" class="required">Base Rate ($)</label>
+                                            <label for="base_rate" class="required">Base Rate (Tzs)</label>
                                             <div class="input-group">
                                                 <div class="input-group-prepend">
-                                                    <span class="input-group-text">$</span>
+                                                    <span class="input-group-text">Tzs</span>
                                                 </div>
                                                 <input type="number" name="base_rate" id="base_rate" 
                                                        class="form-control @error('base_rate') is-invalid @enderror" 
