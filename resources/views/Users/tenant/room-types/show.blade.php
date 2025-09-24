@@ -171,7 +171,7 @@
                                         </tr>
                                         <tr>
                                             <th>Maximum Occupancy</th>
-                                            <td><i class="fas fa-users text-info"></i> {{ $roomType->max_occupancy }} guests</td>
+                                            <td><i class="fas fa-users text-info"></i> {{ $roomType->capacity }} guests</td>
                                         </tr>
                                         @if($roomType->size_sqm)
                                         <tr>

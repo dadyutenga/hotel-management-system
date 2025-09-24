@@ -213,12 +213,12 @@
                                     <!-- Max Occupancy -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="max_occupancy" class="required">Maximum Occupancy</label>
-                                            <input type="number" name="max_occupancy" id="max_occupancy" 
-                                                   class="form-control @error('max_occupancy') is-invalid @enderror" 
-                                                   value="{{ old('max_occupancy', $roomType->max_occupancy) }}" 
+                                            <label for="capacity" class="required">Maximum Occupancy</label>
+                                            <input type="number" name="capacity" id="capacity" 
+                                                   class="form-control @error('capacity') is-invalid @enderror" 
+                                                   value="{{ old('capacity', $roomType->capacity) }}" 
                                                    min="1" max="20" required>
-                                            @error('max_occupancy')
+                                            @error('capacity')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                             <small class="form-text text-muted">Number of guests this room type can accommodate</small>

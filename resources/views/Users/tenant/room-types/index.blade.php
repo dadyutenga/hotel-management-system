@@ -34,6 +34,559 @@
         }
         
         .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .filters-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+        }
+        
+        .room-types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .room-type-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+        }
+        
+        .room-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+        
+        .room-type-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .property-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .description {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .info-value {
+            color: #2c3e50;
+        }
+        
+        .price {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .capacity {
+            color: #007bff;
+            font-weight: 600;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        
+        .empty-icon {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+        
+        .empty-title {
+            font-size: 1.5rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        
+        .empty-text {
+            color: #adb5bd;
+            margin-bottom: 30px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        @include('Users.shared.sidebars.manager')
+        
+        <div class="main-content">
+            <div class="container">
+                <!-- Header -->
+                <div class="header">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h1 style="margin-bottom: 5px;"><i class="fas fa-bed"></i> Room Types Management</h1>
+                            <p style="color: #6c757d; margin: 0;">Manage room types for your properties</p>
+                        </div>
+                        <a href="{{ route('tenant.room-types.create') }}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Add New Room Type
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Success/Error Messages -->
+                @if(session('success'))
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+                    </div>
+                @endif
+
+                <!-- Filters -->
+                <div class="filters-section">
+                    <h3 style="margin-bottom: 20px;"><i class="fas fa-filter"></i> Filter Room Types</h3>
+                    <form method="GET" action="{{ route('tenant.room-types.index') }}">
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label for="property_id">Property</label>
+                                <select name="property_id" id="property_id" class="form-control">
+                                    <option value="">All Properties</option>
+                                    @foreach($properties as $property)
+                                        <option value="{{ $property->id }}" {{ $propertyId == $property->id ? 'selected' : '' }}>
+                                            {{ $property->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="search">Search</label>
+                                <input type="text" name="search" id="search" class="form-control" 
+                                       placeholder="Search by name or description..." value="{{ $search }}">
+                            </div>
+                            <div class="form-group">
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search"></i> Filter
+                                    </button>
+                                    <a href="{{ route('tenant.room-types.index') }}" class="btn btn-secondary">
+                                        <i class="fas fa-times"></i> Clear
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Room Types Grid -->
+                @if($roomTypes->count() > 0)
+                    <div class="room-types-grid">
+                        @foreach($roomTypes as $roomType)
+                            <div class="room-type-card">
+                                <div class="card-header">
+                                    <h3 class="room-type-name">{{ $roomType->name }}</h3>
+                                </div>
+                                
+                                <div class="property-info">
+                                    <i class="fas fa-building"></i> {{ $roomType->property->name }}
+                                </div>
+                                
+                                @if($roomType->description)
+                                    <div class="description">
+                                        {{ Str::limit($roomType->description, 120) }}
+                                    </div>
+                                @endif
+                                
+                                <div class="info-row">
+                                    <span class="info-label">Base Rate:</span>
+                                    <span class="info-value price">${{ number_format($roomType->base_rate, 2) }}</span>
+                                </div>
+                                
+                                <div class="info-row">
+                                    <span class="info-label">Capacity:</span>
+                                    <span class="info-value capacity">{{ $roomType->capacity }} guests</span>
+                                </div>
+                                
+                                <div class="card-actions">
+                                    <a href="{{ route('tenant.room-types.show', $roomType->id) }}" class="btn btn-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <a href="{{ route('tenant.room-types.edit', $roomType->id) }}" class="btn btn-warning">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <button type="button" class="btn btn-danger" 
+                                            onclick="deleteRoomType('{{ $roomType->id }}', '{{ $roomType->name }}')">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-bed"></i>
+                        </div>
+                        <h3 class="empty-title">No Room Types Found</h3>
+                        <p class="empty-text">
+                            @if($search || $propertyId)
+                                No room types match your current filters. Try adjusting your search criteria.
+                            @else
+                                You haven't created any room types yet. Create your first room type to get started.
+                            @endif
+                        </p>
+                        <a href="{{ route('tenant.room-types.create') }}" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Create Room Type
+                        </a>
+                    </div>
+                @endif
+
+                <!-- Pagination -->
+                @if($roomTypes->hasPages())
+                    <div class="pagination">
+                        {{ $roomTypes->appends(request()->query())->links() }}
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Confirm Delete</h5>
+                <span class="close" onclick="closeDeleteModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the room type "<span id="deleteRoomTypeName"></span>"?</p>
+                <p style="color: #dc3545; font-size: 0.9rem;">This action cannot be undone.</p>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CSRF Token setup
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        // Delete room type functionality
+        let roomTypeToDelete = null;
+
+        function deleteRoomType(roomTypeId, roomTypeName) {
+            roomTypeToDelete = roomTypeId;
+            document.getElementById('deleteRoomTypeName').textContent = roomTypeName;
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            roomTypeToDelete = null;
+        }
+
+        document.getElementById('confirmDelete').addEventListener('click', function() {
+            if (roomTypeToDelete) {
+                fetch(`/room-types/${roomTypeToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the card from the grid
+                        const card = document.querySelector(`[onclick="deleteRoomType('${roomTypeToDelete}', '${document.getElementById('deleteRoomTypeName').textContent}')"]`).closest('.room-type-card');
+                        card.style.opacity = '0';
+                        setTimeout(() => {
+                            card.remove();
+                        }, 300);
+                        
+                        // Show success message
+                        showMessage(data.message, 'success');
+                    } else {
+                        showMessage(data.message, 'error');
+                    }
+                    closeDeleteModal();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('Failed to delete room type', 'error');
+                    closeDeleteModal();
+                });
+            }
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('deleteModal');
+            if (event.target === modal) {
+                closeDeleteModal();
+            }
+        });
+
+        // Show message function
+        function showMessage(message, type) {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Create new alert
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type === 'success' ? 'success' : 'danger'}`;
+            alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i> ${message}`;
+            
+            // Insert after header
+            const header = document.querySelector('.header');
+            header.insertAdjacentElement('afterend', alert);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Types Management - HotelPro</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Figtree', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            min-height: 100vh;
+        }
+        
+        .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
@@ -657,7 +1210,7 @@
                                         </div>
                                         <div>
                                             <strong>Max Occupancy:</strong>
-                                            <div class="text-info">{{ $roomType->max_occupancy }} guests</div>
+                                            <div class="text-info">{{ $roomType->capacity }} guests</div>
                                         </div>
                                     </div>
                                     
@@ -1382,7 +1935,7 @@
                                 </div>
                                 <div class="info-item">
                                     <i class="fas fa-users"></i>
-                                    <span class="info-value">{{ $roomType->max_occupancy }} guests</span>
+                                    <span class="info-value">{{ $roomType->capacity }} guests</span>
                                 </div>
                                 @if($roomType->size_sqm)
                                     <div class="info-item">

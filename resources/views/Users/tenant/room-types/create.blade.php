@@ -507,51 +507,17 @@
                                     <!-- Max Occupancy -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="max_occupancy" class="required">Maximum Occupancy</label>
-                                            <input type="number" name="max_occupancy" id="max_occupancy" 
-                                                   class="form-control @error('max_occupancy') is-invalid @enderror" 
-                                                   value="{{ old('max_occupancy', 2) }}" 
+                                            <label for="capacity" class="required">Maximum Occupancy</label>
+                                            <input type="number" name="capacity" id="capacity" 
+                                                   class="form-control @error('capacity') is-invalid @enderror" 
+                                                   value="{{ old('capacity', 2) }}" 
                                                    min="1" max="20" required>
-                                            @error('max_occupancy')
+                                            @error('capacity')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                             <small class="form-text text-muted">Number of guests this room type can accommodate</small>
                                         </div>
                                     </div>
-
-                                    <!-- Size -->
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label for="size_sqm">Size (sq.m)</label>
-                                            <div class="input-group">
-                                                <input type="number" name="size_sqm" id="size_sqm" 
-                                                       class="form-control @error('size_sqm') is-invalid @enderror" 
-                                                       value="{{ old('size_sqm') }}" 
-                                                       step="0.01" min="0" max="9999.99" 
-                                                       placeholder="0.00">
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text">sq.m</span>
-                                                </div>
-                                                @error('size_sqm')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Status -->
-                                <div class="form-group">
-                                    <div class="custom-control custom-switch">
-                                        <input type="checkbox" class="custom-control-input" id="is_active" 
-                                               name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
-                                        <label class="custom-control-label" for="is_active">
-                                            Active Room Type
-                                        </label>
-                                    </div>
-                                    <small class="form-text text-muted">
-                                        Active room types are available for room assignments and bookings
-                                    </small>
                                 </div>
                             </div>
 
@@ -611,7 +577,7 @@
                 let isValid = true;
                 
                 // Validate required fields
-                const requiredFields = ['property_id', 'name', 'base_rate', 'max_occupancy'];
+                const requiredFields = ['property_id', 'name', 'base_rate', 'capacity'];
                 requiredFields.forEach(function(field) {
                     const input = document.getElementById(field);
                     if (!input.value) {
@@ -630,10 +596,10 @@
                     isValid = false;
                 }
 
-                // Validate max occupancy
-                const maxOccupancy = parseInt(document.getElementById('max_occupancy').value);
-                if (maxOccupancy < 1 || maxOccupancy > 20) {
-                    document.getElementById('max_occupancy').classList.add('is-invalid');
+                // Validate capacity
+                const capacity = parseInt(document.getElementById('capacity').value);
+                if (capacity < 1 || capacity > 20) {
+                    document.getElementById('capacity').classList.add('is-invalid');
                     alert('Maximum occupancy must be between 1 and 20');
                     isValid = false;
                 }
@@ -663,10 +629,6 @@
                 });
                 if (descriptionCount) {
                     descriptionCount.textContent = '0';
-                }
-                const isActiveCheckbox = document.getElementById('is_active');
-                if (isActiveCheckbox) {
-                    isActiveCheckbox.checked = true;
                 }
             }
         }

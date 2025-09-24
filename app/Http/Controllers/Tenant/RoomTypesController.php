@@ -69,13 +69,9 @@ class RoomTypesController extends Controller
             });
         }
 
-        if ($status) {
-            $roomTypesQuery->where('is_active', $status === 'active');
-        }
-
         $roomTypes = $roomTypesQuery->orderBy('name')->paginate(12);
 
-        return view('Users.tenant.room-types.index', compact('roomTypes', 'properties', 'propertyId', 'search', 'status'));
+        return view('Users.tenant.room-types.index', compact('roomTypes', 'properties', 'propertyId', 'search'));
     }
 
     /**
@@ -155,15 +151,11 @@ class RoomTypesController extends Controller
             DB::beginTransaction();
 
             $roomType = RoomType::create([
-                'id' => Str::uuid(),
                 'property_id' => $validated['property_id'],
                 'name' => $validated['name'],
                 'description' => $validated['description'],
                 'base_rate' => $validated['base_rate'],
-                'max_occupancy' => $validated['max_occupancy'],
-                'size_sqm' => $validated['size_sqm'],
-                'is_active' => $validated['is_active'] ?? true,
-                'created_by' => $user->id
+                'capacity' => $validated['capacity']
             ]);
 
             DB::commit();
@@ -265,9 +257,7 @@ class RoomTypesController extends Controller
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
             'base_rate' => 'required|numeric|min:0|max:999999.99',
-            'max_occupancy' => 'required|integer|min:1|max:20',
-            'size_sqm' => 'nullable|numeric|min:0|max:9999.99',
-            'is_active' => 'boolean'
+            'capacity' => 'required|integer|min:1|max:20'
         ]);
 
         // Validate new property belongs to current tenant
@@ -299,10 +289,7 @@ class RoomTypesController extends Controller
                 'name' => $validated['name'],
                 'description' => $validated['description'],
                 'base_rate' => $validated['base_rate'],
-                'max_occupancy' => $validated['max_occupancy'],
-                'size_sqm' => $validated['size_sqm'],
-                'is_active' => $validated['is_active'] ?? true,
-                'updated_by' => $user->id
+                'capacity' => $validated['capacity']
             ]);
 
             DB::commit();
@@ -356,48 +343,7 @@ class RoomTypesController extends Controller
         }
     }
 
-    /**
-     * Update room type status (AJAX)
-     */
-    public function updateStatus(Request $request, $id)
-    {
-        // Ensure user has proper permissions
-        $user = Auth::user();
-        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER'])) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
 
-        $roomType = RoomType::where('id', $id)->first();
-
-        if (!$roomType) {
-            return response()->json(['success' => false, 'message' => 'Room type not found'], 404);
-        }
-
-        // Validate tenant security
-        if ($roomType->property->tenant_id !== $user->tenant_id) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized access'], 403);
-        }
-
-        $validated = $request->validate([
-            'is_active' => 'required|boolean'
-        ]);
-
-        try {
-            $roomType->update([
-                'is_active' => $validated['is_active'],
-                'updated_by' => $user->id
-            ]);
-
-            $status = $validated['is_active'] ? 'activated' : 'deactivated';
-            return response()->json([
-                'success' => true, 
-                'message' => "Room type {$status} successfully",
-                'is_active' => $roomType->is_active
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Failed to update status'], 500);
-        }
-    }
 
     /**
      * Get room types for a specific property (AJAX)
@@ -415,9 +361,8 @@ class RoomTypesController extends Controller
         }
 
         $roomTypes = RoomType::where('property_id', $propertyId)
-            ->where('is_active', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'base_rate', 'max_occupancy']);
+            ->get(['id', 'name', 'base_rate', 'capacity']);
 
         return response()->json($roomTypes);
     }

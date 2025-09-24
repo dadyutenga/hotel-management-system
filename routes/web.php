@@ -77,7 +77,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/{roomType}/edit', [RoomTypesController::class, 'edit'])->name('edit');
         Route::put('/{roomType}', [RoomTypesController::class, 'update'])->name('update');
         Route::delete('/{roomType}', [RoomTypesController::class, 'destroy'])->name('destroy');
-        Route::put('/{roomType}/status', [RoomTypesController::class, 'updateStatus'])->name('update-status');
         Route::get('/property/{property}/types', [RoomTypesController::class, 'getRoomTypesByProperty'])->name('by-property');
     });
     
