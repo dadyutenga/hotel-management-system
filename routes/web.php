@@ -106,6 +106,48 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{floor}', [RoomsController::class, 'floorsDestroy'])->name('destroy');
     });
 
+    // Guest management routes
+    Route::prefix('guests')->name('tenant.guests.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Tenant\GuestController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Tenant\GuestController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Tenant\GuestController::class, 'store'])->name('store');
+        Route::get('/search', [\App\Http\Controllers\Tenant\GuestController::class, 'search'])->name('search');
+        Route::get('/{guest}', [\App\Http\Controllers\Tenant\GuestController::class, 'show'])->name('show');
+        Route::get('/{guest}/edit', [\App\Http\Controllers\Tenant\GuestController::class, 'edit'])->name('edit');
+        Route::put('/{guest}', [\App\Http\Controllers\Tenant\GuestController::class, 'update'])->name('update');
+        Route::delete('/{guest}', [\App\Http\Controllers\Tenant\GuestController::class, 'destroy'])->name('destroy');
+    });
+
+    // Reservation management routes
+    Route::prefix('reservations')->name('tenant.reservations.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Tenant\ReservationController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Tenant\ReservationController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Tenant\ReservationController::class, 'store'])->name('store');
+        Route::get('/{reservation}', [\App\Http\Controllers\Tenant\ReservationController::class, 'show'])->name('show');
+        Route::put('/{reservation}/status', [\App\Http\Controllers\Tenant\ReservationController::class, 'updateStatus'])->name('update-status');
+        Route::get('/available-rooms/search', [\App\Http\Controllers\Tenant\ReservationController::class, 'getAvailableRooms'])->name('available-rooms');
+    });
+
+    // Folio management routes
+    Route::prefix('folios')->name('tenant.folios.')->group(function () {
+        Route::get('/{folio}', [\App\Http\Controllers\Tenant\FolioController::class, 'show'])->name('show');
+        Route::post('/{folio}/charges', [\App\Http\Controllers\Tenant\FolioController::class, 'addCharge'])->name('add-charge');
+        Route::post('/{folio}/payments', [\App\Http\Controllers\Tenant\FolioController::class, 'addPayment'])->name('add-payment');
+        Route::post('/{folio}/invoice', [\App\Http\Controllers\Tenant\FolioController::class, 'generateInvoice'])->name('generate-invoice');
+        Route::put('/{folio}/close', [\App\Http\Controllers\Tenant\FolioController::class, 'close'])->name('close');
+    });
+
+    // Housekeeping management routes
+    Route::prefix('housekeeping')->name('tenant.housekeeping.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Tenant\HousekeepingController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Tenant\HousekeepingController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Tenant\HousekeepingController::class, 'store'])->name('store');
+        Route::get('/{housekeeping}', [\App\Http\Controllers\Tenant\HousekeepingController::class, 'show'])->name('show');
+        Route::put('/{housekeeping}/status', [\App\Http\Controllers\Tenant\HousekeepingController::class, 'updateStatus'])->name('update-status');
+        Route::put('/{housekeeping}/assign', [\App\Http\Controllers\Tenant\HousekeepingController::class, 'assign'])->name('assign');
+        Route::post('/create-for-dirty-rooms', [\App\Http\Controllers\Tenant\HousekeepingController::class, 'createForDirtyRooms'])->name('create-for-dirty-rooms');
+    });
+
     // User dashboard route
     Route::get('/user-dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/user-dashboard/stats', [UserController::class, 'getDashboardStats'])->name('user.dashboard.stats');
