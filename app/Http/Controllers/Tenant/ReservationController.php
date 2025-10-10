@@ -4,52 +4,17 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
-use App\Models\Guest;
-use App\Models\Property;
-use App\Models\Room;
-use App\Models\RoomType;
-use App\Models\RatePlan;
-use App\Models\ReservationRoom;
-use App\Models\ReservationRoomRate;
-use App\Models\ReservationStatusHistory;
+
 use App\Models\Folio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+
 use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
-    /**
-     * Display a listing of reservations
-     */
-    public function index(Request $request)
-    {
-        $user = Auth::user();
-        
-        // Check authorization
-        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER', 'RECEPTIONIST'])) {
-            return redirect()->route('user.dashboard')
-                ->with('error', 'You do not have permission to access reservations.');
-        }
-
-        $query = Reservation::query()
-            ->with(['guest', 'property', 'reservationRooms.roomType', 'creator']);
-
-        // Filter by tenant's properties
-        if ($user->role->name === 'DIRECTOR') {
-            $query->whereHas('property', function($q) use ($user) {
-                $q->where('tenant_id', $user->tenant_id);
-            });
-        } elseif ($user->role->name === 'MANAGER' && $user->property_id) {
-            $query->where('property_id', $user->property_id);
-        } else {
-            $query->whereHas('property', function($q) use ($user) {
-                $q->where('tenant_id', $user->tenant_id);
-            });
-        }
-
-        // Filter by status
+> main
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
