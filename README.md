@@ -1,11 +1,72 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Hotel Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive multi-tenant hotel management system built with Laravel 11 and PostgreSQL.
+
+## Features
+
+### Core Functionality
+- **Multi-tenancy** - Powered by Stancl/Tenancy for complete tenant isolation
+- **Property Management** - Manage multiple properties, buildings, floors, and rooms
+- **User Management** - Role-based access control with 7 distinct roles
+- **Room Types & Features** - Configurable room types with custom features
+
+### Guest & Reservation Management ✨ NEW
+- **Guest Profiles** - Complete guest management with contact details, preferences, and history
+- **Reservations** - Full booking system with room assignment and availability checking
+- **Check-in/Check-out** - Streamlined guest arrival and departure processes
+- **Status Tracking** - Real-time reservation status updates
+
+### Financial Management ✨ NEW
+- **Folios** - Guest billing with charge tracking
+- **Payments** - Multiple payment methods (Cash, Card, Mobile, Bank)
+- **Invoicing** - Automated invoice generation (Proforma & Actual)
+- **Revenue Tracking** - Comprehensive financial reports
+
+### Operations Management ✨ NEW
+- **Housekeeping** - Task assignment and tracking for cleaning staff
+- **Maintenance** - Request management with priority levels
+- **Room Status** - Automatic room status updates (Available, Occupied, Dirty, Clean, Maintenance)
+
+### Point of Sale ✨ NEW
+- **POS Orders** - Restaurant and bar order management
+- **Menu Management** - Configurable menus and items
+- **Room Service** - Automatic folio integration for room charges
+- **Payment Processing** - Multiple payment methods with receipt generation
+
+### Reports & Analytics ✨ NEW
+- **Occupancy Reports** - Property-wise occupancy rates and statistics
+- **Revenue Reports** - Detailed revenue breakdown (Room, F&B, Other)
+- **Guest Analytics** - Demographics, repeat guests, marketing consent
+- **Reservation Analytics** - Booking sources, cancellation rates, average stay
+- **Housekeeping Performance** - Task completion statistics
+
+## Technology Stack
+
+- **Framework**: Laravel 11.x
+- **PHP**: 8.2+
+- **Database**: PostgreSQL with schemas (core, auth, res, fin, pos, ops, inv)
+- **Multi-tenancy**: Stancl/Tenancy
+- **Authentication**: Laravel Breeze
+- **Frontend**: Blade templates with modern CSS
+- **Icons**: Font Awesome
+
+## Role-Based Access Control
+
+The system includes 7 pre-defined roles with specific permissions:
+
+1. **DIRECTOR** - Full system access, all properties
+2. **MANAGER** - Property management, operations, reporting
+3. **SUPERVISOR** - Housekeeping and maintenance oversight
+4. **ACCOUNTANT** - Financial management and reporting
+5. **RECEPTIONIST** - Guest services, reservations, check-in/out
+6. **BAR_TENDER** - POS operations for F&B
+7. **HOUSEKEEPER** - Task completion and room status updates
+
+## Documentation
+
+See [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md) for detailed documentation of all features, routes, and implementation details.
+
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 ## About Laravel
 
