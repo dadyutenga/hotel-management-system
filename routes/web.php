@@ -148,6 +148,43 @@ Route::middleware('auth')->group(function () {
         Route::post('/create-for-dirty-rooms', [\App\Http\Controllers\Tenant\HousekeepingController::class, 'createForDirtyRooms'])->name('create-for-dirty-rooms');
     });
 
+    // Maintenance management routes
+    Route::prefix('maintenance')->name('tenant.maintenance.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Tenant\MaintenanceController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Tenant\MaintenanceController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Tenant\MaintenanceController::class, 'store'])->name('store');
+        Route::get('/{maintenance}', [\App\Http\Controllers\Tenant\MaintenanceController::class, 'show'])->name('show');
+        Route::put('/{maintenance}/status', [\App\Http\Controllers\Tenant\MaintenanceController::class, 'updateStatus'])->name('update-status');
+        Route::put('/{maintenance}/assign', [\App\Http\Controllers\Tenant\MaintenanceController::class, 'assign'])->name('assign');
+    });
+
+    // Invoice routes
+    Route::prefix('invoices')->name('tenant.invoices.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Tenant\InvoiceController::class, 'index'])->name('index');
+        Route::get('/{invoice}', [\App\Http\Controllers\Tenant\InvoiceController::class, 'show'])->name('show');
+        Route::get('/{invoice}/download', [\App\Http\Controllers\Tenant\InvoiceController::class, 'download'])->name('download');
+        Route::post('/{invoice}/email', [\App\Http\Controllers\Tenant\InvoiceController::class, 'email'])->name('email');
+    });
+
+    // POS routes
+    Route::prefix('pos')->name('tenant.pos.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Tenant\PosController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Tenant\PosController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Tenant\PosController::class, 'store'])->name('store');
+        Route::get('/{pos}', [\App\Http\Controllers\Tenant\PosController::class, 'show'])->name('show');
+        Route::post('/{pos}/payment', [\App\Http\Controllers\Tenant\PosController::class, 'processPayment'])->name('process-payment');
+    });
+
+    // Reports routes
+    Route::prefix('reports')->name('tenant.reports.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Tenant\ReportController::class, 'index'])->name('index');
+        Route::get('/occupancy', [\App\Http\Controllers\Tenant\ReportController::class, 'occupancy'])->name('occupancy');
+        Route::get('/revenue', [\App\Http\Controllers\Tenant\ReportController::class, 'revenue'])->name('revenue');
+        Route::get('/guests', [\App\Http\Controllers\Tenant\ReportController::class, 'guests'])->name('guests');
+        Route::get('/reservations', [\App\Http\Controllers\Tenant\ReportController::class, 'reservations'])->name('reservations');
+        Route::get('/housekeeping', [\App\Http\Controllers\Tenant\ReportController::class, 'housekeeping'])->name('housekeeping');
+    });
+
     // User dashboard route
     Route::get('/user-dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/user-dashboard/stats', [UserController::class, 'getDashboardStats'])->name('user.dashboard.stats');
