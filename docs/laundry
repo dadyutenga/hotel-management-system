@@ -1,0 +1,18 @@
+UNDRY. 
+Below is the proposed design for laundry section 
+THE DASHBOARD
+PROPOSED ALTERATIONs; 
+1.The side bar should be 
+DASHBOARD - Overview  
+ORDERS - detailed information on  
+SERVICES  
+REQUISITION AND DELIVERY NOTE 
+REPORTS - daily , weekly , monthly, quarterly and yearly report of how  
+SETTINGS - register coth type, service , set price. 
+2. REMOVE TOTAL SHOP, TOTAL CUSTOMERs, and TOTAL ORDERS. 
+3.NEW ORDERS - should be the orders sent on that current date , the day passes its no longer a 
+new order. 
+4. PICK UP ORDERS - are already serviced order waiting to be returned to customers . This data 
+would be obtained from the “ORDERS” page on the status column an order is marked completed 
+the total sum of completed orders would be added to get “PICK UP ORDERS” 
+When PICK UP ORDERS is clicked a pop up should appear a table with all completed orders.

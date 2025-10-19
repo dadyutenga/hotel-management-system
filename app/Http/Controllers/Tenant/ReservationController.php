@@ -14,7 +14,6 @@ use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
-> main
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
