@@ -4,7 +4,7 @@
         <div class="brand-logo">HotelPro</div>
         <div class="brand-subtitle">Housekeeper</div>
     </div>
-    
+
     <nav class="sidebar-nav">
         <div class="nav-item">
             <a href="{{ route('user.dashboard') }}" class="nav-link {{ request()->routeIs('user.dashboard') ? 'active' : '' }}">
@@ -12,185 +12,19 @@
                 <span>Dashboard</span>
             </a>
         </div>
-        
-        <!-- Room Management -->
+
         <div class="nav-section">
-            <div class="nav-section-title">Room Management</div>
+            <div class="nav-section-title">My Tasks</div>
         </div>
-        
+
         <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-tasks"></i>
-                <span>Today's Tasks</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-door-open"></i>
-                <span>Room Status</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-bed"></i>
-                <span>Cleaning Schedule</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-clipboard-check"></i>
-                <span>Room Inspections</span>
-            </a>
-        </div>
-        
-        <!-- Housekeeping Tasks -->
-        <div class="nav-section">
-            <div class="nav-section-title">Housekeeping Tasks</div>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('tenant.housekeeper.tasks.index') }}" class="nav-link {{ request()->routeIs('tenant.housekeeper.tasks.*') ? 'active' : '' }}">
                 <i class="fas fa-broom"></i>
-                <span>Room Cleaning</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-shower"></i>
-                <span>Bathroom Maintenance</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-tshirt"></i>
-                <span>Laundry Service</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-vacuum"></i>
-                <span>Deep Cleaning</span>
-            </a>
-        </div>
-        
-        <!-- Inventory Management -->
-        <div class="nav-section">
-            <div class="nav-section-title">Inventory</div>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-boxes"></i>
-                <span>Supplies Inventory</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-shopping-cart"></i>
-                <span>Request Supplies</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-clipboard-list"></i>
-                <span>Amenities Stock</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-wine-bottle"></i>
-                <span>Minibar Restocking</span>
-            </a>
-        </div>
-        
-        <!-- Maintenance -->
-        <div class="nav-section">
-            <div class="nav-section-title">Maintenance</div>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-exclamation-triangle"></i>
-                <span>Report Issues</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-tools"></i>
-                <span>Maintenance Requests</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-key"></i>
-                <span>Lost & Found</span>
-            </a>
-        </div>
-        
-        <!-- Reports & Logs -->
-        <div class="nav-section">
-            <div class="nav-section-title">Reports & Logs</div>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-clock"></i>
-                <span>Time Tracking</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-check-circle"></i>
-                <span>Completed Tasks</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-chart-bar"></i>
-                <span>Daily Reports</span>
-            </a>
-        </div>
-        
-        <!-- Guest Services -->
-        <div class="nav-section">
-            <div class="nav-section-title">Guest Services</div>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-concierge-bell"></i>
-                <span>Guest Requests</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-hand-sparkles"></i>
-                <span>Special Cleaning</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-gift"></i>
-                <span>Room Setup</span>
+                <span>Housekeeping Tasks</span>
             </a>
         </div>
     </nav>
-    
+
     <!-- User Info -->
     <div class="sidebar-footer">
         <div class="user-profile">
@@ -219,7 +53,7 @@
 /* Housekeeper Sidebar Styles */
 .sidebar {
     width: 280px;
-    background: linear-gradient(135deg, #795548 0%, #8d6e63 100%);
+    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
     color: white;
     position: fixed;
     height: 100vh;
@@ -272,106 +106,78 @@
     display: flex;
     align-items: center;
     padding: 12px 20px;
-    color: rgba(255,255,255,0.8);
+    color: rgba(255,255,255,0.85);
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     font-weight: 500;
-    border-radius: 0 25px 25px 0;
-    margin-right: 10px;
-}
-
-.nav-link:hover {
-    background-color: rgba(255,255,255,0.1);
-    color: white;
-    transform: translateX(5px);
-}
-
-.nav-link.active {
-    background-color: rgba(255,255,255,0.2);
-    color: white;
-    border-right: 4px solid #ffeb3b;
 }
 
 .nav-link i {
+    width: 24px;
     margin-right: 12px;
-    width: 18px;
-    text-align: center;
+    font-size: 16px;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: rgba(255,255,255,0.15);
+    color: #ffffff;
+    padding-left: 24px;
 }
 
 .sidebar-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
     padding: 20px;
     border-top: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.2);
 }
 
 .user-profile {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 12px;
+    text-align: center;
 }
 
 .user-avatar {
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.15);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
-}
-
-.user-details {
-    flex: 1;
+    font-size: 24px;
+    margin-bottom: 12px;
 }
 
 .user-name {
+    font-size: 16px;
     font-weight: 600;
-    font-size: 14px;
 }
 
 .user-role {
-    font-size: 12px;
+    font-size: 14px;
     opacity: 0.8;
 }
 
 .user-property {
-    font-size: 11px;
+    font-size: 13px;
     opacity: 0.7;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
-/* Logout Button Styles */
 .logout-btn {
-    background: rgba(255, 255, 255, 0.2);
+    margin-top: 12px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.6);
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
+    border-radius: 20px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    justify-content: center;
+    transition: all 0.2s ease;
 }
 
 .logout-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-1px);
-}
-
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        position: relative;
-        height: auto;
-    }
+    background: rgba(255,255,255,0.2);
+    border-color: white;
 }
 </style>
