@@ -81,10 +81,10 @@
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: {!! json_encode($chart['labels'] ?? []) !!},
+                    labels: @json($chart['labels'] ?? []),
                     datasets: [{
                         label: 'Occupancy %',
-                        data: {!! json_encode($chart['data'] ?? []) !!},
+                        data: @json($chart['data'] ?? []),
                         backgroundColor: '#38bdf8',
                     }]
                 },

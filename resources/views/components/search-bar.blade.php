@@ -5,7 +5,7 @@
     'value' => null,
 ])
 
-<div x-data="searchComponent({{ json_encode($endpoint) }}, '{{ $name }}', '{{ $value }}')" class="relative">
+<div x-data="searchComponent(@json($endpoint), @json($name), @json($value))" class="relative">
     <div class="flex items-center bg-white border border-slate-200 rounded-full shadow-sm focus-within:border-amber-400">
         <span class="pl-4 text-slate-400">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -35,6 +35,7 @@
             </template>
         </ul>
     </div>
+    <p x-show="errorMessage" x-text="errorMessage" class="mt-2 text-xs text-rose-600"></p>
 </div>
 
 @once
@@ -47,7 +48,9 @@
                     query: initialValue || '',
                     results: [],
                     open: false,
+                    errorMessage: '',
                     performSearch() {
+                        this.errorMessage = '';
                         if (!this.endpoint || this.query.length < 2) {
                             this.results = [];
                             this.open = false;
@@ -56,10 +59,21 @@
                         fetch(`${this.endpoint}?${new URLSearchParams({ query: this.query })}`, {
                             headers: { 'X-Requested-With': 'XMLHttpRequest' },
                         })
-                            .then(response => response.json())
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Search request failed');
+                                }
+                                return response.json();
+                            })
                             .then(data => {
                                 this.results = data.results || [];
                                 this.open = this.results.length > 0;
+                                this.errorMessage = '';
+                            })
+                            .catch(() => {
+                                this.results = [];
+                                this.open = false;
+                                this.errorMessage = 'Unable to load search results. Please try again.';
                             });
                     },
                     select(result) {
