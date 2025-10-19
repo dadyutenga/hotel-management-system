@@ -4,7 +4,15 @@
     'size' => 'max-w-2xl',
 ])
 
-<div x-data="{ open: false }" x-on:open-modal.window="if($event.detail === '{{ $id }}'){ open = true }" x-on:close-modal.window="if($event.detail === '{{ $id }}'){ open = false }" x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
+<div
+    x-data="{ open: false, modalId: @json($id) }"
+    x-on:open-modal.window="if ($event.detail === modalId) { open = true }"
+    x-on:close-modal.window="if ($event.detail === modalId) { open = false }"
+    x-on:keydown.window.escape="if (open) { open = false }"
+    x-show="open"
+    x-cloak
+    class="fixed inset-0 z-50 flex items-center justify-center"
+>
     <div class="fixed inset-0 bg-slate-900/70" @click="open = false"></div>
     <div class="relative w-full {{ $size }} mx-auto">
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden">

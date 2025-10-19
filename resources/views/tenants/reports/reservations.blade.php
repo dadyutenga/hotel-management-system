@@ -88,10 +88,10 @@
                 new Chart(trendCtx, {
                     type: 'line',
                     data: {
-                        labels: {!! json_encode($chart['trend']['labels'] ?? []) !!},
+                        labels: @json($chart['trend']['labels'] ?? []),
                         datasets: [{
                             label: 'Reservations',
-                            data: {!! json_encode($chart['trend']['data'] ?? []) !!},
+                            data: @json($chart['trend']['data'] ?? []),
                             borderColor: '#0ea5e9',
                             backgroundColor: 'rgba(14, 165, 233, 0.1)',
                             tension: 0.4,
@@ -107,14 +107,14 @@
                 new Chart(cancellationCtx, {
                     type: 'bar',
                     data: {
-                        labels: {!! json_encode($chart['cancellation']['labels'] ?? []) !!},
+                        labels: @json($chart['cancellation']['labels'] ?? []),
                         datasets: [{
                             label: 'Cancellations',
-                            data: {!! json_encode($chart['cancellation']['cancelled'] ?? []) !!},
+                            data: @json($chart['cancellation']['cancelled'] ?? []),
                             backgroundColor: '#f97316',
                         }, {
                             label: 'No Shows',
-                            data: {!! json_encode($chart['cancellation']['no_show'] ?? []) !!},
+                            data: @json($chart['cancellation']['no_show'] ?? []),
                             backgroundColor: '#f43f5e',
                         }]
                     },

@@ -69,7 +69,7 @@
                         </template>
                         <template x-for="room in availableRooms" :key="room.id">
                             <label class="flex items-center gap-3 text-sm text-slate-600">
-                                <input type="checkbox" :value="room.id" x-model="form.room_ids" class="rounded border-slate-300 text-emerald-500 focus:ring-emerald-200" />
+                                <input type="checkbox" name="room_ids[]" :value="room.id" x-model="form.room_ids" class="rounded border-slate-300 text-emerald-500 focus:ring-emerald-200" />
                                 <div>
                                     <p class="font-semibold text-slate-800" x-text="room.label"></p>
                                     <p class="text-xs text-slate-500" x-text="room.description"></p>
