@@ -1,0 +1,1 @@
+@include('tenants.reports.occupancy')
