@@ -49,14 +49,14 @@
         </div>
         
         <div class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('tenant.reservations.index') }}" class="nav-link {{ request()->routeIs('tenant.reservations.*') ? 'active' : '' }}">
                 <i class="fas fa-calendar-check"></i>
                 <span>Reservations</span>
             </a>
         </div>
-        
+
         <div class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('tenant.guests.index') }}" class="nav-link {{ request()->routeIs('tenant.guests.*') ? 'active' : '' }}">
                 <i class="fas fa-users"></i>
                 <span>Guest Management</span>
             </a>
@@ -74,69 +74,69 @@
             </a>
         </div>
         
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-clock"></i>
-                <span>Schedules</span>
-            </a>
-        </div>
-        
-        <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-tasks"></i>
-                <span>Task Assignment</span>
-            </a>
-        </div>
-        
         <!-- Daily Operations -->
         <div class="nav-section">
             <div class="nav-section-title">Daily Operations</div>
         </div>
-        
+
         <div class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('tenant.housekeeping.index') }}" class="nav-link {{ request()->routeIs('tenant.housekeeping.*') ? 'active' : '' }}">
                 <i class="fas fa-broom"></i>
                 <span>Housekeeping</span>
             </a>
         </div>
-        
+
         <div class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('tenant.maintenance.index') }}" class="nav-link {{ request()->routeIs('tenant.maintenance.*') ? 'active' : '' }}">
                 <i class="fas fa-tools"></i>
                 <span>Maintenance</span>
             </a>
         </div>
-        
+
         <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-concierge-bell"></i>
-                <span>Front Desk</span>
+            <a href="{{ route('tenant.pos.index') }}" class="nav-link {{ request()->routeIs('tenant.pos.*') ? 'active' : '' }}">
+                <i class="fas fa-cash-register"></i>
+                <span>POS</span>
             </a>
         </div>
-        
+
+        <div class="nav-item">
+            <a href="{{ route('tenant.invoices.index') }}" class="nav-link {{ request()->routeIs('tenant.invoices.*') ? 'active' : '' }}">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Invoices</span>
+            </a>
+        </div>
+
         <!-- Reports -->
         <div class="nav-section">
             <div class="nav-section-title">Reports & Analytics</div>
         </div>
-        
+
         <div class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('tenant.reports.index') }}" class="nav-link {{ request()->routeIs('tenant.reports.index') ? 'active' : '' }}">
+                <i class="fas fa-chart-pie"></i>
+                <span>Reports Dashboard</span>
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a href="{{ route('tenant.reports.occupancy') }}" class="nav-link {{ request()->routeIs('tenant.reports.occupancy') ? 'active' : '' }}">
                 <i class="fas fa-chart-line"></i>
                 <span>Occupancy Reports</span>
             </a>
         </div>
-        
+
         <div class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{{ route('tenant.reports.revenue') }}" class="nav-link {{ request()->routeIs('tenant.reports.revenue') ? 'active' : '' }}">
                 <i class="fas fa-dollar-sign"></i>
                 <span>Revenue Reports</span>
             </a>
         </div>
-        
+
         <div class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-star"></i>
-                <span>Guest Satisfaction</span>
+            <a href="{{ route('tenant.reports.guests') }}" class="nav-link {{ request()->routeIs('tenant.reports.guests') ? 'active' : '' }}">
+                <i class="fas fa-users"></i>
+                <span>Guest Reports</span>
             </a>
         </div>
     </nav>
