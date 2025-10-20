@@ -295,16 +295,23 @@ class AuthController extends Controller
     public function showRejectedDashboard()
     {
         $user = Auth::user();
+        
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        
         $tenant = $user->tenant;
+        
+        if (!$tenant) {
+            return redirect()->route('login');
+        }
 
-        // Check if the tenant status has changed and redirect accordingly
         if ($tenant->status === Tenant::STATUS_VERIFIED) {
             return redirect()->route('dashboard');
         } elseif ($tenant->status === Tenant::STATUS_PENDING) {
             return redirect()->route('dashboard.pending');
         }
 
-        // Get the rejection notification for this tenant
         $rejectionNotification = Notification::where('tenant_id', $tenant->id)
             ->where('type', 'account_rejected')
             ->orderBy('created_at', 'desc')

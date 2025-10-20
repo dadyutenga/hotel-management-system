@@ -265,9 +265,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/user-dashboard/stats', [UserController::class, 'getDashboardStats'])->name('user.dashboard.stats');
 });
 
-// Add this route for the rejected dashboard
 Route::get('/dashboard/rejected', [AuthController::class, 'showRejectedDashboard'])
-    ->middleware(['auth', 'tenant'])
+    ->middleware(['auth'])
     ->name('dashboard.rejected');
 
 // Superadmin routes

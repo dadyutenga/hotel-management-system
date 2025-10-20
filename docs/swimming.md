@@ -43,3 +43,54 @@ from PLAYGROUND.
 If either of the sticker is below threshold  to automatically generate low stock alert. 
 2. The “ADD” button below -when the button is clicked it increases the row of the particular 
 section and proceed selecting customer category.
+
+resources/views/components/modal.blade.php lines 7-22: the modal lacks
+Escape-key support; add a window keydown handler on the root x-data element to
+close when Escape is pressed, for example add
+x-on:keydown.window.escape="if(open) open = false" (or equivalent Alpine
+shorthand) to the outer div so pressing Escape will set open = false only when
+the modal is open.
+
+In resources/views/components/modal.blade.php around line 7, the Alpine.js
+expressions interpolate '{{ $id }}' directly which can break JS or allow XSS if
+$id contains quotes/special chars; replace the raw interpolation with a
+JSON-encoded value (e.g. use json_encode() or Blade's @json() / {!!
+json_encode($id) !!}) so the id is safely quoted/escaped inside the JS
+expression and update both open-modal and close-modal checks accordingly.
+
+In resources/views/components/search-bar.blade.php around line 8, the Alpine.js
+call uses unescaped string interpolation for '{{ $name }}' and '{{ $value }}'
+which can break JS or allow XSS; replace those single-quoted Blade
+interpolations with JSON-encoded values (e.g. use json_encode or Blade @json) so
+the values are safely escaped for JavaScript, and pass them into the
+searchComponent invocation as properly encoded JS literals instead of raw quoted
+strings.
+
+In resources/views/components/search-bar.blade.php around lines 56 to 63, the
+fetch call has no error handling for network failures or non-2xx responses;
+update the promise chain to check response.ok and throw on non-OK responses, add
+a .catch handler for network errors and thrown errors, and in the error handler
+set this.results = [] and this.open = false (or appropriate UI state) and
+surface an error indicator (e.g., set this.errorMessage or toggle a visible
+error flag) so users receive feedback when the search request fails.
+
+In resources/views/tenants/reports/occupancy.blade.php around lines 84 to 90,
+the template uses raw {!! json_encode($chart['labels'] ?? []) !!} and {!!
+json_encode($chart['data'] ?? []) !!} which can allow XSS via unescaped JSON;
+replace these with Blade's safe @json($chart['labels'] ?? []) and
+@json($chart['data'] ?? []) so the output is JSON-escaped (JSON_HEX_*) before it
+is embedded in the <script> block.
+
+In resources/views/tenants/reports/reservations.blade.php around lines 91-99 and
+110-119 the template is embedding raw JSON using {!! json_encode(...) !!} inside
+a script which risks XSS; replace those instances with Blade’s @json(...) helper
+(e.g. @json($chart['trend']['labels'] ?? []) and @json($chart['trend']['data']
+?? [])) so the output is safely encoded with JSON_HEX_* flags, keeping the rest
+of the chart config unchanged.
+
+In resources/views/tenants/reservations/create.blade.php around lines 71 to 73,
+the checkbox inputs bind to Alpine's x-model but are missing an HTML name
+attribute so checked values won't be posted to PHP; add name="room_ids[]" to the
+input element (keeping the existing :value and x-model) so the server receives
+an array of selected room IDs.
+
