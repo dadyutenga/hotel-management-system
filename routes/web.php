@@ -37,7 +37,7 @@ Route::middleware('guest')->group(function () {
 });
 
 // User Protected Routes
-Route::middleware(['auth', 'tenant'])->group(function () {
+Route::middleware(['auth', 'check.tenant.status'])->group(function () {
     Route::get('/dashboard/pending', [AuthController::class, 'showPendingDashboard'])->name('dashboard.pending');
     Route::get('/dashboard', [AuthController::class, 'showDashboard'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
