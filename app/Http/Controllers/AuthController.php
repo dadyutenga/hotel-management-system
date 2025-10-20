@@ -344,4 +344,7 @@ class AuthController extends Controller
 
         return view('Users.Retry', compact('tenant', 'rejectionNotification'));
     }
+
+
+    
 }

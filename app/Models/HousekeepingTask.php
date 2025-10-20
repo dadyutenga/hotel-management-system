@@ -16,7 +16,7 @@ class HousekeepingTask extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'ops.housekeeping_tasks';
+    protected $table = 'housekeeping_tasks';
 
     protected $fillable = [
         'property_id',

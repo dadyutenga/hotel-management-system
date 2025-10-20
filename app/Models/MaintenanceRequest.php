@@ -16,7 +16,7 @@ class MaintenanceRequest extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'ops.maintenance_requests';
+    protected $table = 'maintenance_requests';
 
     protected $fillable = [
         'property_id',
