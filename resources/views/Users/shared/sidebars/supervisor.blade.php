@@ -18,7 +18,7 @@
         </div>
 
         <div class="nav-item">
-            <a href="{{ route('tenant.supervisor.tasks.index') }}" class="nav-link {{ request()->routeIs('tenant.supervisor.tasks.*') ? 'active' : '' }}">
+            <a href="{{ route('supervisor.housekeeping.index') }}" class="nav-link {{ request()->routeIs('supervisor.housekeeping.*') ? 'active' : '' }}">
                 <i class="fas fa-clipboard-check"></i>
                 <span>Housekeeping</span>
             </a>
