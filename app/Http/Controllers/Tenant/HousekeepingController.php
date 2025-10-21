@@ -108,33 +108,58 @@ class HousekeepingController extends Controller
         }
 
         $validated = $request->validate([
-            'property_id' => 'required|uuid|exists:properties,id',
-            'room_id' => 'required|uuid|exists:rooms,id',
-            'assigned_to' => 'required|uuid|exists:users,id',
+            'property_id' => 'required|exists:properties,id',
+            'room_id' => 'required|exists:rooms,id',
+            'assigned_to' => 'required|exists:users,id',
             'task_type' => 'required|in:DAILY_CLEAN,DEEP_CLEAN,TURNDOWN,INSPECTION,OTHER',
             'priority' => 'required|in:LOW,MEDIUM,HIGH',
             'scheduled_date' => 'required|date',
-            'scheduled_time' => 'nullable',
-            'notes' => 'nullable|string',
+            'scheduled_time' => 'nullable|date_format:H:i',
+            'notes' => 'nullable|string|max:1000',
         ]);
 
         try {
             DB::beginTransaction();
 
+            // Verify property belongs to tenant
             $property = Property::where('id', $validated['property_id'])
                 ->where('tenant_id', $user->tenant_id)
-                ->firstOrFail();
+                ->first();
 
+            if (!$property) {
+                DB::rollBack();
+                return back()->withInput()
+                    ->with('error', 'Property not found or does not belong to your organization.');
+            }
+
+            // Verify room belongs to the property
+            $room = Room::where('id', $validated['room_id'])
+                ->where('property_id', $property->id)
+                ->first();
+
+            if (!$room) {
+                DB::rollBack();
+                return back()->withInput()
+                    ->with('error', 'Room not found or does not belong to the selected property.');
+            }
+
+            // Verify housekeeper exists and has correct role
             $housekeeper = User::where('id', $validated['assigned_to'])
                 ->where('tenant_id', $user->tenant_id)
                 ->whereHas('role', function($q) {
                     $q->where('name', 'HOUSEKEEPER');
                 })
-                ->firstOrFail();
+                ->first();
+
+            if (!$housekeeper) {
+                DB::rollBack();
+                return back()->withInput()
+                    ->with('error', 'Selected user is not a housekeeper or does not belong to your organization.');
+            }
 
             $task = HousekeepingTask::create([
                 'property_id' => $property->id,
-                'room_id' => $validated['room_id'],
+                'room_id' => $room->id,
                 'assigned_to' => $housekeeper->id,
                 'task_type' => $validated['task_type'],
                 'status' => 'PENDING',
@@ -151,6 +176,11 @@ class HousekeepingController extends Controller
                 ->with('success', 'Housekeeping task created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Error creating housekeeping task: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'data' => $validated ?? $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return back()->withInput()
                 ->with('error', 'Failed to create task: ' . $e->getMessage());
         }
@@ -477,7 +507,7 @@ class HousekeepingController extends Controller
         }
 
         $validated = $request->validate([
-            'notes' => 'nullable|string',
+            'completion_notes' => 'nullable|string|max:1000',
         ]);
 
         try {
@@ -493,8 +523,9 @@ class HousekeepingController extends Controller
                 $updateData['started_at'] = now();
             }
 
-            if ($request->filled('notes')) {
-                $updateData['notes'] = $validated['notes'];
+            if ($request->filled('completion_notes')) {
+                $existingNotes = $task->notes ? $task->notes . "\n\n" : "";
+                $updateData['notes'] = $existingNotes . "Completion Notes: " . $validated['completion_notes'];
             }
 
             $task->update($updateData);
