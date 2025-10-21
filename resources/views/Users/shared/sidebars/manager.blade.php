@@ -18,15 +18,6 @@
             <div class="nav-section-title">Property Operations</div>
         </div>
         
-        @if(Auth::user()->property)
-        <div class="nav-item">
-            <a href="{{ route('tenant.properties.show', Auth::user()->property->id) }}" class="nav-link {{ request()->routeIs('tenant.properties.show') ? 'active' : '' }}">
-                <i class="fas fa-building"></i>
-                <span>My Property</span>
-            </a>
-        </div>
-        @endif
-        
         <div class="nav-item">
             <a href="{{ route('tenant.rooms.index') }}" class="nav-link {{ request()->routeIs('tenant.rooms.*') ? 'active' : '' }}">
                 <i class="fas fa-door-open"></i>
