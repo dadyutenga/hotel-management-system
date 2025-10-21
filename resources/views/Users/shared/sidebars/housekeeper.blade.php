@@ -18,7 +18,7 @@
         </div>
 
         <div class="nav-item">
-            <a href="{{ route('tenant.housekeeper.tasks.index') }}" class="nav-link {{ request()->routeIs('tenant.housekeeper.tasks.*') ? 'active' : '' }}">
+            <a href="{{ route('housekeeper.tasks.index') }}" class="nav-link {{ request()->routeIs('housekeeper.tasks.*') ? 'active' : '' }}">
                 <i class="fas fa-broom"></i>
                 <span>Housekeeping Tasks</span>
             </a>
