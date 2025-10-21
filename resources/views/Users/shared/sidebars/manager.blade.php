@@ -80,7 +80,7 @@
         </div>
 
         <div class="nav-item">
-            <a href="{{ route('tenant.housekeeping.index') }}" class="nav-link {{ request()->routeIs('tenant.housekeeping.*') ? 'active' : '' }}">
+            <a href="{{ route('supervisor.housekeeping.index') }}" class="nav-link {{ request()->routeIs('supervisor.housekeeping.*') ? 'active' : '' }}">
                 <i class="fas fa-broom"></i>
                 <span>Housekeeping</span>
             </a>
