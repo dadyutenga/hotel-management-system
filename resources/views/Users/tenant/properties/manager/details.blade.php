@@ -1,0 +1,1 @@
+<!-- TODO: Code property details manager view here -->
