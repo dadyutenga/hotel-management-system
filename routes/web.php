@@ -160,14 +160,14 @@ Route::middleware(['auth', 'check.tenant.status'])->group(function () {
         Route::post('/bulk-assign', [HousekeepingController::class, 'bulkAssign'])->name('bulk-assign');
     });
 
-    // Housekeeper Task Routes
-    Route::prefix('housekeeper/tasks')->name('housekeeper.tasks.')->middleware('auth')->group(function() {
-        Route::get('/', [HousekeepingController::class, 'housekeeperIndex'])->name('index');
-        Route::get('/{task}/manage', [HousekeepingController::class, 'housekeeperManage'])->name('manage');
-        Route::get('/{task}', [HousekeepingController::class, 'housekeeperShow'])->name('show');
-        Route::post('/{task}/start', [HousekeepingController::class, 'startTask'])->name('start');
-        Route::post('/{task}/complete', [HousekeepingController::class, 'completeTask'])->name('complete');
-    });
+  // Housekeeper Task Routes - CORRECTED
+Route::prefix('housekeeper/tasks')->name('housekeeper.tasks.')->middleware('auth')->group(function() {
+    Route::get('/', [HousekeepingController::class, 'housekeeperIndex'])->name('index');
+    Route::get('/{task}/manage', [HousekeepingController::class, 'housekeeperManage'])->name('manage');
+    Route::get('/{task}', [HousekeepingController::class, 'housekeeperShow'])->name('show');
+    Route::post('/{task}/start', [HousekeepingController::class, 'startTask'])->name('start');
+    Route::post('/{task}/complete', [HousekeepingController::class, 'completeTask'])->name('complete');
+});
 
     // Maintenance management routes
     Route::prefix('maintenance')->name('tenant.maintenance.')->group(function () {
