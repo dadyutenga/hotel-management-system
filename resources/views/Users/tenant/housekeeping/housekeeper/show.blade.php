@@ -299,7 +299,7 @@
                     <div class="breadcrumb">
                         <a href="{{ route('user.dashboard') }}">Home</a>
                         <span>/</span>
-                        <a href="{{ route('housekeeper.tasks.index') }}">My Tasks</a>
+                        <a href="{{ route('tenant.housekeeper.tasks.index') }}">My Tasks</a>
                         <span>/</span>
                         <span>Task #{{ $task->id }}</span>
                     </div>
@@ -442,13 +442,13 @@
                         <div class="row">
                             <div class="col-md-6">
                                 @if(in_array($task->status, ['PENDING', 'IN_PROGRESS']))
-                                    <a href="{{ route('housekeeper.tasks.manage', $task) }}" class="btn btn-success">
+                                    <a href="{{ route('tenant.housekeeper.tasks.manage', $task) }}" class="btn btn-success">
                                         <i class="fas fa-tasks"></i> Manage Task
                                     </a>
                                 @endif
                             </div>
                             <div class="col-md-6 text-right">
-                                <a href="{{ route('housekeeper.tasks.index') }}" class="btn btn-secondary">
+                                <a href="{{ route('tenant.housekeeper.tasks.index') }}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left"></i> Back to List
                                 </a>
                             </div>

@@ -471,11 +471,11 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <a href="{{ route('housekeeper.tasks.show', $task) }}" class="btn btn-primary btn-sm">
+                                                    <a href="{{ route('tenant.housekeeper.tasks.show', $task) }}" class="btn btn-primary btn-sm">
                                                         <i class="fas fa-eye"></i> View
                                                     </a>
                                                     @if(in_array($task->status, ['PENDING', 'IN_PROGRESS']))
-                                                        <a href="{{ route('housekeeper.tasks.manage', $task) }}" class="btn btn-success btn-sm ml-2">
+                                                        <a href="{{ route('tenant.housekeeper.tasks.manage', $task) }}" class="btn btn-success btn-sm ml-2">
                                                             <i class="fas fa-tasks"></i> Manage
                                                         </a>
                                                     @endif

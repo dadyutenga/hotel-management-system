@@ -247,15 +247,11 @@ Route::prefix('housekeeper/tasks')->name('housekeeper.tasks.')->middleware('auth
     });
 
     Route::prefix('housekeeper')->name('tenant.housekeeper.')->group(function () {
-        Route::get('/tasks', [HousekeeperController::class, 'myTasks'])->name('tasks.index');
-        Route::get('/tasks/today', [HousekeeperController::class, 'todayTasks'])->name('tasks.today');
-        Route::get('/tasks/{task}', [HousekeeperController::class, 'showTask'])->name('tasks.show');
-        Route::put('/tasks/{task}/start', [HousekeeperController::class, 'startTask'])->name('tasks.start');
-        Route::put('/tasks/{task}/complete', [HousekeeperController::class, 'completeTask'])->name('tasks.complete');
-        Route::put('/tasks/{task}/progress', [HousekeeperController::class, 'updateTaskProgress'])->name('tasks.progress');
-        Route::put('/tasks/{task}/room-status', [HousekeeperController::class, 'updateRoomStatus'])->name('tasks.room-status');
-        Route::get('/statistics', [HousekeeperController::class, 'myStatistics'])->name('statistics');
-        Route::post('/tasks/{task}/issues', [HousekeeperController::class, 'reportIssue'])->name('tasks.report-issue');
+        Route::get('/tasks', [HousekeepingController::class, 'housekeeperIndex'])->name('tasks.index');
+        Route::get('/tasks/{task}', [HousekeepingController::class, 'housekeeperShow'])->name('tasks.show');
+        Route::get('/tasks/{task}/manage', [HousekeepingController::class, 'housekeeperManage'])->name('tasks.manage');
+        Route::post('/tasks/{task}/start', [HousekeepingController::class, 'startTask'])->name('tasks.start');
+        Route::post('/tasks/{task}/complete', [HousekeepingController::class, 'completeTask'])->name('tasks.complete');
     });
 
     Route::prefix('supervisor')->name('tenant.supervisor.')->group(function () {

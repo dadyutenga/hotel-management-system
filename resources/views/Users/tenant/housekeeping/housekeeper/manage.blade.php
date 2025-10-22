@@ -357,7 +357,7 @@
                     <div class="breadcrumb">
                         <a href="{{ route('user.dashboard') }}">Home</a>
                         <span>/</span>
-                        <a href="{{ route('housekeeper.tasks.index') }}">My Tasks</a>
+                        <a href="{{ route('tenant.housekeeper.tasks.index') }}">My Tasks</a>
                         <span>/</span>
                         <span>Manage #{{ $task->id }}</span>
                     </div>
@@ -426,7 +426,7 @@
                     
                     <div class="card-body">
                         @if($task->status == 'PENDING')
-                            <form action="{{ route('housekeeper.tasks.start', $task) }}" method="POST">
+                            <form action="{{ route('tenant.housekeeper.tasks.start', $task) }}" method="POST">
                                 @csrf
                                 <p style="margin-bottom: 20px;">Click the button below to start working on this task. The task status will be changed to "In Progress".</p>
                                 <button type="submit" class="btn btn-primary" style="width: 100%;">
@@ -434,7 +434,7 @@
                                 </button>
                             </form>
                         @elseif($task->status == 'IN_PROGRESS')
-                            <form action="{{ route('housekeeper.tasks.complete', $task) }}" method="POST" id="completeForm">
+                            <form action="{{ route('tenant.housekeeper.tasks.complete', $task) }}" method="POST" id="completeForm">
                                 @csrf
                                 
                                 <div class="form-group">
@@ -461,12 +461,12 @@
                     <div class="card-footer">
                         <div class="row">
                             <div class="col-md-6">
-                                <a href="{{ route('housekeeper.tasks.show', $task) }}" class="btn btn-secondary">
+                                <a href="{{ route('tenant.housekeeper.tasks.show', $task) }}" class="btn btn-secondary">
                                     <i class="fas fa-eye"></i> View Details
                                 </a>
                             </div>
                             <div class="col-md-6 text-right">
-                                <a href="{{ route('housekeeper.tasks.index') }}" class="btn btn-outline-secondary">
+                                <a href="{{ route('tenant.housekeeper.tasks.index') }}" class="btn btn-outline-secondary">
                                     <i class="fas fa-arrow-left"></i> Back to List
                                 </a>
                             </div>
