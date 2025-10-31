@@ -49,7 +49,7 @@
         </div>
 
         <div class="nav-item">
-            <a href="{{ route('supervisor.housekeeping.index') }}" class="nav-link {{ request()->routeIs('supervisor.housekeeping.*') ? 'active' : '' }}">
+            <a href="{{ route('tenant.housekeeping.index') }}" class="nav-link {{ request()->routeIs('tenant.housekeeping.*') ? 'active' : '' }}">
                 <i class="fas fa-broom"></i>
                 <span>Housekeeping</span>
             </a>
@@ -75,18 +75,30 @@
                 <span>All Reports</span>
             </a>
         </div>
+    </nav>
 
-        <!-- Logout -->
-        <div class="nav-item" style="margin-top: 30px;">
-            <form method="POST" action="{{ route('logout') }}">
+    <!-- User Info -->
+    <div class="sidebar-footer">
+        <div class="user-profile">
+            <div class="user-avatar">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div class="user-details">
+                <div class="user-name">{{ Auth::user()->full_name }}</div>
+                <div class="user-role">Business Director</div>
+                @if(Auth::user()->property)
+                    <div class="user-property">{{ Auth::user()->property->name }}</div>
+                @endif
+            </div>
+            <form method="POST" action="{{ route('logout') }}" style="margin-top: 10px;">
                 @csrf
-                <button type="submit" class="nav-link" style="width: 100%; background: none; border: none; cursor: pointer; font-family: inherit;">
+                <button type="submit" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
+                    Logout
                 </button>
             </form>
         </div>
-    </nav>
+    </div>
 </div>
 
 <style>
@@ -163,5 +175,61 @@
     background: rgba(255,255,255,0.15);
     color: #ffffff;
     padding-left: 24px;
+}
+
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.user-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.user-name {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.user-role {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.user-property {
+    font-size: 13px;
+    opacity: 0.7;
+    margin-top: 4px;
+}
+
+.logout-btn {
+    margin-top: 12px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.6);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: white;
 }
 </style>

@@ -403,7 +403,29 @@
                     
                     <div class="card-content">
                         <div class="actions-grid">
-                            <a href="#" class="action-item">
+                            @if($user->property)
+                                <a href="{{ route('tenant.properties.show', $user->property->id) }}" class="action-item">
+                                    <div class="action-icon">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <div class="action-info">
+                                        <h4>Property Details</h4>
+                                        <p>View property information</p>
+                                    </div>
+                                </a>
+                                
+                                <a href="{{ route('tenant.properties.edit', $user->property->id) }}" class="action-item">
+                                    <div class="action-icon">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="action-info">
+                                        <h4>Edit Property</h4>
+                                        <p>Update property details</p>
+                                    </div>
+                                </a>
+                            @endif
+                            
+                            <a href="{{ route('tenant.users.index') }}" class="action-item">
                                 <div class="action-icon">
                                     <i class="fas fa-users"></i>
                                 </div>
@@ -413,7 +435,7 @@
                                 </div>
                             </a>
                             
-                            <a href="#" class="action-item">
+                            <a href="{{ route('tenant.users.create') }}" class="action-item">
                                 <div class="action-icon">
                                     <i class="fas fa-user-plus"></i>
                                 </div>

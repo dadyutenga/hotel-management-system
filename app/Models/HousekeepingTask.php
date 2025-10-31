@@ -38,6 +38,7 @@ class HousekeepingTask extends Model
 
     protected $casts = [
         'scheduled_date' => 'date',
+        'scheduled_time' => 'time',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
         'verified_at' => 'datetime',

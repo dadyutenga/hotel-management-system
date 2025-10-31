@@ -31,6 +31,7 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+                // Validate the form data
         $validated = $request->validate([
             // Business details
             'business_name' => 'required|string|max:255',
@@ -59,12 +60,9 @@ class AuthController extends Controller
             'mfa_enabled' => 'boolean',
         ]);
 
-        $documents = [];
-        
         try {
-            DB::beginTransaction();
-            
             // Store uploaded documents
+            $documents = [];
             $documentFields = ['business_license', 'tax_certificate', 'owner_id', 'registration_certificate'];
             
             foreach ($documentFields as $field) {
@@ -76,6 +74,8 @@ class AuthController extends Controller
                 }
             }
 
+            // Create tenant
+                        // Create the tenant record
             $tenant = Tenant::create([
                 'id' => Str::uuid(),
                 'name' => $validated['business_name'],
@@ -101,7 +101,7 @@ class AuthController extends Controller
             );
 
             // Create admin user
-            User::create([
+            $adminUser = User::create([
                 'tenant_id' => $tenant->id,
                 'username' => $validated['admin_username'],
                 'email' => $validated['admin_email'],
@@ -115,24 +115,15 @@ class AuthController extends Controller
 
             // Send notification to all superadmins
             $this->notifySuperadmins($tenant);
-            
-            DB::commit();
 
             return redirect()->route('login')->with('success', 
                 'Registration successful! Your application is pending verification. You will be notified once approved.');
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            
             // Clean up uploaded files if tenant creation fails
             foreach ($documents as $path) {
                 Storage::disk('public')->delete($path);
             }
-            
-            \Log::error('Registration failed: ' . $e->getMessage(), [
-                'exception' => $e,
-                'email' => $validated['admin_email'] ?? null
-            ]);
             
             return back()->withErrors(['error' => 'Registration failed. Please try again.'])->withInput();
         }
@@ -175,12 +166,6 @@ class AuthController extends Controller
         // Check tenant status first
         $tenant = $user->tenant;
         
-        if (!$tenant) {
-            throw ValidationException::withMessages([
-                'email' => ['Account configuration error. Please contact support.'],
-            ]);
-        }
-        
         // Allow login for rejected users so they can see rejection page
         if ($tenant->status === Tenant::STATUS_REJECTED) {
             Auth::login($user);
@@ -218,17 +203,7 @@ class AuthController extends Controller
     public function showPendingDashboard()
     {
         $user = Auth::user();
-        
-        if (!$user) {
-            return redirect()->route('login');
-        }
-        
         $tenant = $user->tenant;
-        
-        if (!$tenant) {
-            Auth::logout();
-            return redirect()->route('login')->withErrors(['error' => 'Account configuration error. Please contact support.']);
-        }
 
         // Check tenant status and redirect accordingly
         if ($tenant->status === Tenant::STATUS_VERIFIED) {
@@ -320,23 +295,16 @@ class AuthController extends Controller
     public function showRejectedDashboard()
     {
         $user = Auth::user();
-        
-        if (!$user) {
-            return redirect()->route('login');
-        }
-        
         $tenant = $user->tenant;
-        
-        if (!$tenant) {
-            return redirect()->route('login');
-        }
 
+        // Check if the tenant status has changed and redirect accordingly
         if ($tenant->status === Tenant::STATUS_VERIFIED) {
             return redirect()->route('dashboard');
         } elseif ($tenant->status === Tenant::STATUS_PENDING) {
             return redirect()->route('dashboard.pending');
         }
 
+        // Get the rejection notification for this tenant
         $rejectionNotification = Notification::where('tenant_id', $tenant->id)
             ->where('type', 'account_rejected')
             ->orderBy('created_at', 'desc')
@@ -344,7 +312,4 @@ class AuthController extends Controller
 
         return view('Users.Retry', compact('tenant', 'rejectionNotification'));
     }
-
-
-    
 }

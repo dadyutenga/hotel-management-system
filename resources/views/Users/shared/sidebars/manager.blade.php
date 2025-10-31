@@ -18,6 +18,15 @@
             <div class="nav-section-title">Property Operations</div>
         </div>
         
+        @if(Auth::user()->property)
+        <div class="nav-item">
+            <a href="{{ route('tenant.properties.show', Auth::user()->property->id) }}" class="nav-link {{ request()->routeIs('tenant.properties.show') ? 'active' : '' }}">
+                <i class="fas fa-building"></i>
+                <span>My Property</span>
+            </a>
+        </div>
+        @endif
+        
         <div class="nav-item">
             <a href="{{ route('tenant.rooms.index') }}" class="nav-link {{ request()->routeIs('tenant.rooms.*') ? 'active' : '' }}">
                 <i class="fas fa-door-open"></i>
@@ -71,7 +80,7 @@
         </div>
 
         <div class="nav-item">
-            <a href="{{ route('supervisor.housekeeping.index') }}" class="nav-link {{ request()->routeIs('supervisor.housekeeping.*') ? 'active' : '' }}">
+            <a href="{{ route('tenant.housekeeping.index') }}" class="nav-link {{ request()->routeIs('tenant.housekeeping.*') ? 'active' : '' }}">
                 <i class="fas fa-broom"></i>
                 <span>Housekeeping</span>
             </a>
@@ -130,18 +139,30 @@
                 <span>Guest Reports</span>
             </a>
         </div>
-
-        <!-- Logout -->
-        <div class="nav-item" style="margin-top: 30px;">
-            <form method="POST" action="{{ route('logout') }}">
+    </nav>
+    
+    <!-- User Info -->
+    <div class="sidebar-footer">
+        <div class="user-profile">
+            <div class="user-avatar">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="user-details">
+                <div class="user-name">{{ Auth::user()->full_name }}</div>
+                <div class="user-role">Property Manager</div>
+                @if(Auth::user()->property)
+                    <div class="user-property">{{ Auth::user()->property->name }}</div>
+                @endif
+            </div>
+            <form method="POST" action="{{ route('logout') }}" style="margin-top: 10px;">
                 @csrf
-                <button type="submit" class="nav-link" style="width: 100%; background: none; border: none; cursor: pointer; font-family: inherit;">
+                <button type="submit" class="logout-btn">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>Logout</span>
+                    Logout
                 </button>
             </form>
         </div>
-    </nav>
+    </div>
 </div>
 
 <style>
@@ -152,17 +173,15 @@
     color: white;
     position: fixed;
     height: 100vh;
+    overflow-y: auto;
     z-index: 1000;
     box-shadow: 4px 0 15px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
 }
 
 .sidebar-header {
     padding: 30px 20px;
     border-bottom: 1px solid rgba(255,255,255,0.1);
     text-align: center;
-    flex-shrink: 0;
 }
 
 .brand-logo {
@@ -179,8 +198,6 @@
 
 .sidebar-nav {
     padding: 20px 0;
-    flex: 1;
-    overflow-y: auto;
 }
 
 .nav-section {
@@ -229,6 +246,75 @@
     margin-right: 12px;
     width: 18px;
     text-align: center;
+}
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.2);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.user-role {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.user-property {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 2px;
+}
+
+/* Logout Button Styles */
+.logout-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
 }
 
 @media (max-width: 768px) {

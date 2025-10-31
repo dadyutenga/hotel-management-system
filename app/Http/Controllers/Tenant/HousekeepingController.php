@@ -13,70 +13,88 @@ use Illuminate\Support\Facades\DB;
 
 class HousekeepingController extends Controller
 {
-    public function supervisorIndex(Request $request)
+    /**
+     * Display a listing of housekeeping tasks
+     */
+    public function index(Request $request)
     {
         $user = Auth::user();
         
-        if ($user->role->name !== 'SUPERVISOR') {
+        // Authorization: DIRECTOR, MANAGER, SUPERVISOR, HOUSEKEEPER can access
+        if (!in_array($user->role->name, [ 'SUPERVISOR', 'HOUSEKEEPER'])) {
             return redirect()->route('user.dashboard')
-                ->with('error', 'Unauthorized access.');
+                ->with('error', 'You do not have permission to access housekeeping management.');
         }
 
-        $query = HousekeepingTask::with(['property', 'room.roomType', 'assignedTo', 'creator', 'verifiedBy']);
+        $query = HousekeepingTask::with(['property', 'room', 'assignedTo', 'creator']);
 
-        if ($user->property_id) {
-            $query->where('property_id', $user->property_id);
-        } else {
+        // Filter by tenant's properties
+        if ($user->role->name === 'DIRECTOR') {
             $query->whereHas('property', function($q) use ($user) {
                 $q->where('tenant_id', $user->tenant_id);
             });
+        } elseif ($user->role->name === 'MANAGER' && $user->property_id) {
+            $query->where('property_id', $user->property_id);
+        } elseif ($user->role->name === 'HOUSEKEEPER') {
+            // Housekeepers see only their assigned tasks
+            $query->where('assigned_to', $user->id);
         }
 
+        // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        } else {
+            // Default: show pending and in-progress tasks
+            $query->whereIn('status', ['PENDING', 'IN_PROGRESS']);
         }
 
+        // Filter by priority
         if ($request->filled('priority')) {
             $query->where('priority', $request->priority);
         }
 
+        // Filter by date
         if ($request->filled('date')) {
             $query->whereDate('scheduled_date', $request->date);
+        } else {
+            // Default: show today's tasks
+            $query->whereDate('scheduled_date', now());
         }
 
-        if ($request->filled('assigned_to')) {
-            $query->where('assigned_to', $request->assigned_to);
+        // Filter by property
+        if ($request->filled('property_id')) {
+            $query->where('property_id', $request->property_id);
         }
 
         $tasks = $query->latest('scheduled_date')->latest('scheduled_time')->paginate(20);
 
+        // Get properties for filter
         $properties = Property::where('tenant_id', $user->tenant_id)
             ->where('is_active', true)
             ->get();
 
-        $housekeepers = User::where('tenant_id', $user->tenant_id)
-            ->whereHas('role', function($q) {
-                $q->where('name', 'HOUSEKEEPER');
-            })
-            ->where('is_active', true)
-            ->get();
-
-        return view('Users.tenant.housekeeping.supervisor.index', compact('tasks', 'properties', 'housekeepers'));
+        return view('Users.tenant.housekeeping.index', compact('tasks', 'properties'));
     }
 
-    public function supervisorCreate(Request $request)
+    /**
+     * Show the form for creating a new task
+     */
+    public function create(Request $request)
     {
         $user = Auth::user();
         
-        if ($user->role->name !== 'SUPERVISOR') {
+        // Only DIRECTOR, MANAGER, SUPERVISOR can create tasks
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER', 'SUPERVISOR'])) {
             return redirect()->route('user.dashboard')
-                ->with('error', 'Unauthorized access.');
+                ->with('error', 'You do not have permission to create housekeeping tasks.');
         }
 
+        // Get properties
         $properties = Property::where('tenant_id', $user->tenant_id)
             ->where('is_active', true)
             ->get();
 
+        // Get housekeepers
         $housekeepers = User::where('tenant_id', $user->tenant_id)
             ->whereHas('role', function($q) {
                 $q->where('name', 'HOUSEKEEPER');
@@ -84,38 +102,38 @@ class HousekeepingController extends Controller
             ->where('is_active', true)
             ->get();
 
+        // Get rooms if property is pre-selected
         $rooms = collect();
         if ($request->filled('property_id')) {
             $rooms = Room::where('property_id', $request->property_id)
                 ->with('roomType')
                 ->get();
-        } elseif ($user->property_id) {
-            $rooms = Room::where('property_id', $user->property_id)
-                ->with('roomType')
-                ->get();
         }
 
-        return view('Users.tenant.housekeeping.supervisor.create', compact('properties', 'housekeepers', 'rooms'));
+        return view('Users.tenant.housekeeping.create', compact('properties', 'housekeepers', 'rooms'));
     }
 
-    public function supervisorStore(Request $request)
+    /**
+     * Store a newly created task
+     */
+    public function store(Request $request)
     {
         $user = Auth::user();
         
-        if ($user->role->name !== 'SUPERVISOR') {
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER', 'SUPERVISOR'])) {
             return redirect()->route('user.dashboard')
-                ->with('error', 'Unauthorized access.');
+                ->with('error', 'You do not have permission to create housekeeping tasks.');
         }
 
         $validated = $request->validate([
-            'property_id' => 'required|exists:properties,id',
-            'room_id' => 'required|exists:rooms,id',
-            'assigned_to' => 'required|exists:users,id',
+            'property_id' => 'required|uuid|exists:properties,id',
+            'room_id' => 'required|uuid|exists:rooms,id',
+            'assigned_to' => 'required|uuid|exists:users,id',
             'task_type' => 'required|in:DAILY_CLEAN,DEEP_CLEAN,TURNDOWN,INSPECTION,OTHER',
             'priority' => 'required|in:LOW,MEDIUM,HIGH',
             'scheduled_date' => 'required|date',
-            'scheduled_time' => 'nullable|date_format:H:i',
-            'notes' => 'nullable|string|max:1000',
+            'scheduled_time' => 'nullable',
+            'notes' => 'nullable|string',
         ]);
 
         try {
@@ -124,42 +142,19 @@ class HousekeepingController extends Controller
             // Verify property belongs to tenant
             $property = Property::where('id', $validated['property_id'])
                 ->where('tenant_id', $user->tenant_id)
-                ->first();
+                ->firstOrFail();
 
-            if (!$property) {
-                DB::rollBack();
-                return back()->withInput()
-                    ->with('error', 'Property not found or does not belong to your organization.');
-            }
-
-            // Verify room belongs to the property
-            $room = Room::where('id', $validated['room_id'])
-                ->where('property_id', $property->id)
-                ->first();
-
-            if (!$room) {
-                DB::rollBack();
-                return back()->withInput()
-                    ->with('error', 'Room not found or does not belong to the selected property.');
-            }
-
-            // Verify housekeeper exists and has correct role
+            // Verify assigned user is a housekeeper
             $housekeeper = User::where('id', $validated['assigned_to'])
                 ->where('tenant_id', $user->tenant_id)
                 ->whereHas('role', function($q) {
                     $q->where('name', 'HOUSEKEEPER');
                 })
-                ->first();
-
-            if (!$housekeeper) {
-                DB::rollBack();
-                return back()->withInput()
-                    ->with('error', 'Selected user is not a housekeeper or does not belong to your organization.');
-            }
+                ->firstOrFail();
 
             $task = HousekeepingTask::create([
                 'property_id' => $property->id,
-                'room_id' => $room->id,
+                'room_id' => $validated['room_id'],
                 'assigned_to' => $housekeeper->id,
                 'task_type' => $validated['task_type'],
                 'status' => 'PENDING',
@@ -172,65 +167,131 @@ class HousekeepingController extends Controller
 
             DB::commit();
 
-            return redirect()->route('supervisor.housekeeping.index')
+            return redirect()->route('tenant.housekeeping.show', $task)
                 ->with('success', 'Housekeeping task created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Error creating housekeeping task: ' . $e->getMessage(), [
-                'user_id' => $user->id,
-                'data' => $validated ?? $request->all(),
-                'trace' => $e->getTraceAsString()
-            ]);
             return back()->withInput()
                 ->with('error', 'Failed to create task: ' . $e->getMessage());
         }
     }
 
-    public function supervisorShow(HousekeepingTask $task)
+    /**
+     * Display the specified task
+     */
+    public function show(HousekeepingTask $housekeeping)
     {
         $user = Auth::user();
         
-        if ($user->role->name !== 'SUPERVISOR') {
-            return redirect()->route('user.dashboard')
-                ->with('error', 'Unauthorized access.');
-        }
-
-        if ($task->property->tenant_id !== $user->tenant_id) {
+        // Verify tenant ownership
+        if ($housekeeping->property->tenant_id !== $user->tenant_id) {
             abort(403, 'Unauthorized access to this task.');
         }
 
-        $task->load(['property', 'room.roomType', 'assignedTo', 'verifiedBy', 'creator', 'updater']);
+        // HOUSEKEEPER can only see their own tasks
+        if ($user->role->name === 'HOUSEKEEPER' && $housekeeping->assigned_to !== $user->id) {
+            abort(403, 'You can only view tasks assigned to you.');
+        }
 
-        return view('Users.tenant.housekeeping.supervisor.show', compact('task'));
+        $housekeeping->load(['property', 'room.roomType', 'assignedTo', 'verifiedBy', 'creator', 'updater']);
+
+        return view('Users.tenant.housekeeping.show', compact('housekeeping'));
     }
 
-    public function supervisorUpdate(Request $request, HousekeepingTask $task)
+    /**
+     * Update task status
+     */
+    public function updateStatus(Request $request, HousekeepingTask $housekeeping)
     {
         $user = Auth::user();
         
-        if ($user->role->name !== 'SUPERVISOR') {
-            return redirect()->route('user.dashboard')
-                ->with('error', 'Unauthorized access.');
-        }
-
-        if ($task->property->tenant_id !== $user->tenant_id) {
+        // Verify tenant ownership
+        if ($housekeeping->property->tenant_id !== $user->tenant_id) {
             abort(403, 'Unauthorized access to this task.');
         }
 
         $validated = $request->validate([
-            'room_id' => 'required|uuid|exists:rooms,id',
-            'assigned_to' => 'required|uuid|exists:users,id',
-            'task_type' => 'required|in:DAILY_CLEAN,DEEP_CLEAN,TURNDOWN,INSPECTION,OTHER',
-            'priority' => 'required|in:LOW,MEDIUM,HIGH',
             'status' => 'required|in:PENDING,IN_PROGRESS,COMPLETED,VERIFIED,CANCELLED',
-            'scheduled_date' => 'required|date',
-            'scheduled_time' => 'nullable',
             'notes' => 'nullable|string',
         ]);
 
         try {
             DB::beginTransaction();
 
+            $newStatus = $validated['status'];
+
+            // Authorization checks
+            if ($user->role->name === 'HOUSEKEEPER') {
+                // Housekeepers can only update their own tasks
+                if ($housekeeping->assigned_to !== $user->id) {
+                    throw new \Exception('You can only update your own tasks.');
+                }
+                // Housekeepers can only mark as IN_PROGRESS or COMPLETED
+                if (!in_array($newStatus, ['IN_PROGRESS', 'COMPLETED'])) {
+                    throw new \Exception('You can only mark tasks as In Progress or Completed.');
+                }
+            }
+
+            $updateData = ['status' => $newStatus, 'updated_by' => $user->id];
+
+            // Set timestamps based on status
+            if ($newStatus === 'IN_PROGRESS' && !$housekeeping->started_at) {
+                $updateData['started_at'] = now();
+            } elseif ($newStatus === 'COMPLETED' && !$housekeeping->completed_at) {
+                $updateData['completed_at'] = now();
+                
+                // Update room status to CLEAN if it was DIRTY
+                if ($housekeeping->room->status === 'DIRTY') {
+                    $housekeeping->room->update(['status' => 'CLEAN']);
+                }
+            } elseif ($newStatus === 'VERIFIED') {
+                $updateData['verified_at'] = now();
+                $updateData['verified_by'] = $user->id;
+                
+                // Make room available
+                if (in_array($housekeeping->room->status, ['DIRTY', 'CLEAN'])) {
+                    $housekeeping->room->update(['status' => 'AVAILABLE']);
+                }
+            }
+
+            if ($request->filled('notes')) {
+                $updateData['notes'] = $validated['notes'];
+            }
+
+            $housekeeping->update($updateData);
+
+            DB::commit();
+
+            return back()->with('success', 'Task status updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to update task: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Assign task to housekeeper
+     */
+    public function assign(Request $request, HousekeepingTask $housekeeping)
+    {
+        $user = Auth::user();
+        
+        // Only DIRECTOR, MANAGER, SUPERVISOR can reassign
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER', 'SUPERVISOR'])) {
+            return back()->with('error', 'You do not have permission to reassign tasks.');
+        }
+
+        // Verify tenant ownership
+        if ($housekeeping->property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access to this task.');
+        }
+
+        $validated = $request->validate([
+            'assigned_to' => 'required|uuid|exists:users,id',
+        ]);
+
+        try {
+            // Verify new assignee is a housekeeper
             $housekeeper = User::where('id', $validated['assigned_to'])
                 ->where('tenant_id', $user->tenant_id)
                 ->whereHas('role', function($q) {
@@ -238,105 +299,31 @@ class HousekeepingController extends Controller
                 })
                 ->firstOrFail();
 
-            $updateData = [
-                'room_id' => $validated['room_id'],
+            $housekeeping->update([
                 'assigned_to' => $housekeeper->id,
-                'task_type' => $validated['task_type'],
-                'priority' => $validated['priority'],
-                'status' => $validated['status'],
-                'scheduled_date' => $validated['scheduled_date'],
-                'scheduled_time' => $validated['scheduled_time'] ?? null,
-                'notes' => $validated['notes'] ?? null,
-                'updated_by' => $user->id,
-            ];
-
-            $task->update($updateData);
-
-            DB::commit();
-
-            return redirect()->route('supervisor.housekeeping.index')
-                ->with('success', 'Task updated successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withInput()
-                ->with('error', 'Failed to update task: ' . $e->getMessage());
-        }
-    }
-
-    public function supervisorDestroy(HousekeepingTask $task)
-    {
-        $user = Auth::user();
-        
-        if ($user->role->name !== 'SUPERVISOR') {
-            return redirect()->route('user.dashboard')
-                ->with('error', 'Unauthorized access.');
-        }
-
-        if ($task->property->tenant_id !== $user->tenant_id) {
-            abort(403, 'Unauthorized access to this task.');
-        }
-
-        try {
-            $task->delete();
-            return redirect()->route('supervisor.housekeeping.index')
-                ->with('success', 'Task deleted successfully.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to delete task: ' . $e->getMessage());
-        }
-    }
-
-    public function verifyTask(Request $request, HousekeepingTask $task)
-    {
-        $user = Auth::user();
-        
-        if ($user->role->name !== 'SUPERVISOR') {
-            return back()->with('error', 'Unauthorized access.');
-        }
-
-        if ($task->property->tenant_id !== $user->tenant_id) {
-            abort(403, 'Unauthorized access to this task.');
-        }
-
-        if ($task->status !== 'COMPLETED') {
-            return back()->with('error', 'Only completed tasks can be verified.');
-        }
-
-        try {
-            DB::beginTransaction();
-
-            $task->update([
-                'status' => 'VERIFIED',
-                'verified_at' => now(),
-                'verified_by' => $user->id,
                 'updated_by' => $user->id,
             ]);
 
-            if (in_array($task->room->status, ['DIRTY', 'CLEAN'])) {
-                $task->room->update(['status' => 'AVAILABLE']);
-            }
-
-            DB::commit();
-
-            return back()->with('success', 'Task verified successfully.');
+            return back()->with('success', 'Task reassigned successfully.');
         } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Failed to verify task: ' . $e->getMessage());
+            return back()->with('error', 'Failed to reassign task: ' . $e->getMessage());
         }
     }
 
-    public function bulkAssign(Request $request)
+    /**
+     * Create tasks for dirty rooms
+     */
+    public function createForDirtyRooms(Request $request)
     {
         $user = Auth::user();
         
-        if ($user->role->name !== 'SUPERVISOR') {
-            return back()->with('error', 'Unauthorized access.');
+        if (!in_array($user->role->name, ['DIRECTOR', 'MANAGER', 'SUPERVISOR'])) {
+            return back()->with('error', 'You do not have permission to create tasks.');
         }
 
         $validated = $request->validate([
             'property_id' => 'required|uuid|exists:properties,id',
             'assigned_to' => 'required|uuid|exists:users,id',
-            'task_type' => 'required|in:DAILY_CLEAN,DEEP_CLEAN,TURNDOWN,INSPECTION,OTHER',
-            'priority' => 'required|in:LOW,MEDIUM,HIGH',
         ]);
 
         try {
@@ -346,6 +333,7 @@ class HousekeepingController extends Controller
                 ->where('tenant_id', $user->tenant_id)
                 ->firstOrFail();
 
+            // Get all dirty rooms
             $dirtyRooms = Room::where('property_id', $property->id)
                 ->where('status', 'DIRTY')
                 ->get();
@@ -356,6 +344,7 @@ class HousekeepingController extends Controller
 
             $tasksCreated = 0;
             foreach ($dirtyRooms as $room) {
+                // Check if task already exists
                 $existingTask = HousekeepingTask::where('room_id', $room->id)
                     ->whereDate('scheduled_date', now())
                     ->whereIn('status', ['PENDING', 'IN_PROGRESS'])
@@ -366,9 +355,9 @@ class HousekeepingController extends Controller
                         'property_id' => $property->id,
                         'room_id' => $room->id,
                         'assigned_to' => $validated['assigned_to'],
-                        'task_type' => $validated['task_type'],
+                        'task_type' => 'DAILY_CLEAN',
                         'status' => 'PENDING',
-                        'priority' => $validated['priority'],
+                        'priority' => 'HIGH',
                         'scheduled_date' => now(),
                         'created_by' => $user->id,
                     ]);
@@ -382,164 +371,6 @@ class HousekeepingController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Failed to create tasks: ' . $e->getMessage());
-        }
-    }
-
-    public function housekeeperIndex(Request $request)
-    {
-        $user = Auth::user();
-        
-        if ($user->role->name !== 'HOUSEKEEPER') {
-            return redirect()->route('user.dashboard')
-                ->with('error', 'Unauthorized access.');
-        }
-
-        $query = HousekeepingTask::with(['property', 'room.roomType', 'creator'])
-            ->where('assigned_to', $user->id);
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        } else {
-            $query->whereIn('status', ['PENDING', 'IN_PROGRESS']);
-        }
-
-        if ($request->filled('date')) {
-            $query->whereDate('scheduled_date', $request->date);
-        }
-
-        $tasks = $query->latest('scheduled_date')->latest('scheduled_time')->paginate(20);
-
-        $stats = [
-            'pending' => HousekeepingTask::where('assigned_to', $user->id)
-                ->where('status', 'PENDING')
-                ->count(),
-            'in_progress' => HousekeepingTask::where('assigned_to', $user->id)
-                ->where('status', 'IN_PROGRESS')
-                ->count(),
-            'completed_today' => HousekeepingTask::where('assigned_to', $user->id)
-                ->where('status', 'COMPLETED')
-                ->whereDate('completed_at', now())
-                ->count(),
-        ];
-
-        return view('Users.tenant.housekeeping.housekeeper.index', compact('tasks', 'stats'));
-    }
-
-    public function housekeeperShow(HousekeepingTask $task)
-    {
-        $user = Auth::user();
-        
-        if ($user->role->name !== 'HOUSEKEEPER') {
-            return redirect()->route('user.dashboard')
-                ->with('error', 'Unauthorized access.');
-        }
-
-        if ($task->assigned_to !== $user->id) {
-            abort(403, 'You can only view tasks assigned to you.');
-        }
-
-        $task->load(['property', 'room.roomType', 'creator', 'verifiedBy']);
-
-        return view('Users.tenant.housekeeping.housekeeper.show', compact('task'));
-    }
-
-    public function housekeeperManage(HousekeepingTask $task)
-    {
-        $user = Auth::user();
-        
-        if ($user->role->name !== 'HOUSEKEEPER') {
-            return redirect()->route('user.dashboard')
-                ->with('error', 'Unauthorized access.');
-        }
-
-        if ($task->assigned_to !== $user->id) {
-            abort(403, 'You can only manage tasks assigned to you.');
-        }
-
-        $task->load(['property', 'room.roomType', 'creator']);
-
-        return view('Users.tenant.housekeeping.housekeeper.manage', compact('task'));
-    }
-
-    public function startTask(Request $request, HousekeepingTask $task)
-    {
-        $user = Auth::user();
-        
-        if ($user->role->name !== 'HOUSEKEEPER') {
-            return back()->with('error', 'Unauthorized access.');
-        }
-
-        if ($task->assigned_to !== $user->id) {
-            abort(403, 'You can only start tasks assigned to you.');
-        }
-
-        if ($task->status !== 'PENDING') {
-            return back()->with('error', 'Only pending tasks can be started.');
-        }
-
-        try {
-            $task->update([
-                'status' => 'IN_PROGRESS',
-                'started_at' => now(),
-                'updated_by' => $user->id,
-            ]);
-
-            return back()->with('success', 'Task started successfully.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to start task: ' . $e->getMessage());
-        }
-    }
-
-    public function completeTask(Request $request, HousekeepingTask $task)
-    {
-        $user = Auth::user();
-        
-        if ($user->role->name !== 'HOUSEKEEPER') {
-            return back()->with('error', 'Unauthorized access.');
-        }
-
-        if ($task->assigned_to !== $user->id) {
-            abort(403, 'You can only complete tasks assigned to you.');
-        }
-
-        if (!in_array($task->status, ['PENDING', 'IN_PROGRESS'])) {
-            return back()->with('error', 'Only pending or in-progress tasks can be completed.');
-        }
-
-        $validated = $request->validate([
-            'completion_notes' => 'nullable|string|max:1000',
-        ]);
-
-        try {
-            DB::beginTransaction();
-
-            $updateData = [
-                'status' => 'COMPLETED',
-                'completed_at' => now(),
-                'updated_by' => $user->id,
-            ];
-
-            if (!$task->started_at) {
-                $updateData['started_at'] = now();
-            }
-
-            if ($request->filled('completion_notes')) {
-                $existingNotes = $task->notes ? $task->notes . "\n\n" : "";
-                $updateData['notes'] = $existingNotes . "Completion Notes: " . $validated['completion_notes'];
-            }
-
-            $task->update($updateData);
-
-            if ($task->room->status === 'DIRTY') {
-                $task->room->update(['status' => 'CLEAN']);
-            }
-
-            DB::commit();
-
-            return back()->with('success', 'Task completed successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Failed to complete task: ' . $e->getMessage());
         }
     }
 }

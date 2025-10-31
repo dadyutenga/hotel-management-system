@@ -37,7 +37,7 @@ Route::middleware('guest')->group(function () {
 });
 
 // User Protected Routes
-Route::middleware(['auth', 'check.tenant.status'])->group(function () {
+Route::middleware(['auth', 'tenant'])->group(function () {
     Route::get('/dashboard/pending', [AuthController::class, 'showPendingDashboard'])->name('dashboard.pending');
     Route::get('/dashboard', [AuthController::class, 'showDashboard'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -148,26 +148,16 @@ Route::middleware(['auth', 'check.tenant.status'])->group(function () {
         Route::put('/{folio}/close', [FolioController::class, 'close'])->name('close');
     });
 
-    // Supervisor Housekeeping Routes
-    Route::prefix('supervisor/housekeeping')->name('supervisor.housekeeping.')->middleware('auth')->group(function() {
-        Route::get('/', [HousekeepingController::class, 'supervisorIndex'])->name('index');
-        Route::get('/create', [HousekeepingController::class, 'supervisorCreate'])->name('create');
-        Route::post('/', [HousekeepingController::class, 'supervisorStore'])->name('store');
-        Route::get('/{task}', [HousekeepingController::class, 'supervisorShow'])->name('show');
-        Route::put('/{task}', [HousekeepingController::class, 'supervisorUpdate'])->name('update');
-        Route::delete('/{task}', [HousekeepingController::class, 'supervisorDestroy'])->name('destroy');
-        Route::post('/{task}/verify', [HousekeepingController::class, 'verifyTask'])->name('verify');
-        Route::post('/bulk-assign', [HousekeepingController::class, 'bulkAssign'])->name('bulk-assign');
+    // Housekeeping management routes
+    Route::prefix('housekeeping')->name('tenant.housekeeping.')->group(function () {
+        Route::get('/', [HousekeepingController::class, 'index'])->name('index');
+        Route::get('/create', [HousekeepingController::class, 'create'])->name('create');
+        Route::post('/', [HousekeepingController::class, 'store'])->name('store');
+        Route::get('/{housekeeping}', [HousekeepingController::class, 'show'])->name('show');
+        Route::put('/{housekeeping}/status', [HousekeepingController::class, 'updateStatus'])->name('update-status');
+        Route::put('/{housekeeping}/assign', [HousekeepingController::class, 'assign'])->name('assign');
+        Route::post('/create-for-dirty-rooms', [HousekeepingController::class, 'createForDirtyRooms'])->name('create-for-dirty-rooms');
     });
-
-  // Housekeeper Task Routes - CORRECTED
-Route::prefix('housekeeper/tasks')->name('housekeeper.tasks.')->middleware('auth')->group(function() {
-    Route::get('/', [HousekeepingController::class, 'housekeeperIndex'])->name('index');
-    Route::get('/{task}/manage', [HousekeepingController::class, 'housekeeperManage'])->name('manage');
-    Route::get('/{task}', [HousekeepingController::class, 'housekeeperShow'])->name('show');
-    Route::post('/{task}/start', [HousekeepingController::class, 'startTask'])->name('start');
-    Route::post('/{task}/complete', [HousekeepingController::class, 'completeTask'])->name('complete');
-});
 
     // Maintenance management routes
     Route::prefix('maintenance')->name('tenant.maintenance.')->group(function () {
@@ -247,11 +237,15 @@ Route::prefix('housekeeper/tasks')->name('housekeeper.tasks.')->middleware('auth
     });
 
     Route::prefix('housekeeper')->name('tenant.housekeeper.')->group(function () {
-        Route::get('/tasks', [HousekeepingController::class, 'housekeeperIndex'])->name('tasks.index');
-        Route::get('/tasks/{task}', [HousekeepingController::class, 'housekeeperShow'])->name('tasks.show');
-        Route::get('/tasks/{task}/manage', [HousekeepingController::class, 'housekeeperManage'])->name('tasks.manage');
-        Route::post('/tasks/{task}/start', [HousekeepingController::class, 'startTask'])->name('tasks.start');
-        Route::post('/tasks/{task}/complete', [HousekeepingController::class, 'completeTask'])->name('tasks.complete');
+        Route::get('/tasks', [HousekeeperController::class, 'myTasks'])->name('tasks.index');
+        Route::get('/tasks/today', [HousekeeperController::class, 'todayTasks'])->name('tasks.today');
+        Route::get('/tasks/{task}', [HousekeeperController::class, 'showTask'])->name('tasks.show');
+        Route::put('/tasks/{task}/start', [HousekeeperController::class, 'startTask'])->name('tasks.start');
+        Route::put('/tasks/{task}/complete', [HousekeeperController::class, 'completeTask'])->name('tasks.complete');
+        Route::put('/tasks/{task}/progress', [HousekeeperController::class, 'updateTaskProgress'])->name('tasks.progress');
+        Route::put('/tasks/{task}/room-status', [HousekeeperController::class, 'updateRoomStatus'])->name('tasks.room-status');
+        Route::get('/statistics', [HousekeeperController::class, 'myStatistics'])->name('statistics');
+        Route::post('/tasks/{task}/issues', [HousekeeperController::class, 'reportIssue'])->name('tasks.report-issue');
     });
 
     Route::prefix('supervisor')->name('tenant.supervisor.')->group(function () {
@@ -271,8 +265,9 @@ Route::prefix('housekeeper/tasks')->name('housekeeper.tasks.')->middleware('auth
     Route::get('/user-dashboard/stats', [UserController::class, 'getDashboardStats'])->name('user.dashboard.stats');
 });
 
+// Add this route for the rejected dashboard
 Route::get('/dashboard/rejected', [AuthController::class, 'showRejectedDashboard'])
-    ->middleware(['auth'])
+    ->middleware(['auth', 'tenant'])
     ->name('dashboard.rejected');
 
 // Superadmin routes
@@ -302,3 +297,17 @@ Route::group(['prefix' => 'superadmin'], function () {
         Route::get('/tenants/{tenant}/documents/{documentType}/download', [SuperadminController::class, 'downloadDocument'])->name('superadmin.tenant.download');
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Tenant Routes
+|--------------------------------------------------------------------------
+|
+| Tenant routes are handled by the tenant.php file and are automatically
+| loaded when a tenant domain is accessed. These routes are isolated
+| per tenant using the stancl/tenancy package.
+|
+*/
+
+// The tenant routes are defined in routes/tenant.php
+// They are automatically loaded by the tenancy package when accessing tenant domains
