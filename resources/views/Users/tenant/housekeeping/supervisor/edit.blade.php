@@ -446,21 +446,26 @@
                     roomSelect.prop('disabled', true).html('<option value="">Loading...</option>');
 
                     $.ajax({
-                        url: `/housekeeping/property/${propertyId}/rooms`,
+                        url: '/housekeeping/property/' + propertyId + '/rooms',
                         type: 'GET',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(data) {
                             roomSelect.html('<option value="">Select Room</option>');
-                            data.forEach(room => {
-                                const selected = room.id === currentRoomId ? 'selected' : '';
-                                roomSelect.append(`<option value="${room.id}" ${selected}>Room ${room.room_number} (${room.status})</option>`);
-                            });
+                            if (data && data.length > 0) {
+                                data.forEach(room => {
+                                    const selected = room.id === currentRoomId ? 'selected' : '';
+                                    roomSelect.append(`<option value="${room.id}" ${selected}>Room ${room.room_number} (${room.status})</option>`);
+                                });
+                            } else {
+                                roomSelect.append('<option value="">No rooms available</option>');
+                            }
                             roomSelect.prop('disabled', false);
                             loading.hide();
                         },
-                        error: function() {
+                        error: function(xhr, status, error) {
+                            console.error('Error loading rooms:', error);
                             roomSelect.html('<option value="">Error loading rooms</option>');
                             loading.hide();
                             alert('Failed to load rooms. Please try again.');

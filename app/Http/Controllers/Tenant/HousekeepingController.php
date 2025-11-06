@@ -136,7 +136,7 @@ class HousekeepingController extends Controller
             'task_type' => 'required|in:DAILY_CLEAN,DEEP_CLEAN,TURNDOWN,INSPECTION,OTHER',
             'priority' => 'required|in:LOW,MEDIUM,HIGH',
             'scheduled_date' => 'required|date',
-            'scheduled_time' => 'nullable',
+            'scheduled_time' => 'nullable|date_format:H:i',
             'notes' => 'nullable|string',
         ]);
 
