@@ -403,48 +403,6 @@
                     
                     <div class="card-content">
                         <div class="actions-grid">
-                            @if($user->property)
-                                <a href="{{ route('tenant.properties.show', $user->property->id) }}" class="action-item">
-                                    <div class="action-icon">
-                                        <i class="fas fa-building"></i>
-                                    </div>
-                                    <div class="action-info">
-                                        <h4>Property Details</h4>
-                                        <p>View property information</p>
-                                    </div>
-                                </a>
-                                
-                                <a href="{{ route('tenant.properties.edit', $user->property->id) }}" class="action-item">
-                                    <div class="action-icon">
-                                        <i class="fas fa-edit"></i>
-                                    </div>
-                                    <div class="action-info">
-                                        <h4>Edit Property</h4>
-                                        <p>Update property details</p>
-                                    </div>
-                                </a>
-                            @endif
-                            
-                            <a href="{{ route('tenant.users.index') }}" class="action-item">
-                                <div class="action-icon">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="action-info">
-                                    <h4>Manage Staff</h4>
-                                    <p>View and manage staff</p>
-                                </div>
-                            </a>
-                            
-                            <a href="{{ route('tenant.users.create') }}" class="action-item">
-                                <div class="action-icon">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <div class="action-info">
-                                    <h4>Add Staff</h4>
-                                    <p>Create new staff account</p>
-                                </div>
-                            </a>
-                            
                             <a href="{{ route('tenant.rooms.index') }}" class="action-item">
                                 <div class="action-icon">
                                     <i class="fas fa-door-open"></i>
@@ -510,8 +468,8 @@
                                     <i class="fas fa-broom"></i>
                                 </div>
                                 <div class="action-info">
-                                    <h4>Housekeeping</h4>
-                                    <p>Manage cleaning tasks</p>
+                                    <h4>View Housekeeping & Maintenance Tasks</h4>
+                                    <p>View housekeeping and maintenance tasks</p>
                                 </div>
                             </a>
                         </div>

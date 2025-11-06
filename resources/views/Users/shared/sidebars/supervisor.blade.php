@@ -1,197 +1,289 @@
-<!-- Supervisor Sidebar - Team & Operations Oversight -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <div class="brand-logo">HotelPro</div>
-        <div class="brand-subtitle">Supervisor</div>
+<!-- Supervisor Sidebar -->
+<aside class="sidebar">
+    <!-- Brand Header -->
+    <div class="sidebar-brand">
+        <div class="brand-icon">
+            <i class="fas fa-hotel"></i>
+        </div>
+        <div class="brand-content">
+            <h1 class="brand-title">HotelPro</h1>
+            <p class="brand-subtitle">Supervisor</p>
+        </div>
     </div>
 
-    <nav class="sidebar-nav">
-        <div class="nav-item">
-            <a href="{{ route('user.dashboard') }}" class="nav-link {{ request()->routeIs('user.dashboard') ? 'active' : '' }}">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>Dashboard</span>
-            </a>
+    <!-- Navigation -->
+    <nav class="sidebar-menu">
+        <!-- Dashboard -->
+        <a href="{{ route('user.dashboard') }}" class="menu-item {{ request()->routeIs('user.dashboard') ? 'active' : '' }}">
+            <i class="menu-icon fas fa-tachometer-alt"></i>
+            <span class="menu-text">Dashboard</span>
+        </a>
+
+        <!-- Operational Control Section -->
+        <div class="menu-section">
+            <span class="section-label">Operational Control</span>
         </div>
 
-        <div class="nav-section">
-            <div class="nav-section-title">Operational Control</div>
+        <a href="{{ route('tenant.supervisor.tasks.index') }}" class="menu-item {{ request()->routeIs('tenant.supervisor.tasks.*') ? 'active' : '' }}">
+            <i class="menu-icon fas fa-clipboard-check"></i>
+            <span class="menu-text">Housekeeping</span>
+        </a>
+
+        <a href="{{ route('tenant.maintenance.index') }}" class="menu-item {{ request()->routeIs('tenant.maintenance.*') ? 'active' : '' }}">
+            <i class="menu-icon fas fa-tools"></i>
+            <span class="menu-text">Maintenance</span>
+        </a>
+
+        <a href="{{ route('tenant.reports.housekeeping') }}" class="menu-item {{ request()->routeIs('tenant.reports.housekeeping') ? 'active' : '' }}">
+            <i class="menu-icon fas fa-chart-line"></i>
+            <span class="menu-text">Housekeeping Report</span>
+        </a>
+
+        <!-- Logout Section -->
+        <div class="menu-section">
+            <span class="section-label">Account</span>
         </div>
 
-        <div class="nav-item">
-            <a href="{{ route('tenant.supervisor.tasks.index') }}" class="nav-link {{ request()->routeIs('tenant.supervisor.tasks.*') ? 'active' : '' }}">
-                <i class="fas fa-clipboard-check"></i>
-                <span>Housekeeping</span>
-            </a>
-        </div>
-
-        <div class="nav-item">
-            <a href="{{ route('tenant.maintenance.index') }}" class="nav-link {{ request()->routeIs('tenant.maintenance.*') ? 'active' : '' }}">
-                <i class="fas fa-tools"></i>
-                <span>Maintenance</span>
-            </a>
-        </div>
-
-        <div class="nav-item">
-            <a href="{{ route('tenant.reports.housekeeping') }}" class="nav-link {{ request()->routeIs('tenant.reports.housekeeping') ? 'active' : '' }}">
-                <i class="fas fa-chart-line"></i>
-                <span>Housekeeping Report</span>
-            </a>
-        </div>
+        <form method="POST" action="{{ route('logout') }}" class="logout-form">
+            @csrf
+            <button type="submit" class="menu-item logout-menu-item">
+                <i class="menu-icon fas fa-sign-out-alt"></i>
+                <span class="menu-text">Logout</span>
+            </button>
+        </form>
     </nav>
 
-    <!-- User Info -->
+    <!-- User Profile Footer -->
     <div class="sidebar-footer">
-        <div class="user-profile">
-            <div class="user-avatar">
-                <i class="fas fa-user-friends"></i>
-            </div>
-            <div class="user-details">
-                <div class="user-name">{{ Auth::user()->full_name }}</div>
-                <div class="user-role">Supervisor</div>
-                @if(Auth::user()->property)
-                    <div class="user-property">{{ Auth::user()->property->name }}</div>
-                @endif
-            </div>
-            <form method="POST" action="{{ route('logout') }}" style="margin-top: 10px;">
-                @csrf
-                <button type="submit" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                </button>
-            </form>
-        </div>
     </div>
-</div>
+</aside>
 
 <style>
-/* Supervisor Sidebar Styles */
+/* ========== UNIFIED SIDEBAR DESIGN ========== */
+
 .sidebar {
-    width: 280px;
-    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
-    color: white;
     position: fixed;
+    left: 0;
+    top: 0;
+    width: 280px;
     height: 100vh;
-    overflow-y: auto;
-    z-index: 1000;
-    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
-}
-
-.sidebar-header {
-    padding: 30px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    text-align: center;
-}
-
-.brand-logo {
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: 5px;
-}
-
-.brand-subtitle {
-    font-size: 14px;
-    opacity: 0.8;
-    font-weight: 500;
-}
-
-.sidebar-nav {
-    padding: 20px 0;
-}
-
-.nav-section {
-    padding: 15px 20px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    margin-bottom: 10px;
-}
-
-.nav-section-title {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    opacity: 0.7;
-    letter-spacing: 1px;
-}
-
-.nav-item {
-    margin-bottom: 5px;
-}
-
-.nav-link {
-    display: flex;
-    align-items: center;
-    padding: 12px 20px;
-    color: rgba(255,255,255,0.85);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    font-weight: 500;
-}
-
-.nav-link i {
-    width: 24px;
-    margin-right: 12px;
-    font-size: 16px;
-}
-
-.nav-link:hover,
-.nav-link.active {
-    background: rgba(255,255,255,0.15);
-    color: #ffffff;
-    padding-left: 24px;
-}
-
-.sidebar-footer {
-    padding: 20px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.user-profile {
+    background: linear-gradient(180deg, #7c2d12 0%, #9a3412 50%, #c2410c 100%);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    z-index: 1000;
+    overflow: hidden;
 }
 
-.user-avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.15);
+/* ========== BRAND HEADER ========== */
+
+.sidebar-brand {
+    padding: 24px 20px;
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    margin-bottom: 12px;
+    color: #fff;
+    flex-shrink: 0;
 }
 
-.user-name {
-    font-size: 16px;
-    font-weight: 600;
+.brand-content {
+    flex: 1;
+    min-width: 0;
 }
 
-.user-role {
+.brand-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.brand-subtitle {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 2px 0 0;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ========== NAVIGATION MENU ========== */
+
+.sidebar-menu {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px 0 16px;
+}
+
+.sidebar-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-menu::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.sidebar-menu::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========== MENU SECTIONS ========== */
+
+.menu-section {
+    padding: 20px 20px 8px;
+    margin-top: 8px;
+}
+
+.menu-section:first-child {
+    margin-top: 0;
+}
+
+.section-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* ========== MENU ITEMS ========== */
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 20px;
+    margin: 2px 12px;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     font-size: 14px;
-    opacity: 0.8;
+    font-weight: 500;
+    position: relative;
 }
 
-.user-property {
-    font-size: 13px;
-    opacity: 0.7;
-    margin-top: 4px;
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    transform: translateX(4px);
 }
 
-.logout-btn {
-    margin-top: 12px;
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.6);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
+.menu-item.active {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.menu-item.active::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 24px;
+    background: #fff;
+    border-radius: 0 4px 4px 0;
+}
+
+.menu-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.menu-text {
+    margin-left: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ========== LOGOUT MENU ITEM ========== */
+
+.logout-form {
+    margin: 2px 12px;
+}
+
+.logout-menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 20px;
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    border-radius: 10px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 14px;
+    font-weight: 500;
+    position: relative;
+    background: none;
+    border: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    text-align: left;
 }
 
-.logout-btn:hover {
-    background: rgba(255,255,255,0.2);
-    border-color: white;
+.logout-menu-item:hover {
+    background: rgba(255, 59, 48, 0.2);
+    color: #ffffff;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+}
+
+/* ========== USER PROFILE FOOTER ========== */
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+    }
+    
+    .sidebar-menu {
+        padding-bottom: 16px;
+    }
+    
+    .sidebar-footer {
+        position: relative;
+    }
 }
 </style>
