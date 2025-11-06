@@ -13,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
+            'tenant' => \App\Http\Middleware\CheckTenantStatus::class,
             'check.tenant.status' => \App\Http\Middleware\CheckTenantStatus::class,
         ]);
         // DISABLED TENANCY MIDDLEWARE
