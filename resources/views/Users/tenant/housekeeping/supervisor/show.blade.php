@@ -417,16 +417,21 @@
                                 @csrf
                                 @method('PUT')
                                 <select name="status" class="form-control">
-                                    <option value="PENDING" {{ $housekeeping->status == 'PENDING' ? 'selected' : '' }}>Pending</option>
-                                    <option value="IN_PROGRESS" {{ $housekeeping->status == 'IN_PROGRESS' ? 'selected' : '' }}>In Progress</option>
-                                    <option value="COMPLETED" {{ $housekeeping->status == 'COMPLETED' ? 'selected' : '' }}>Completed</option>
-                                    <option value="VERIFIED" {{ $housekeeping->status == 'VERIFIED' ? 'selected' : '' }}>Verified</option>
-                                    <option value="CANCELLED" {{ $housekeeping->status == 'CANCELLED' ? 'selected' : '' }}>Cancelled</option>
+                                    <option value="{{ $housekeeping->status }}" selected>{{ str_replace('_', ' ', $housekeeping->status) }} (Current)</option>
+                                    @if($housekeeping->status == 'COMPLETED')
+                                        <option value="VERIFIED">Verified</option>
+                                    @endif
+                                    @if($housekeeping->status !== 'CANCELLED')
+                                        <option value="CANCELLED">Cancelled</option>
+                                    @endif
                                 </select>
                                 <button type="submit" class="btn btn-info" style="width: 100%;">
                                     <i class="fas fa-sync"></i> Update Status
                                 </button>
                             </form>
+                            <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                                <i class="fas fa-info-circle"></i> Only VERIFIED or CANCELLED status changes allowed
+                            </p>
                         </div>
 
                         <!-- Reassign Task -->

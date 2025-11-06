@@ -379,7 +379,16 @@
                         </div>
                         <div class="stat-info">
                             <h3>{{ $tasks->where('status', 'COMPLETED')->count() }}</h3>
-                            <p>Completed Today</p>
+                            <p>Completed</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #6f42c1;">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ $tasks->where('status', 'VERIFIED')->count() }}</h3>
+                            <p>Verified</p>
                         </div>
                     </div>
                 </div>

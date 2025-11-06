@@ -349,6 +349,7 @@ class HousekeepingController extends Controller
 
     /**
      * Update task status (Supervisor)
+     * Supervisors can only set VERIFIED (for completed tasks) or CANCELLED
      */
     public function updateStatus(Request $request, HousekeepingTask $housekeeping)
     {
@@ -365,15 +366,29 @@ class HousekeepingController extends Controller
                 ->with('error', 'You do not have permission to access this page.');
         }
 
+        // Supervisor can only set VERIFIED or CANCELLED
         $validated = $request->validate([
-            'status' => 'required|in:PENDING,IN_PROGRESS,COMPLETED,VERIFIED,CANCELLED',
+            'status' => 'required|in:VERIFIED,CANCELLED',
         ]);
 
         try {
-            $housekeeping->update([
+            // VERIFIED can only be set if task is COMPLETED
+            if ($validated['status'] === 'VERIFIED' && $housekeeping->status !== 'COMPLETED') {
+                return back()->with('error', 'Only completed tasks can be verified.');
+            }
+
+            $updateData = [
                 'status' => $validated['status'],
                 'updated_by' => $user->id,
-            ]);
+            ];
+
+            // Set verified_by if status is VERIFIED
+            if ($validated['status'] === 'VERIFIED') {
+                $updateData['verified_by'] = $user->id;
+                $updateData['verified_at'] = now();
+            }
+
+            $housekeeping->update($updateData);
 
             return back()->with('success', 'Task status updated successfully.');
         } catch (\Exception $e) {
@@ -545,16 +560,14 @@ class HousekeepingController extends Controller
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
-        } else {
-            $query->whereIn('status', ['PENDING', 'IN_PROGRESS']);
         }
+        // Don't filter by status if not specified - show all tasks
 
         // Filter by date
         if ($request->filled('date')) {
             $query->whereDate('scheduled_date', $request->date);
-        } else {
-            $query->whereDate('scheduled_date', '>=', now());
         }
+        // Don't filter by date if not specified - show all tasks
 
         $tasks = $query->latest('scheduled_date')->latest('scheduled_time')->paginate(20);
 
@@ -598,7 +611,7 @@ class HousekeepingController extends Controller
             abort(403, 'You can only view your own tasks.');
         }
 
-        $task->load(['property', 'room.roomType', 'assignedTo', 'creator', 'updater']);
+        $task->load(['property', 'room.roomType', 'assignedTo', 'verifiedBy', 'creator', 'updater']);
 
         return view('Users.tenant.housekeeping.housekeeper.show', compact('task'));
     }

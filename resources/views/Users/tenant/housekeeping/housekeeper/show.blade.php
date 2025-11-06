@@ -275,6 +275,16 @@
             color: #155724;
         }
         
+        .status-verified {
+            background: #e2d5f5;
+            color: #6f42c1;
+        }
+        
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
         @media (max-width: 968px) {
             .main-content {
                 margin-left: 0;
@@ -298,7 +308,7 @@
                 <div class="header">
                     <div>
                         <h1>Task Details</h1>
-                        <p>Room {{ $housekeeping->room->room_number }} - {{ str_replace('_', ' ', $housekeeping->task_type) }}</p>
+                        <p>Room {{ $task->room->room_number }} - {{ str_replace('_', ' ', $task->task_type) }}</p>
                     </div>
                     <a href="{{ route('tenant.housekeeper.tasks.index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back to My Tasks
@@ -319,14 +329,14 @@
                 @endif
 
                 <!-- Status Indicator -->
-                <div class="status-indicator status-{{ strtolower(str_replace('_', '-', $housekeeping->status)) }}">
+                <div class="status-indicator status-{{ strtolower(str_replace('_', '-', $task->status)) }}">
                     <i class="fas 
-                        @if($housekeeping->status == 'PENDING') fa-clock
-                        @elseif($housekeeping->status == 'IN_PROGRESS') fa-spinner
+                        @if($task->status == 'PENDING') fa-clock
+                        @elseif($task->status == 'IN_PROGRESS') fa-spinner
                         @else fa-check-circle
                         @endif
                     "></i>
-                    Task Status: {{ str_replace('_', ' ', $housekeeping->status) }}
+                    Task Status: {{ str_replace('_', ' ', $task->status) }}
                 </div>
 
                 <!-- Content Grid -->
@@ -339,63 +349,77 @@
 
                         <div class="detail-row">
                             <span class="detail-label">Property</span>
-                            <span class="detail-value">{{ $housekeeping->property->name }}</span>
+                            <span class="detail-value">{{ $task->property->name }}</span>
                         </div>
 
                         <div class="detail-row">
                             <span class="detail-label">Room Number</span>
-                            <span class="detail-value"><strong>{{ $housekeeping->room->room_number }}</strong></span>
+                            <span class="detail-value"><strong>{{ $task->room->room_number }}</strong></span>
                         </div>
 
                         <div class="detail-row">
                             <span class="detail-label">Room Type</span>
-                            <span class="detail-value">{{ $housekeeping->room->roomType->name ?? 'N/A' }}</span>
+                            <span class="detail-value">{{ $task->room->roomType->name ?? 'N/A' }}</span>
                         </div>
 
                         <div class="detail-row">
                             <span class="detail-label">Task Type</span>
-                            <span class="detail-value">{{ str_replace('_', ' ', $housekeeping->task_type) }}</span>
+                            <span class="detail-value">{{ str_replace('_', ' ', $task->task_type) }}</span>
                         </div>
 
                         <div class="detail-row">
                             <span class="detail-label">Priority</span>
                             <span class="detail-value">
-                                <span class="badge badge-{{ strtolower($housekeeping->priority) }}">
-                                    {{ $housekeeping->priority }}
+                                <span class="badge badge-{{ strtolower($task->priority) }}">
+                                    {{ $task->priority }}
                                 </span>
                             </span>
                         </div>
 
                         <div class="detail-row">
                             <span class="detail-label">Scheduled Date</span>
-                            <span class="detail-value">{{ $housekeeping->scheduled_date->format('F j, Y') }}</span>
+                            <span class="detail-value">{{ $task->scheduled_date->format('F j, Y') }}</span>
                         </div>
 
-                        @if($housekeeping->scheduled_time)
+                        @if($task->scheduled_time)
                             <div class="detail-row">
                                 <span class="detail-label">Scheduled Time</span>
-                                <span class="detail-value">{{ $housekeeping->scheduled_time }}</span>
+                                <span class="detail-value">{{ $task->scheduled_time }}</span>
                             </div>
                         @endif
 
-                        @if($housekeeping->started_at)
+                        @if($task->started_at)
                             <div class="detail-row">
                                 <span class="detail-label">Started At</span>
-                                <span class="detail-value">{{ $housekeeping->started_at->format('M j, Y H:i') }}</span>
+                                <span class="detail-value">{{ $task->started_at->format('M j, Y H:i') }}</span>
                             </div>
                         @endif
 
-                        @if($housekeeping->completed_at)
+                        @if($task->completed_at)
                             <div class="detail-row">
                                 <span class="detail-label">Completed At</span>
-                                <span class="detail-value">{{ $housekeeping->completed_at->format('M j, Y H:i') }}</span>
+                                <span class="detail-value">{{ $task->completed_at->format('M j, Y H:i') }}</span>
                             </div>
                         @endif
 
-                        @if($housekeeping->notes)
+                        @if($task->status == 'VERIFIED' && $task->verified_at)
+                            <div class="detail-row">
+                                <span class="detail-label">Verified At</span>
+                                <span class="detail-value">{{ $task->verified_at->format('M j, Y H:i') }}</span>
+                            </div>
+                        @endif
+
+                        @if($task->status == 'VERIFIED' && $task->verifiedBy)
+                            <div class="detail-row">
+                                <span class="detail-label">Verified By</span>
+                                <span class="detail-value">{{ $task->verifiedBy->name }}</span>
+                            </div>
+                        @endif
+
+                        @if($task->notes)
                             <div class="notes-section">
                                 <h3><i class="fas fa-sticky-note"></i> Task Notes</h3>
-                                <div class="notes-content">{{ $housekeeping->notes }}</div>
+                                <div class="notes-content">{{ $task->notes }}</div>
                             </div>
                         @endif
                     </div>
@@ -407,10 +431,10 @@
                         </div>
 
                         <!-- Start Task Button (Only for Pending) -->
-                        @if($housekeeping->status == 'PENDING')
+                        @if($task->status == 'PENDING')
                             <div class="action-group">
                                 <h3>Start Working</h3>
-                                <form method="POST" action="{{ route('tenant.housekeeper.tasks.start', $housekeeping) }}">
+                                <form method="POST" action="{{ route('tenant.housekeeper.tasks.start', $task) }}">
                                     @csrf
                                     <button type="submit" class="btn btn-warning" style="width: 100%;" onclick="return confirm('Start working on this task?')">
                                         <i class="fas fa-play"></i> Start Task
@@ -423,10 +447,10 @@
                         @endif
 
                         <!-- Complete Task Button (Only for In Progress) -->
-                        @if($housekeeping->status == 'IN_PROGRESS')
+                        @if($task->status == 'IN_PROGRESS')
                             <div class="action-group">
                                 <h3>Complete Task</h3>
-                                <form method="POST" action="{{ route('tenant.housekeeper.tasks.complete', $housekeeping) }}">
+                                <form method="POST" action="{{ route('tenant.housekeeper.tasks.complete', $task) }}">
                                     @csrf
                                     <button type="submit" class="btn btn-primary" style="width: 100%;" onclick="return confirm('Mark this task as completed?')">
                                         <i class="fas fa-check"></i> Mark as Complete
@@ -439,10 +463,10 @@
                         @endif
 
                         <!-- Progress Notes (Only for In Progress) -->
-                        @if($housekeeping->status == 'IN_PROGRESS')
+                        @if($task->status == 'IN_PROGRESS')
                             <div class="action-group">
                                 <h3>Add Progress Notes</h3>
-                                <form method="POST" action="{{ route('tenant.housekeeper.tasks.progress', $housekeeping) }}">
+                                <form method="POST" action="{{ route('tenant.housekeeper.tasks.progress', $task) }}">
                                     @csrf
                                     <textarea name="progress_notes" class="form-control" placeholder="Add any notes about the progress or issues found..." required></textarea>
                                     <button type="submit" class="btn btn-secondary" style="width: 100%;">
@@ -453,13 +477,44 @@
                         @endif
 
                         <!-- Task Completed Message -->
-                        @if(in_array($housekeeping->status, ['COMPLETED', 'VERIFIED']))
+                        @if($task->status == 'COMPLETED')
                             <div class="action-group">
                                 <div style="background: #d4edda; padding: 20px; border-radius: 8px; text-align: center;">
                                     <i class="fas fa-check-circle" style="font-size: 48px; color: #28a745; margin-bottom: 10px;"></i>
                                     <h3 style="color: #155724; margin-bottom: 5px;">Task Completed!</h3>
                                     <p style="font-size: 14px; color: #155724;">
-                                        This task has been marked as {{ strtolower($housekeeping->status) }}
+                                        Waiting for supervisor verification
+                                    </p>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Task Verified Message -->
+                        @if($task->status == 'VERIFIED')
+                            <div class="action-group">
+                                <div style="background: #e2d5f5; padding: 20px; border-radius: 8px; text-align: center;">
+                                    <i class="fas fa-certificate" style="font-size: 48px; color: #6f42c1; margin-bottom: 10px;"></i>
+                                    <h3 style="color: #6f42c1; margin-bottom: 5px;">Task Verified! ✓</h3>
+                                    <p style="font-size: 14px; color: #6f42c1;">
+                                        Great job! Your work has been verified by the supervisor.
+                                    </p>
+                                    @if($task->verifiedBy)
+                                        <p style="font-size: 12px; color: #6f42c1; margin-top: 10px;">
+                                            Verified by: <strong>{{ $task->verifiedBy->name }}</strong>
+                                        </p>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Task Cancelled Message -->
+                        @if($task->status == 'CANCELLED')
+                            <div class="action-group">
+                                <div style="background: #f8d7da; padding: 20px; border-radius: 8px; text-align: center;">
+                                    <i class="fas fa-times-circle" style="font-size: 48px; color: #dc3545; margin-bottom: 10px;"></i>
+                                    <h3 style="color: #721c24; margin-bottom: 5px;">Task Cancelled</h3>
+                                    <p style="font-size: 14px; color: #721c24;">
+                                        This task has been cancelled by the supervisor
                                     </p>
                                 </div>
                             </div>
