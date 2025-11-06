@@ -155,8 +155,8 @@ class MaintenanceController extends Controller
             // Update room status if maintenance is urgent and room is specified
             if ($validated['priority'] === 'URGENT' && isset($validated['room_id'])) {
                 $room = Room::find($validated['room_id']);
-                if ($room && in_array($room->status, ['AVAILABLE', 'CLEAN'])) {
-                    $room->update(['status' => 'MAINTENANCE']);
+                if ($room && in_array($room->status, ['VACANT', 'CLEAN'])) {
+                    $room->update(['status' => 'OUT_OF_ORDER']);
                 }
             }
 
@@ -399,8 +399,8 @@ class MaintenanceController extends Controller
             } elseif ($validated['status'] === 'COMPLETED' && !$maintenance->completed_at) {
                 $updateData['completed_at'] = now();
                 
-                // Update room status if it was in maintenance
-                if ($maintenance->room && $maintenance->room->status === 'MAINTENANCE') {
+                // Update room status if it was out of order for maintenance
+                if ($maintenance->room && $maintenance->room->status === 'OUT_OF_ORDER') {
                     $maintenance->room->update(['status' => 'DIRTY']);
                 }
             }
@@ -693,8 +693,8 @@ class MaintenanceController extends Controller
                 'resolution_notes' => $validated['resolution_notes'] ?? null,
             ]);
 
-            // Update room status to DIRTY if it was in MAINTENANCE
-            if ($maintenanceRequest->room && $maintenanceRequest->room->status === 'MAINTENANCE') {
+            // Update room status to DIRTY if it was OUT_OF_ORDER for maintenance
+            if ($maintenanceRequest->room && $maintenanceRequest->room->status === 'OUT_OF_ORDER') {
                 $maintenanceRequest->room->update(['status' => 'DIRTY']);
             }
 
