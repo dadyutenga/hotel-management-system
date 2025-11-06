@@ -24,7 +24,7 @@
             <span class="section-label">Operational Control</span>
         </div>
 
-        <a href="{{ route('tenant.supervisor.tasks.index') }}" class="menu-item {{ request()->routeIs('tenant.supervisor.tasks.*') ? 'active' : '' }}">
+        <a href="{{ route('tenant.housekeeping.index') }}" class="menu-item {{ request()->routeIs('tenant.housekeeping.*') ? 'active' : '' }}">
             <i class="menu-icon fas fa-clipboard-check"></i>
             <span class="menu-text">Housekeeping</span>
         </a>

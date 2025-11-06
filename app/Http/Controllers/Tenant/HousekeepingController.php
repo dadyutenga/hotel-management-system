@@ -532,6 +532,16 @@ class HousekeepingController extends Controller
         $query = HousekeepingTask::where('assigned_to', $user->id)
             ->with(['property', 'room.roomType']);
 
+        // Filter by property
+        if ($request->filled('property_id')) {
+            $query->where('property_id', $request->property_id);
+        }
+
+        // Filter by priority
+        if ($request->filled('priority')) {
+            $query->where('priority', $request->priority);
+        }
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -548,7 +558,12 @@ class HousekeepingController extends Controller
 
         $tasks = $query->latest('scheduled_date')->latest('scheduled_time')->paginate(20);
 
-        return view('Users.tenant.housekeeping.housekeeper.index', compact('tasks'));
+        // Get properties for filter dropdown
+        $properties = Property::where('tenant_id', $user->tenant_id)
+            ->orderBy('name')
+            ->get();
+
+        return view('Users.tenant.housekeeping.housekeeper.index', compact('tasks', 'properties'));
     }
 
     /**
@@ -698,41 +713,86 @@ class HousekeepingController extends Controller
                 ->with('error', 'You do not have permission to access this page.');
         }
 
-        // Get statistics for the current month
-        $startOfMonth = now()->startOfMonth();
-        $endOfMonth = now()->endOfMonth();
+        // Overall statistics
+        $totalTasks = HousekeepingTask::where('assigned_to', $user->id)->count();
+        $completedTasks = HousekeepingTask::where('assigned_to', $user->id)
+            ->whereIn('status', ['COMPLETED', 'VERIFIED'])
+            ->count();
 
-        $stats = [
-            'total_tasks' => HousekeepingTask::where('assigned_to', $user->id)
-                ->whereBetween('scheduled_date', [$startOfMonth, $endOfMonth])
-                ->count(),
+        // Calculate completion rate
+        $completionRate = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
 
-            'completed_tasks' => HousekeepingTask::where('assigned_to', $user->id)
-                ->where('status', 'COMPLETED')
-                ->whereBetween('scheduled_date', [$startOfMonth, $endOfMonth])
-                ->count(),
+        // Calculate average completion time
+        $avgCompletionTime = HousekeepingTask::where('assigned_to', $user->id)
+            ->where('status', 'COMPLETED')
+            ->whereNotNull('started_at')
+            ->whereNotNull('completed_at')
+            ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, started_at, completed_at)) as avg_time')
+            ->first()
+            ->avg_time ?? 0;
 
-            'pending_tasks' => HousekeepingTask::where('assigned_to', $user->id)
-                ->where('status', 'PENDING')
-                ->whereBetween('scheduled_date', [$startOfMonth, $endOfMonth])
-                ->count(),
+        // Get task counts by type
+        $tasksByType = HousekeepingTask::where('assigned_to', $user->id)
+            ->whereIn('status', ['COMPLETED', 'VERIFIED'])
+            ->selectRaw('task_type, COUNT(*) as count')
+            ->groupBy('task_type')
+            ->pluck('count', 'task_type')
+            ->toArray();
 
-            'in_progress_tasks' => HousekeepingTask::where('assigned_to', $user->id)
+        // Monthly breakdown (last 6 months)
+        $monthlyData = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $monthKey = $date->format('Y-m');
+            
+            $monthStart = $date->copy()->startOfMonth();
+            $monthEnd = $date->copy()->endOfMonth();
+
+            $total = HousekeepingTask::where('assigned_to', $user->id)
+                ->whereBetween('scheduled_date', [$monthStart, $monthEnd])
+                ->count();
+
+            $completed = HousekeepingTask::where('assigned_to', $user->id)
+                ->whereIn('status', ['COMPLETED', 'VERIFIED'])
+                ->whereBetween('scheduled_date', [$monthStart, $monthEnd])
+                ->count();
+
+            $inProgress = HousekeepingTask::where('assigned_to', $user->id)
                 ->where('status', 'IN_PROGRESS')
-                ->whereBetween('scheduled_date', [$startOfMonth, $endOfMonth])
-                ->count(),
+                ->whereBetween('scheduled_date', [$monthStart, $monthEnd])
+                ->count();
 
-            'average_completion_time' => HousekeepingTask::where('assigned_to', $user->id)
-                ->where('status', 'COMPLETED')
-                ->whereBetween('scheduled_date', [$startOfMonth, $endOfMonth])
-                ->whereNotNull('started_at')
-                ->whereNotNull('completed_at')
-                ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, started_at, completed_at)) as avg_time')
-                ->first()
-                ->avg_time ?? 0,
+            $pending = HousekeepingTask::where('assigned_to', $user->id)
+                ->where('status', 'PENDING')
+                ->whereBetween('scheduled_date', [$monthStart, $monthEnd])
+                ->count();
+
+            $monthlyData[$monthKey] = [
+                'total' => $total,
+                'completed' => $completed,
+                'in_progress' => $inProgress,
+                'pending' => $pending,
+            ];
+        }
+
+        $statistics = [
+            'overall' => [
+                'total_tasks' => $totalTasks,
+                'completed_tasks' => $completedTasks,
+                'in_progress_tasks' => HousekeepingTask::where('assigned_to', $user->id)
+                    ->where('status', 'IN_PROGRESS')
+                    ->count(),
+                'pending_tasks' => HousekeepingTask::where('assigned_to', $user->id)
+                    ->where('status', 'PENDING')
+                    ->count(),
+                'completion_rate' => $completionRate,
+                'average_completion_time' => round($avgCompletionTime),
+                'tasks_by_type' => $tasksByType,
+            ],
+            'monthly' => $monthlyData,
         ];
 
-        return view('Users.tenant.housekeeping.housekeeper.statistics', compact('stats'));
+        return view('Users.tenant.housekeeping.housekeeper.statistics', compact('statistics'));
     }
 
     /**
