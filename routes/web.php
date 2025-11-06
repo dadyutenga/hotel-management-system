@@ -173,8 +173,8 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('/{maintenance}/edit', [MaintenanceController::class, 'edit'])->name('edit');
         Route::put('/{maintenance}', [MaintenanceController::class, 'update'])->name('update');
         Route::delete('/{maintenance}', [MaintenanceController::class, 'destroy'])->name('destroy');
-        Route::put('/{maintenance}/status', [MaintenanceController::class, 'updateStatus'])->name('update-status');
-        Route::put('/{maintenance}/assign-staff', [MaintenanceController::class, 'assignStaff'])->name('assign-staff');
+        Route::patch('/{maintenance}/status', [MaintenanceController::class, 'updateStatus'])->name('update-status');
+        Route::post('/{maintenance}/assign-staff', [MaintenanceController::class, 'assignStaff'])->name('assign-staff');
         Route::get('/property/{property}/rooms', [MaintenanceController::class, 'getRoomsByProperty'])->name('property-rooms');
     });
 
@@ -182,9 +182,9 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     Route::prefix('maintenance-housekeeper')->name('tenant.maintenance.housekeeper.')->group(function () {
         Route::get('/', [MaintenanceController::class, 'myTasks'])->name('index');
         Route::get('/today', [MaintenanceController::class, 'todayTasks'])->name('today');
-        Route::get('/{request}', [MaintenanceController::class, 'showTask'])->name('show');
-        Route::post('/{request}/start', [MaintenanceController::class, 'startTask'])->name('start');
-        Route::post('/{request}/complete', [MaintenanceController::class, 'completeTask'])->name('complete');
+        Route::get('/{maintenanceRequest}', [MaintenanceController::class, 'showTask'])->name('show');
+        Route::post('/{maintenanceRequest}/start', [MaintenanceController::class, 'startTask'])->name('start');
+        Route::patch('/{maintenanceRequest}/complete', [MaintenanceController::class, 'completeTask'])->name('complete');
     });
 
     // Invoice routes

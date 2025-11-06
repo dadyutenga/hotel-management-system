@@ -199,7 +199,9 @@ class MaintenanceController extends Controller
             ->where('is_active', true)
             ->get();
 
-        return view('Users.tenant.maintenance.supervisor.show', compact('maintenance', 'housekeepers'));
+        $maintenanceRequest = $maintenance;
+
+        return view('Users.tenant.maintenance.supervisor.show', compact('maintenanceRequest', 'housekeepers'));
     }
 
     /**
@@ -240,7 +242,9 @@ class MaintenanceController extends Controller
 
         $maintenance->load(['assignedStaff']);
 
-        return view('Users.tenant.maintenance.supervisor.edit', compact('maintenance', 'properties', 'housekeepers', 'rooms'));
+        $maintenanceRequest = $maintenance;
+
+        return view('Users.tenant.maintenance.supervisor.edit', compact('maintenanceRequest', 'properties', 'housekeepers', 'rooms'));
     }
 
     /**
