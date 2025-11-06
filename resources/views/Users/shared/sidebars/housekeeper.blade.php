@@ -29,6 +29,16 @@
             <span class="menu-text">Housekeeping Tasks</span>
         </a>
 
+        <a href="{{ route('tenant.maintenance.housekeeper.index') }}" class="menu-item {{ request()->routeIs('tenant.maintenance.housekeeper.*') ? 'active' : '' }}">
+            <i class="menu-icon fas fa-tools"></i>
+            <span class="menu-text">Maintenance Tasks</span>
+        </a>
+
+        <a href="{{ route('tenant.maintenance.housekeeper.today') }}" class="menu-item {{ request()->routeIs('tenant.maintenance.housekeeper.today') ? 'active' : '' }}">
+            <i class="menu-icon fas fa-calendar-day"></i>
+            <span class="menu-text">Today's Maintenance</span>
+        </a>
+
         <!-- Logout Section -->
         <div class="menu-section">
             <span class="section-label">Account</span>

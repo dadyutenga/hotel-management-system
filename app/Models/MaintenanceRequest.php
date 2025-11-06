@@ -82,4 +82,14 @@ class MaintenanceRequest extends Model
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
+
+    /**
+     * Many-to-many: Multiple staff can be assigned to a maintenance request
+     */
+    public function assignedStaff()
+    {
+        return $this->belongsToMany(User::class, 'maintenance_request_staff', 'maintenance_request_id', 'user_id')
+            ->withTimestamps()
+            ->withPivot('assigned_at');
+    }
 }
