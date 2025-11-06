@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'My Tasks')
+@section('title', 'Today\'s Tasks')
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="bg-white rounded-lg shadow-md p-6">
-        <h1 class="text-2xl font-bold mb-6">My Tasks</h1>
+        <h1 class="text-2xl font-bold mb-6">Today's Tasks</h1>
 
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -19,24 +19,6 @@
             </div>
         @endif
 
-        <div class="mb-4 flex justify-between items-center">
-            <div>
-                <a href="{{ route('tenant.housekeeper.tasks.today') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Today's Tasks</a>
-                <a href="{{ route('tenant.housekeeper.statistics') }}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2">My Statistics</a>
-            </div>
-            <div>
-                <form method="GET" class="inline">
-                    <select name="status" class="border rounded px-2 py-1">
-                        <option value="">All Status</option>
-                        <option value="PENDING" {{ request('status') === 'PENDING' ? 'selected' : '' }}>Pending</option>
-                        <option value="IN_PROGRESS" {{ request('status') === 'IN_PROGRESS' ? 'selected' : '' }}>In Progress</option>
-                        <option value="COMPLETED" {{ request('status') === 'COMPLETED' ? 'selected' : '' }}>Completed</option>
-                    </select>
-                    <button type="submit" class="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600">Filter</button>
-                </form>
-            </div>
-        </div>
-
         @if($tasks->count() > 0)
             <div class="space-y-4">
                 @foreach($tasks as $task)
@@ -44,7 +26,7 @@
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="font-semibold">{{ $task->room->room_number }} - {{ $task->task_type }}</h3>
-                                <p class="text-sm text-gray-600">{{ $task->property->name }} - {{ $task->scheduled_date->format('M j, Y') }}</p>
+                                <p class="text-sm text-gray-600">{{ $task->property->name }}</p>
                                 <p class="text-sm">{{ $task->notes }}</p>
                                 <span class="inline-block px-2 py-1 text-xs rounded-full {{ $task->priority === 'HIGH' ? 'bg-red-100 text-red-800' : ($task->priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800') }}">
                                     {{ $task->priority }}
@@ -65,12 +47,8 @@
                     </div>
                 @endforeach
             </div>
-
-            <div class="mt-6">
-                {{ $tasks->links() }}
-            </div>
         @else
-            <p class="text-gray-500">No tasks found.</p>
+            <p class="text-gray-500">No tasks scheduled for today.</p>
         @endif
     </div>
 </div>

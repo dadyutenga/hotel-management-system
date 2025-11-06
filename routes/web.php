@@ -8,7 +8,6 @@ use App\Http\Controllers\Tenant\DirectorController;
 use App\Http\Controllers\Tenant\FolioController;
 use App\Http\Controllers\Tenant\GuestController;
 use App\Http\Controllers\Tenant\GroupBookingController;
-use App\Http\Controllers\Tenant\HousekeeperController;
 use App\Http\Controllers\Tenant\HousekeepingController;
 use App\Http\Controllers\Tenant\InventoryController;
 use App\Http\Controllers\Tenant\InvoiceController;
@@ -237,15 +236,15 @@ Route::middleware(['auth', 'tenant'])->group(function () {
     });
 
     Route::prefix('housekeeper')->name('tenant.housekeeper.')->group(function () {
-        Route::get('/tasks', [HousekeeperController::class, 'myTasks'])->name('tasks.index');
-        Route::get('/tasks/today', [HousekeeperController::class, 'todayTasks'])->name('tasks.today');
-        Route::get('/tasks/{task}', [HousekeeperController::class, 'showTask'])->name('tasks.show');
-        Route::put('/tasks/{task}/start', [HousekeeperController::class, 'startTask'])->name('tasks.start');
-        Route::put('/tasks/{task}/complete', [HousekeeperController::class, 'completeTask'])->name('tasks.complete');
-        Route::put('/tasks/{task}/progress', [HousekeeperController::class, 'updateTaskProgress'])->name('tasks.progress');
-        Route::put('/tasks/{task}/room-status', [HousekeeperController::class, 'updateRoomStatus'])->name('tasks.room-status');
-        Route::get('/statistics', [HousekeeperController::class, 'myStatistics'])->name('statistics');
-        Route::post('/tasks/{task}/issues', [HousekeeperController::class, 'reportIssue'])->name('tasks.report-issue');
+        Route::get('/tasks', [HousekeepingController::class, 'myTasks'])->name('tasks.index');
+        Route::get('/tasks/today', [HousekeepingController::class, 'todayTasks'])->name('tasks.today');
+        Route::get('/tasks/{task}', [HousekeepingController::class, 'showTask'])->name('tasks.show');
+        Route::put('/tasks/{task}/start', [HousekeepingController::class, 'startTask'])->name('tasks.start');
+        Route::put('/tasks/{task}/complete', [HousekeepingController::class, 'completeTask'])->name('tasks.complete');
+        Route::put('/tasks/{task}/progress', [HousekeepingController::class, 'updateTaskProgress'])->name('tasks.progress');
+        Route::put('/tasks/{task}/room-status', [HousekeepingController::class, 'updateRoomStatus'])->name('tasks.room-status');
+        Route::get('/statistics', [HousekeepingController::class, 'myStatistics'])->name('statistics');
+        Route::post('/tasks/{task}/issues', [HousekeepingController::class, 'reportIssue'])->name('tasks.report-issue');
     });
 
     Route::prefix('supervisor')->name('tenant.supervisor.')->group(function () {

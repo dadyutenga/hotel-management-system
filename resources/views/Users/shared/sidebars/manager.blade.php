@@ -24,12 +24,7 @@
             <span class="section-label">Property Operations</span>
         </div>
 
-        @if(Auth::user()->property)
-        <a href="{{ route('tenant.properties.show', Auth::user()->property->id) }}" class="menu-item {{ request()->routeIs('tenant.properties.show') ? 'active' : '' }}">
-            <i class="menu-icon fas fa-building"></i>
-            <span class="menu-text">My Property</span>
-        </a>
-        @endif
+        
 
         <a href="{{ route('tenant.rooms.index') }}" class="menu-item {{ request()->routeIs('tenant.rooms.*') ? 'active' : '' }}">
             <i class="menu-icon fas fa-door-open"></i>
@@ -56,15 +51,8 @@
             <span class="menu-text">Guest Management</span>
         </a>
 
-        <!-- Staff Management Section -->
-        <div class="menu-section">
-            <span class="section-label">Staff Management</span>
-        </div>
-
-        <a href="{{ route('tenant.users.index') }}" class="menu-item {{ request()->routeIs('tenant.users.*') ? 'active' : '' }}">
-            <i class="menu-icon fas fa-users-cog"></i>
-            <span class="menu-text">Property Staff</span>
-        </a>
+     
+    
 
         <!-- Daily Operations Section -->
         <div class="menu-section">
