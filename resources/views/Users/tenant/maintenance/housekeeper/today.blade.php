@@ -321,7 +321,7 @@
                     <div class="section-header">
                         <div class="section-title">
                             <i class="fas fa-clock"></i>
-                            Pending / Assigned
+                            Open / Assigned
                         </div>
                         <span class="section-count">{{ $pendingTasks->count() }}</span>
                     </div>

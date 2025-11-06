@@ -396,14 +396,14 @@
                         <div class="filters-grid">
                             <div class="form-group">
                                 <label for="status">Filter by Status</label>
-                                <select name="status" id="status" class="form-control">
-                                    <option value="">All Statuses</option>
-                                    <option value="PENDING" {{ request('status') == 'PENDING' ? 'selected' : '' }}>Pending</option>
-                                    <option value="ASSIGNED" {{ request('status') == 'ASSIGNED' ? 'selected' : '' }}>Assigned</option>
-                                    <option value="IN_PROGRESS" {{ request('status') == 'IN_PROGRESS' ? 'selected' : '' }}>In Progress</option>
-                                    <option value="ON_HOLD" {{ request('status') == 'ON_HOLD' ? 'selected' : '' }}>On Hold</option>
-                                    <option value="COMPLETED" {{ request('status') == 'COMPLETED' ? 'selected' : '' }}>Completed</option>
-                                </select>
+                            <select name="status" id="status" class="form-control">
+                                <option value="">All Statuses</option>
+                                <option value="OPEN" {{ request('status') == 'OPEN' ? 'selected' : '' }}>Open</option>
+                                <option value="ASSIGNED" {{ request('status') == 'ASSIGNED' ? 'selected' : '' }}>Assigned</option>
+                                <option value="IN_PROGRESS" {{ request('status') == 'IN_PROGRESS' ? 'selected' : '' }}>In Progress</option>
+                                <option value="ON_HOLD" {{ request('status') == 'ON_HOLD' ? 'selected' : '' }}>On Hold</option>
+                                <option value="COMPLETED" {{ request('status') == 'COMPLETED' ? 'selected' : '' }}>Completed</option>
+                            </select>
                             </div>
 
                             <div class="form-group">

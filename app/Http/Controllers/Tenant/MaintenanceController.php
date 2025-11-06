@@ -137,7 +137,7 @@ class MaintenanceController extends Controller
                 'issue_type' => $validated['issue_type'],
                 'description' => $validated['description'],
                 'priority' => $validated['priority'],
-                'status' => 'PENDING',
+                'status' => 'OPEN',
                 'reported_by' => $user->id,
                 'reported_at' => now(),
             ]);
@@ -166,8 +166,18 @@ class MaintenanceController extends Controller
                 ->with('success', 'Maintenance request created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            // Log the full error for debugging
+            \Log::error('Maintenance request creation failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => $user->id,
+                'data' => $validated
+            ]);
+            
             return back()->withInput()
-                ->with('error', 'Failed to create maintenance request: ' . $e->getMessage());
+                ->withErrors(['error' => 'Failed to create maintenance request: ' . $e->getMessage()])
+                ->with('error', 'Failed to create maintenance request: ' . $e->getMessage() . ' (Line: ' . $e->getLine() . ')');
         }
     }
 
@@ -305,13 +315,13 @@ class MaintenanceController extends Controller
                 $maintenance->assignedStaff()->sync($housekeeperData);
 
                 // Update status based on assignment
-                if (count($housekeeperData) > 0 && $maintenance->status === 'PENDING') {
+                if (count($housekeeperData) > 0 && $maintenance->status === 'OPEN') {
                     $maintenance->update(['status' => 'ASSIGNED']);
                 }
             } else {
                 $maintenance->assignedStaff()->detach();
                 if ($maintenance->status === 'ASSIGNED') {
-                    $maintenance->update(['status' => 'PENDING']);
+                    $maintenance->update(['status' => 'OPEN']);
                 }
             }
 
@@ -374,7 +384,7 @@ class MaintenanceController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|in:PENDING,ASSIGNED,IN_PROGRESS,ON_HOLD,COMPLETED,CANCELLED',
+            'status' => 'required|in:OPEN,ASSIGNED,IN_PROGRESS,ON_HOLD,COMPLETED,CANCELLED',
             'resolution_notes' => 'nullable|string',
         ]);
 
@@ -458,8 +468,8 @@ class MaintenanceController extends Controller
             }
             $maintenance->assignedStaff()->sync($housekeeperData);
 
-            // Update status to ASSIGNED if it was PENDING
-            if ($maintenance->status === 'PENDING') {
+            // Update status to ASSIGNED if it was OPEN
+            if ($maintenance->status === 'OPEN') {
                 $maintenance->update(['status' => 'ASSIGNED']);
             }
 
@@ -530,10 +540,10 @@ class MaintenanceController extends Controller
 
         // Get statistics
         $stats = [
-            'pending' => MaintenanceRequest::whereHas('assignedStaff', function($q) use ($user) {
+            'OPEN' => MaintenanceRequest::whereHas('assignedStaff', function($q) use ($user) {
                     $q->where('user_id', $user->id);
                 })
-                ->whereIn('status', ['PENDING', 'ASSIGNED'])
+                ->whereIn('status', ['OPEN', 'ASSIGNED'])
                 ->count(),
             'in_progress' => MaintenanceRequest::whereHas('assignedStaff', function($q) use ($user) {
                     $q->where('user_id', $user->id);
@@ -573,9 +583,9 @@ class MaintenanceController extends Controller
             ->whereDate('reported_at', now())
             ->with(['property', 'room.roomType', 'reportedBy', 'assignedStaff']);
 
-        // Pending tasks (PENDING or ASSIGNED status)
-        $pendingTasks = (clone $baseQuery)
-            ->whereIn('status', ['PENDING', 'ASSIGNED'])
+        // OPEN tasks (OPEN or ASSIGNED status)
+        $OPENTasks = (clone $baseQuery)
+            ->whereIn('status', ['OPEN', 'ASSIGNED'])
             ->latest('reported_at')
             ->get();
 
@@ -592,7 +602,7 @@ class MaintenanceController extends Controller
             ->latest('completed_at')
             ->get();
 
-        return view('Users.tenant.maintenance.housekeeper.today', compact('pendingTasks', 'inProgressTasks', 'completedTasks'));
+        return view('Users.tenant.maintenance.housekeeper.today', compact('OPENTasks', 'inProgressTasks', 'completedTasks'));
     }
 
     /**
@@ -634,7 +644,7 @@ class MaintenanceController extends Controller
             abort(403, 'You can only update your own maintenance tasks.');
         }
 
-        if (!in_array($maintenanceRequest->status, ['PENDING', 'ASSIGNED'])) {
+        if (!in_array($maintenanceRequest->status, ['OPEN', 'ASSIGNED'])) {
             return back()->with('error', 'Request cannot be started.');
         }
 

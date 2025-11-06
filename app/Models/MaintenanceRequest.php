@@ -89,6 +89,7 @@ class MaintenanceRequest extends Model
     public function assignedStaff()
     {
         return $this->belongsToMany(User::class, 'maintenance_request_staff', 'maintenance_request_id', 'user_id')
+            ->using(MaintenanceRequestStaff::class)
             ->withTimestamps()
             ->withPivot('assigned_at');
     }

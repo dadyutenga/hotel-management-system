@@ -440,7 +440,7 @@
                 @endif
 
                 <!-- Actions -->
-                @if(in_array($task->status, ['PENDING', 'ASSIGNED']))
+                @if(in_array($task->status, ['OPEN', 'ASSIGNED']))
                 <div class="card">
                     <div class="card-title">
                         <i class="fas fa-play-circle"></i> Start Working

@@ -275,6 +275,16 @@
                     </div>
                 @endif
 
+                @if(session('error'))
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <div>
+                            <strong>Error:</strong>
+                            <p style="margin-top: 5px;">{{ session('error') }}</p>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Form -->
                 <div class="form-container">
                     <form method="POST" action="{{ route('tenant.maintenance.store') }}" id="maintenanceForm">
