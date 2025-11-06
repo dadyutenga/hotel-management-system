@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Housekeeping Task - HotelPro</title>
+    <title>Edit Housekeeping Task - HotelPro</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -126,11 +126,6 @@
             border-color: #4caf50;
         }
         
-        .form-control:disabled {
-            background-color: #f8f9fa;
-            color: #6c757d;
-        }
-        
         .form-text {
             font-size: 12px;
             color: #666;
@@ -251,8 +246,8 @@
             <div class="container">
                 <!-- Header -->
                 <div class="header">
-                    <h1>Create Housekeeping Task</h1>
-                    <p>Assign a new task to a housekeeper</p>
+                    <h1>Edit Housekeeping Task</h1>
+                    <p>Update task details and assignment</p>
                 </div>
 
                 <!-- Error Messages -->
@@ -272,8 +267,9 @@
 
                 <!-- Form -->
                 <div class="form-container">
-                    <form method="POST" action="{{ route('tenant.housekeeping.store') }}" id="taskForm">
+                    <form method="POST" action="{{ route('tenant.housekeeping.update', $housekeeping) }}" id="taskForm">
                         @csrf
+                        @method('PUT')
 
                         <!-- Location Information -->
                         <div class="form-section">
@@ -287,7 +283,8 @@
                                     <select name="property_id" id="property_id" class="form-control" required>
                                         <option value="">Select Property</option>
                                         @foreach($properties as $property)
-                                            <option value="{{ $property->id }}" {{ old('property_id') == $property->id ? 'selected' : '' }}>
+                                            <option value="{{ $property->id }}" 
+                                                {{ old('property_id', $housekeeping->property_id) == $property->id ? 'selected' : '' }}>
                                                 {{ $property->name }}
                                             </option>
                                         @endforeach
@@ -299,8 +296,14 @@
 
                                 <div class="form-group">
                                     <label for="room_id">Room <span class="required">*</span></label>
-                                    <select name="room_id" id="room_id" class="form-control" required disabled>
-                                        <option value="">Select Property First</option>
+                                    <select name="room_id" id="room_id" class="form-control" required>
+                                        <option value="">Loading rooms...</option>
+                                        @foreach($rooms as $room)
+                                            <option value="{{ $room->id }}" 
+                                                {{ old('room_id', $housekeeping->room_id) == $room->id ? 'selected' : '' }}>
+                                                Room {{ $room->room_number }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                     <div class="loading" id="roomLoading">
                                         <div class="spinner"></div>
@@ -324,11 +327,11 @@
                                     <label for="task_type">Task Type <span class="required">*</span></label>
                                     <select name="task_type" id="task_type" class="form-control" required>
                                         <option value="">Select Task Type</option>
-                                        <option value="DAILY_CLEAN" {{ old('task_type') == 'DAILY_CLEAN' ? 'selected' : '' }}>Daily Clean</option>
-                                        <option value="DEEP_CLEAN" {{ old('task_type') == 'DEEP_CLEAN' ? 'selected' : '' }}>Deep Clean</option>
-                                        <option value="TURNDOWN" {{ old('task_type') == 'TURNDOWN' ? 'selected' : '' }}>Turndown Service</option>
-                                        <option value="INSPECTION" {{ old('task_type') == 'INSPECTION' ? 'selected' : '' }}>Inspection</option>
-                                        <option value="OTHER" {{ old('task_type') == 'OTHER' ? 'selected' : '' }}>Other</option>
+                                        <option value="DAILY_CLEAN" {{ old('task_type', $housekeeping->task_type) == 'DAILY_CLEAN' ? 'selected' : '' }}>Daily Clean</option>
+                                        <option value="DEEP_CLEAN" {{ old('task_type', $housekeeping->task_type) == 'DEEP_CLEAN' ? 'selected' : '' }}>Deep Clean</option>
+                                        <option value="TURNDOWN" {{ old('task_type', $housekeeping->task_type) == 'TURNDOWN' ? 'selected' : '' }}>Turndown Service</option>
+                                        <option value="INSPECTION" {{ old('task_type', $housekeeping->task_type) == 'INSPECTION' ? 'selected' : '' }}>Inspection</option>
+                                        <option value="OTHER" {{ old('task_type', $housekeeping->task_type) == 'OTHER' ? 'selected' : '' }}>Other</option>
                                     </select>
                                     @error('task_type')
                                         <span class="error-message">{{ $message }}</span>
@@ -339,9 +342,9 @@
                                     <label for="priority">Priority <span class="required">*</span></label>
                                     <select name="priority" id="priority" class="form-control" required>
                                         <option value="">Select Priority</option>
-                                        <option value="LOW" {{ old('priority') == 'LOW' ? 'selected' : '' }}>Low</option>
-                                        <option value="MEDIUM" {{ old('priority') == 'MEDIUM' ? 'selected' : '' }}>Medium</option>
-                                        <option value="HIGH" {{ old('priority') == 'HIGH' ? 'selected' : '' }}>High</option>
+                                        <option value="LOW" {{ old('priority', $housekeeping->priority) == 'LOW' ? 'selected' : '' }}>Low</option>
+                                        <option value="MEDIUM" {{ old('priority', $housekeeping->priority) == 'MEDIUM' ? 'selected' : '' }}>Medium</option>
+                                        <option value="HIGH" {{ old('priority', $housekeeping->priority) == 'HIGH' ? 'selected' : '' }}>High</option>
                                     </select>
                                     @error('priority')
                                         <span class="error-message">{{ $message }}</span>
@@ -362,7 +365,8 @@
                                     <select name="assigned_to" id="assigned_to" class="form-control" required>
                                         <option value="">Select Housekeeper</option>
                                         @foreach($housekeepers as $housekeeper)
-                                            <option value="{{ $housekeeper->id }}" {{ old('assigned_to') == $housekeeper->id ? 'selected' : '' }}>
+                                            <option value="{{ $housekeeper->id }}" 
+                                                {{ old('assigned_to', $housekeeping->assigned_to) == $housekeeper->id ? 'selected' : '' }}>
                                                 {{ $housekeeper->full_name }}
                                             </option>
                                         @endforeach
@@ -375,7 +379,7 @@
                                 <div class="form-group">
                                     <label for="scheduled_date">Scheduled Date <span class="required">*</span></label>
                                     <input type="date" name="scheduled_date" id="scheduled_date" class="form-control" 
-                                           value="{{ old('scheduled_date', date('Y-m-d')) }}" required>
+                                           value="{{ old('scheduled_date', $housekeeping->scheduled_date->format('Y-m-d')) }}" required>
                                     @error('scheduled_date')
                                         <span class="error-message">{{ $message }}</span>
                                     @enderror
@@ -384,7 +388,7 @@
                                 <div class="form-group">
                                     <label for="scheduled_time">Scheduled Time (Optional)</label>
                                     <input type="time" name="scheduled_time" id="scheduled_time" class="form-control" 
-                                           value="{{ old('scheduled_time') }}">
+                                           value="{{ old('scheduled_time', $housekeeping->scheduled_time) }}">
                                     <span class="form-text">Leave empty for any time</span>
                                     @error('scheduled_time')
                                         <span class="error-message">{{ $message }}</span>
@@ -403,7 +407,7 @@
                                 <div class="form-group">
                                     <label for="notes">Notes (Optional)</label>
                                     <textarea name="notes" id="notes" rows="4" class="form-control" 
-                                              placeholder="Any special instructions or notes for the housekeeper...">{{ old('notes') }}</textarea>
+                                              placeholder="Any special instructions or notes for the housekeeper...">{{ old('notes', $housekeeping->notes) }}</textarea>
                                     @error('notes')
                                         <span class="error-message">{{ $message }}</span>
                                     @enderror
@@ -413,11 +417,11 @@
 
                         <!-- Form Actions -->
                         <div class="form-actions">
-                            <a href="{{ route('tenant.housekeeping.index') }}" class="btn btn-secondary">
+                            <a href="{{ route('tenant.housekeeping.show', $housekeeping) }}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-primary" id="submitBtn">
-                                <i class="fas fa-save"></i> Create Task
+                                <i class="fas fa-save"></i> Update Task
                             </button>
                         </div>
                     </form>
@@ -435,6 +439,7 @@
                 const propertyId = $(this).val();
                 const roomSelect = $('#room_id');
                 const loading = $('#roomLoading');
+                const currentRoomId = '{{ old('room_id', $housekeeping->room_id) }}';
 
                 if (propertyId) {
                     loading.css('display', 'flex');
@@ -449,7 +454,8 @@
                         success: function(data) {
                             roomSelect.html('<option value="">Select Room</option>');
                             data.forEach(room => {
-                                roomSelect.append(`<option value="${room.id}">Room ${room.room_number} (${room.status})</option>`);
+                                const selected = room.id === currentRoomId ? 'selected' : '';
+                                roomSelect.append(`<option value="${room.id}" ${selected}>Room ${room.room_number} (${room.status})</option>`);
                             });
                             roomSelect.prop('disabled', false);
                             loading.hide();
@@ -469,16 +475,8 @@
             // Form validation
             $('#taskForm').submit(function(e) {
                 const submitBtn = $('#submitBtn');
-                submitBtn.prop('disabled', true).html('<div class="spinner"></div> Creating...');
+                submitBtn.prop('disabled', true).html('<div class="spinner"></div> Updating...');
             });
-
-            // Trigger room loading if property is pre-selected (for validation errors)
-            @if(old('property_id'))
-                $('#property_id').trigger('change');
-                setTimeout(function() {
-                    $('#room_id').val('{{ old('room_id') }}');
-                }, 500);
-            @endif
         });
     </script>
 </body>

@@ -147,15 +147,21 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::put('/{folio}/close', [FolioController::class, 'close'])->name('close');
     });
 
-    // Housekeeping management routes
+    // Housekeeping management routes - Supervisor
     Route::prefix('housekeeping')->name('tenant.housekeeping.')->group(function () {
+        // Supervisor routes - Create, View, Edit, Delete tasks
         Route::get('/', [HousekeepingController::class, 'index'])->name('index');
         Route::get('/create', [HousekeepingController::class, 'create'])->name('create');
         Route::post('/', [HousekeepingController::class, 'store'])->name('store');
         Route::get('/{housekeeping}', [HousekeepingController::class, 'show'])->name('show');
+        Route::get('/{housekeeping}/edit', [HousekeepingController::class, 'edit'])->name('edit');
+        Route::put('/{housekeeping}', [HousekeepingController::class, 'update'])->name('update');
+        Route::delete('/{housekeeping}', [HousekeepingController::class, 'destroy'])->name('destroy');
         Route::put('/{housekeeping}/status', [HousekeepingController::class, 'updateStatus'])->name('update-status');
         Route::put('/{housekeeping}/assign', [HousekeepingController::class, 'assign'])->name('assign');
+        Route::put('/{housekeeping}/complete', [HousekeepingController::class, 'markComplete'])->name('mark-complete');
         Route::post('/create-for-dirty-rooms', [HousekeepingController::class, 'createForDirtyRooms'])->name('create-for-dirty-rooms');
+        Route::get('/property/{property}/rooms', [HousekeepingController::class, 'getRoomsByProperty'])->name('property-rooms');
     });
 
     // Maintenance management routes
@@ -235,29 +241,19 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('/inventory-valuation', [DirectorController::class, 'inventoryValuation'])->name('inventory-valuation');
     });
 
+    // Housekeeper routes - View assigned tasks only
     Route::prefix('housekeeper')->name('tenant.housekeeper.')->group(function () {
         Route::get('/tasks', [HousekeepingController::class, 'myTasks'])->name('tasks.index');
         Route::get('/tasks/today', [HousekeepingController::class, 'todayTasks'])->name('tasks.today');
         Route::get('/tasks/{task}', [HousekeepingController::class, 'showTask'])->name('tasks.show');
-        Route::put('/tasks/{task}/start', [HousekeepingController::class, 'startTask'])->name('tasks.start');
-        Route::put('/tasks/{task}/complete', [HousekeepingController::class, 'completeTask'])->name('tasks.complete');
-        Route::put('/tasks/{task}/progress', [HousekeepingController::class, 'updateTaskProgress'])->name('tasks.progress');
-        Route::put('/tasks/{task}/room-status', [HousekeepingController::class, 'updateRoomStatus'])->name('tasks.room-status');
+        Route::post('/tasks/{task}/start', [HousekeepingController::class, 'startTask'])->name('tasks.start');
+        Route::post('/tasks/{task}/complete', [HousekeepingController::class, 'completeTask'])->name('tasks.complete');
+        Route::post('/tasks/{task}/progress', [HousekeepingController::class, 'updateTaskProgress'])->name('tasks.progress');
         Route::get('/statistics', [HousekeepingController::class, 'myStatistics'])->name('statistics');
-        Route::post('/tasks/{task}/issues', [HousekeepingController::class, 'reportIssue'])->name('tasks.report-issue');
     });
 
-    Route::prefix('supervisor')->name('tenant.supervisor.')->group(function () {
-        Route::get('/tasks', [SupervisorController::class, 'index'])->name('tasks.index');
-        Route::post('/tasks', [SupervisorController::class, 'store'])->name('tasks.store');
-        Route::get('/tasks/{task}', [SupervisorController::class, 'show'])->name('tasks.show');
-        Route::put('/tasks/{task}', [SupervisorController::class, 'update'])->name('tasks.update');
-        Route::put('/tasks/{task}/verify', [SupervisorController::class, 'verifyTask'])->name('tasks.verify');
-        Route::put('/tasks/{task}/cancel', [SupervisorController::class, 'cancelTask'])->name('tasks.cancel');
-        Route::get('/housekeepers', [SupervisorController::class, 'getHousekeepers'])->name('housekeepers.index');
-        Route::post('/inspections', [SupervisorController::class, 'createInspection'])->name('inspections.store');
-        Route::post('/tasks/bulk-assign', [SupervisorController::class, 'bulkAssignTasks'])->name('tasks.bulk-assign');
-    });
+    // Supervisor routes - removed duplicate supervisor prefix
+    // All supervisor functions are now in the housekeeping routes above
 
     // User dashboard route
     Route::get('/user-dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
