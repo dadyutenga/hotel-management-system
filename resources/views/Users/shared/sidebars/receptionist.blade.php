@@ -26,7 +26,7 @@
 
         <a href="{{ route('tenant.guests.index') }}" class="menu-item {{ request()->routeIs('tenant.guests.*') ? 'active' : '' }}">
             <i class="menu-icon fas fa-users"></i>
-            <span class="menu-text">Guests</span>
+            <span class="menu-text">Guest Management</span>
         </a>
 
         <a href="{{ route('tenant.reservations.index') }}" class="menu-item {{ request()->routeIs('tenant.reservations.*') ? 'active' : '' }}">
@@ -36,7 +36,7 @@
 
         <a href="{{ route('tenant.invoices.index') }}" class="menu-item {{ request()->routeIs('tenant.invoices.*') ? 'active' : '' }}">
             <i class="menu-icon fas fa-file-invoice-dollar"></i>
-            <span class="menu-text">Invoices</span>
+            <span class="menu-text">Invoices & Billing</span>
         </a>
 
         <!-- Logout Section -->

@@ -85,7 +85,13 @@ class GuestController extends Controller
                 })->count(),
         ];
 
-        return view('Users.tenant.guests.index', compact('guests', 'stats', 'nationalities'));
+        // Route to role-specific views
+        if ($user->role->name === 'RECEPTIONIST') {
+            return view('Users.tenant.guests.Receptionist.index', compact('guests', 'stats', 'nationalities'));
+        } else {
+            // MANAGER and DIRECTOR use the same view
+            return view('Users.tenant.guests.Manager.index', compact('guests', 'stats', 'nationalities'));
+        }
     }
 
     /**
@@ -109,7 +115,12 @@ class GuestController extends Controller
             ->sort()
             ->values();
 
-        return view('Users.tenant.guests.create', compact('nationalities'));
+        // Route to role-specific views
+        if ($user->role->name === 'RECEPTIONIST') {
+            return view('Users.tenant.guests.Receptionist.create', compact('nationalities'));
+        } else {
+            return view('Users.tenant.guests.Manager.create', compact('nationalities'));
+        }
     }
 
     /**
@@ -201,7 +212,12 @@ class GuestController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return view('Users.tenant.guests.show', compact('guest', 'stats', 'reservations'));
+        // Route to role-specific views
+        if ($user->role->name === 'RECEPTIONIST') {
+            return view('Users.tenant.guests.Receptionist.show', compact('guest', 'stats', 'reservations'));
+        } else {
+            return view('Users.tenant.guests.Manager.show', compact('guest', 'stats', 'reservations'));
+        }
     }
 
     /**
@@ -230,7 +246,12 @@ class GuestController extends Controller
             ->sort()
             ->values();
 
-        return view('Users.tenant.guests.edit', compact('guest', 'nationalities'));
+        // Route to role-specific views
+        if ($user->role->name === 'RECEPTIONIST') {
+            return view('Users.tenant.guests.Receptionist.edit', compact('guest', 'nationalities'));
+        } else {
+            return view('Users.tenant.guests.Manager.edit', compact('guest', 'nationalities'));
+        }
     }
 
     /**
