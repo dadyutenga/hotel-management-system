@@ -145,9 +145,13 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('/', [ReservationController::class, 'index'])->name('index');
         Route::get('/create', [ReservationController::class, 'create'])->name('create');
         Route::post('/', [ReservationController::class, 'store'])->name('store');
-        Route::get('/{reservation}', [ReservationController::class, 'show'])->name('show');
-        Route::put('/{reservation}/status', [ReservationController::class, 'updateStatus'])->name('update-status');
+        Route::get('/search', [ReservationController::class, 'search'])->name('search');
         Route::get('/available-rooms/search', [ReservationController::class, 'getAvailableRooms'])->name('available-rooms');
+        Route::get('/{reservation}', [ReservationController::class, 'show'])->name('show');
+        Route::get('/{reservation}/edit', [ReservationController::class, 'edit'])->name('edit');
+        Route::put('/{reservation}', [ReservationController::class, 'update'])->name('update');
+        Route::put('/{reservation}/status', [ReservationController::class, 'updateStatus'])->name('update-status');
+        Route::delete('/{reservation}', [ReservationController::class, 'destroy'])->name('destroy');
     });
 
     // Folio management routes

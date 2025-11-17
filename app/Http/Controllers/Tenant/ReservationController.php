@@ -366,6 +366,186 @@ class ReservationController extends Controller
     }
 
     /**
+     * Show the form for editing the specified reservation
+     */
+    public function edit(Reservation $reservation)
+    {
+        $user = Auth::user();
+
+        // Check permissions
+        if (!in_array($user->role->name, ['RECEPTIONIST', 'MANAGER', 'DIRECTOR'])) {
+            return redirect()->route('tenant.reservations.index')
+                ->with('error', 'You do not have permission to edit reservations.');
+        }
+
+        // Check tenant isolation via property
+        if ($reservation->property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Check property access for non-DIRECTOR users
+        if ($user->role->name !== 'DIRECTOR' && $user->property_id !== $reservation->property_id) {
+            abort(403, 'You do not have access to this property.');
+        }
+
+        // Get properties based on user role
+        if ($user->role->name === 'DIRECTOR') {
+            $properties = Property::where('tenant_id', $user->tenant_id)
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name']);
+        } else {
+            $properties = Property::where('id', $user->property_id)
+                ->where('is_active', true)
+                ->get(['id', 'name']);
+        }
+
+        // Get room types
+        if ($user->role->name === 'DIRECTOR') {
+            $roomTypes = RoomType::whereHas('property', function($q) use ($user) {
+                $q->where('tenant_id', $user->tenant_id);
+            })->with('property')->orderBy('name')->get();
+        } else {
+            $roomTypes = RoomType::where('property_id', $user->property_id)
+                ->with('property')
+                ->orderBy('name')
+                ->get();
+        }
+
+        // Get corporate accounts
+        $corporateAccounts = CorporateAccount::where('tenant_id', $user->tenant_id)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+
+        // Get group bookings
+        if ($user->role->name === 'DIRECTOR') {
+            $groupBookings = GroupBooking::whereHas('property', function($q) use ($user) {
+                $q->where('tenant_id', $user->tenant_id);
+            })->whereIn('status', ['PENDING', 'CONFIRMED'])
+              ->with('property')
+              ->orderBy('arrival_date', 'desc')
+              ->get(['id', 'name', 'property_id', 'arrival_date', 'departure_date']);
+        } else {
+            $groupBookings = GroupBooking::where('property_id', $user->property_id)
+                ->whereIn('status', ['PENDING', 'CONFIRMED'])
+                ->with('property')
+                ->orderBy('arrival_date', 'desc')
+                ->get(['id', 'name', 'property_id', 'arrival_date', 'departure_date']);
+        }
+
+        $reservation->load(['reservationRooms.room', 'reservationRooms.roomType']);
+
+        return view('Users.tenant.reservations.edit', compact('reservation', 'properties', 'roomTypes', 'corporateAccounts', 'groupBookings'));
+    }
+
+    /**
+     * Update the specified reservation in storage
+     */
+    public function update(Request $request, Reservation $reservation)
+    {
+        $user = Auth::user();
+
+        // Check permissions
+        if (!in_array($user->role->name, ['RECEPTIONIST', 'MANAGER', 'DIRECTOR'])) {
+            return redirect()->route('tenant.reservations.index')
+                ->with('error', 'You do not have permission to edit reservations.');
+        }
+
+        // Check tenant isolation via property
+        if ($reservation->property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Check property access for non-DIRECTOR users
+        if ($user->role->name !== 'DIRECTOR' && $user->property_id !== $reservation->property_id) {
+            abort(403, 'You do not have access to this property.');
+        }
+
+        $validated = $request->validate([
+            'property_id' => 'required|uuid|exists:properties,id',
+            'guest_id' => 'required|uuid|exists:res.guests,id',
+            'group_booking_id' => 'nullable|uuid|exists:res.group_bookings,id',
+            'corporate_account_id' => 'nullable|uuid|exists:res.corporate_accounts,id',
+            'status' => 'required|in:PENDING,CONFIRMED,CHECKED_IN,CHECKED_OUT,CANCELLED,NO_SHOW,HOLD',
+            'arrival_date' => 'required|date',
+            'departure_date' => 'required|date|after:arrival_date',
+            'adults' => 'required|integer|min:1',
+            'children' => 'nullable|integer|min:0',
+            'total_amount' => 'required|numeric|min:0',
+            'discount_amount' => 'nullable|numeric|min:0',
+            'discount_reason' => 'nullable|string',
+            'special_requests' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'source' => 'nullable|string|max:50',
+            'external_reference' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Verify property belongs to tenant
+            $property = Property::where('id', $validated['property_id'])
+                ->where('tenant_id', $user->tenant_id)
+                ->firstOrFail();
+
+            // For non-DIRECTOR users, verify property assignment
+            if ($user->role->name !== 'DIRECTOR' && $user->property_id !== $property->id) {
+                throw ValidationException::withMessages([
+                    'property_id' => 'You do not have access to this property.'
+                ]);
+            }
+
+            // Verify guest belongs to tenant
+            $guest = Guest::where('id', $validated['guest_id'])
+                ->where('tenant_id', $user->tenant_id)
+                ->firstOrFail();
+
+            // If group booking is provided, verify it belongs to tenant and property
+            if ($validated['group_booking_id'] ?? null) {
+                $groupBooking = GroupBooking::where('id', $validated['group_booking_id'])
+                    ->where('property_id', $validated['property_id'])
+                    ->firstOrFail();
+            }
+
+            // If corporate account is provided, verify it belongs to tenant
+            if ($validated['corporate_account_id'] ?? null) {
+                $corporateAccount = CorporateAccount::where('id', $validated['corporate_account_id'])
+                    ->where('tenant_id', $user->tenant_id)
+                    ->firstOrFail();
+            }
+
+            $reservation->update([
+                'property_id' => $validated['property_id'],
+                'guest_id' => $validated['guest_id'],
+                'group_booking_id' => $validated['group_booking_id'] ?? null,
+                'corporate_account_id' => $validated['corporate_account_id'] ?? null,
+                'status' => $validated['status'],
+                'arrival_date' => $validated['arrival_date'],
+                'departure_date' => $validated['departure_date'],
+                'adults' => $validated['adults'],
+                'children' => $validated['children'] ?? 0,
+                'total_amount' => $validated['total_amount'],
+                'discount_amount' => $validated['discount_amount'] ?? 0,
+                'discount_reason' => $validated['discount_reason'] ?? null,
+                'special_requests' => $validated['special_requests'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'source' => $validated['source'] ?? $reservation->source,
+                'external_reference' => $validated['external_reference'] ?? null,
+                'updated_by' => $user->id,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('tenant.reservations.show', $reservation->id)
+                ->with('success', 'Reservation updated successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()
+                ->with('error', 'Failed to update reservation: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Update the reservation status
      */
     public function updateStatus(Request $request, Reservation $reservation)
@@ -460,5 +640,100 @@ class ReservationController extends Controller
             ->get();
 
         return response()->json($availableRooms);
+    }
+
+    /**
+     * Remove the specified reservation from storage (Only MANAGER and DIRECTOR) or restore if soft deleted
+     */
+    public function destroy(Request $request, Reservation $reservation)
+    {
+        $user = Auth::user();
+
+        // Only MANAGER and DIRECTOR can delete reservations
+        if (!in_array($user->role->name, ['MANAGER', 'DIRECTOR'])) {
+            return redirect()->route('tenant.reservations.index')
+                ->with('error', 'You do not have permission to delete reservations.');
+        }
+
+        // Check tenant isolation via property
+        if ($reservation->property->tenant_id !== $user->tenant_id) {
+            abort(403, 'Unauthorized access.');
+        }
+
+        // Check property access for non-DIRECTOR users
+        if ($user->role->name !== 'DIRECTOR' && $user->property_id !== $reservation->property_id) {
+            abort(403, 'You do not have access to this property.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Handle restore if requested
+            if ($request->boolean('restore') && $reservation->trashed()) {
+                $reservation->restore();
+                DB::commit();
+                return redirect()->route('tenant.reservations.index')
+                    ->with('success', 'Reservation restored successfully!');
+            }
+
+            // Check if reservation is checked in
+            if ($reservation->status === 'CHECKED_IN') {
+                return back()->with('error', 'Cannot delete a checked-in reservation. Please check out the guest first.');
+            }
+
+            // Check if there's a folio with charges
+            if ($reservation->folio) {
+                $hasCharges = $reservation->folio->folioItems()->where('type', 'CHARGE')->exists();
+                if ($hasCharges) {
+                    return back()->with('error', 'Cannot delete reservation with folio charges. Please settle the folio first.');
+                }
+            }
+
+            $reservation->delete();
+
+            DB::commit();
+
+            return redirect()->route('tenant.reservations.index')
+                ->with('success', 'Reservation cancelled successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to process request: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Search for reservations (AJAX)
+     */
+    public function search(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$request->filled('q')) {
+            return response()->json([]);
+        }
+
+        $search = $request->q;
+
+        $query = Reservation::with(['property:id,name', 'guest:id,full_name,email'])
+            ->whereHas('property', function($q) use ($user) {
+                if ($user->role->name === 'DIRECTOR') {
+                    $q->where('tenant_id', $user->tenant_id);
+                } else {
+                    $q->where('id', $user->property_id);
+                }
+            })
+            ->where(function($query) use ($search) {
+                $query->where('id', 'like', "%{$search}%")
+                      ->orWhere('external_reference', 'like', "%{$search}%")
+                      ->orWhereHas('guest', function($gq) use ($search) {
+                          $gq->where('full_name', 'like', "%{$search}%")
+                             ->orWhere('email', 'like', "%{$search}%")
+                             ->orWhere('phone', 'like', "%{$search}%");
+                      });
+            })
+            ->limit(10)
+            ->get(['id', 'property_id', 'guest_id', 'status', 'arrival_date', 'departure_date', 'total_amount', 'external_reference']);
+
+        return response()->json($query);
     }
 }
