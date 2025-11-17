@@ -128,6 +128,18 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::delete('/{guest}', [GuestController::class, 'destroy'])->name('destroy');
     });
 
+    // Group Booking management routes
+    Route::prefix('group-bookings')->name('tenant.group-bookings.')->group(function () {
+        Route::get('/', [GroupBookingController::class, 'index'])->name('index');
+        Route::get('/create', [GroupBookingController::class, 'create'])->name('create');
+        Route::post('/', [GroupBookingController::class, 'store'])->name('store');
+        Route::get('/search', [GroupBookingController::class, 'search'])->name('search');
+        Route::get('/{groupBooking}', [GroupBookingController::class, 'show'])->name('show');
+        Route::get('/{groupBooking}/edit', [GroupBookingController::class, 'edit'])->name('edit');
+        Route::put('/{groupBooking}', [GroupBookingController::class, 'update'])->name('update');
+        Route::delete('/{groupBooking}', [GroupBookingController::class, 'destroy'])->name('destroy');
+    });
+
     // Reservation management routes
     Route::prefix('reservations')->name('tenant.reservations.')->group(function () {
         Route::get('/', [ReservationController::class, 'index'])->name('index');
@@ -212,15 +224,6 @@ Route::middleware(['auth', 'tenant'])->group(function () {
         Route::get('/guests', [ReportController::class, 'guests'])->name('guests');
         Route::get('/reservations', [ReportController::class, 'reservations'])->name('reservations');
         Route::get('/housekeeping', [ReportController::class, 'housekeeping'])->name('housekeeping');
-    });
-
-    Route::prefix('group-bookings')->name('tenant.group-bookings.')->group(function () {
-        Route::get('/', [GroupBookingController::class, 'index'])->name('index');
-        Route::post('/', [GroupBookingController::class, 'store'])->name('store');
-        Route::get('/{groupBooking}', [GroupBookingController::class, 'show'])->name('show');
-        Route::put('/{groupBooking}', [GroupBookingController::class, 'update'])->name('update');
-        Route::post('/{groupBooking}/confirm', [GroupBookingController::class, 'confirm'])->name('confirm');
-        Route::post('/{groupBooking}/cancel', [GroupBookingController::class, 'cancel'])->name('cancel');
     });
 
     Route::prefix('inventory')->name('tenant.inventory.')->group(function () {
