@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 // All routes are already in tenant context due to bootstrap/app.php configuration
 Route::middleware(['auth', 'check.tenant.status'])->group(function () {
-    
+
     // Property management routes
     Route::prefix('properties')->name('tenant.properties.')->group(function () {
         // Main CRUD routes
@@ -30,30 +30,40 @@ Route::middleware(['auth', 'check.tenant.status'])->group(function () {
         Route::get('/{property}/edit', [PropertyController::class, 'edit'])->name('edit');
         Route::put('/{property}', [PropertyController::class, 'update'])->name('update');
         Route::delete('/{property}', [PropertyController::class, 'destroy'])->name('destroy');
-        
+
         // AJAX/API routes for property management
         Route::post('/{property}/toggle-status', [PropertyController::class, 'toggleStatus'])->name('toggle-status');
         Route::get('/{property}/stats', [PropertyController::class, 'getStats'])->name('stats');
         Route::post('/{property}/assign-user', [PropertyController::class, 'assignUser'])->name('assign-user');
         Route::post('/{property}/remove-user', [PropertyController::class, 'removeUser'])->name('remove-user');
     });
-    
+
     // Building management routes (AJAX endpoints)
     Route::prefix('buildings')->name('tenant.buildings.')->group(function () {
         Route::post('/', [BuildingController::class, 'store'])->name('store');
         Route::put('/{building}', [BuildingController::class, 'update'])->name('update');
         Route::delete('/{building}', [BuildingController::class, 'destroy'])->name('destroy');
     });
-    
 
-    
 
-    
+
+
+
+    // ClickPesa Payment Routes
+    Route::prefix('payments/clickpesa')->name('tenant.payments.clickpesa.')->group(function () {
+        Route::post('/initiate', [\App\Http\Controllers\Tenant\Payment\ClickpesaPaymentController::class, 'initiate'])->name('initiate');
+        Route::get('/{id}/status', [\App\Http\Controllers\Tenant\Payment\ClickpesaPaymentController::class, 'status'])->name('status');
+
+        // This should theoretically be exempted from CSRF or Auth if it's a webhook from external
+        // For now putting it here, but might need to be moved to api.php or excluded from middleware
+        Route::post('/callback', [\App\Http\Controllers\Tenant\Payment\ClickpesaPaymentController::class, 'callback'])->withoutMiddleware(['auth', 'check.tenant.status'])->name('callback');
+    });
+
     // Add other tenant routes here as they're implemented...
-    
+
     // Dashboard route (tenant-specific)
     Route::get('/dashboard', function () {
         return redirect()->route('dashboard');
     })->name('tenant.dashboard');
-    
+
 });
