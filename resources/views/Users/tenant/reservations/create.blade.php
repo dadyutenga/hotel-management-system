@@ -157,6 +157,16 @@
                             </div>
 
                             <div class="form-group full-width">
+                                <label class="form-label" for="quick_guest"><i class="fas fa-user-plus"></i> Quick Select Guest with No Reservations</label>
+                                <select id="quick_guest" class="form-select">
+                                    <option value="">Choose a guest...</option>
+                                    @foreach($guestsWithNoReservations ?? [] as $guest)
+                                        <option value="{{ $guest->id }}" data-name="{{ $guest->full_name }}">{{ $guest->full_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group full-width">
                                 <label class="form-label" for="guest_search"><i class="fas fa-user"></i> Guest <span class="required">*</span></label>
                                 <div class="search-wrap">
                                     <input type="text" id="guest_search" class="form-control" placeholder="Search guest name, email, or phone" autocomplete="off" value="{{ old('guest_query', $preselectedGuest ? $preselectedGuest->full_name : '') }}" />
@@ -331,6 +341,18 @@
             document.addEventListener('click', function (e) {
                 if (e.target.closest('.search-wrap')) return;
                 closeResults();
+            });
+
+            document.getElementById('quick_guest').addEventListener('change', function() {
+                const selected = this.options[this.selectedIndex];
+                const id = selected.value;
+                const name = selected.getAttribute('data-name');
+                if (id) {
+                    document.getElementById('guest_id').value = id;
+                    document.getElementById('guest_search').value = name;
+                    // Close results if open
+                    document.getElementById('guest_results').classList.remove('open');
+                }
             });
         })();
     </script>

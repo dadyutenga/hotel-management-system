@@ -190,7 +190,13 @@ class ReservationController extends Controller
                 ->first();
         }
 
-        return view('Users.tenant.reservations.create', compact('properties', 'roomTypes', 'preselectedGuest'));
+        // Get guests with no reservations for dropdown
+        $guestsWithNoReservations = Guest::where('tenant_id', $user->tenant_id)
+            ->whereDoesntHave('reservations')
+            ->orderBy('full_name')
+            ->get(['id', 'full_name']);
+
+        return view('Users.tenant.reservations.create', compact('properties', 'roomTypes', 'preselectedGuest', 'guestsWithNoReservations'));
     }
 
     /**
