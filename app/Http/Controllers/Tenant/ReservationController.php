@@ -217,9 +217,9 @@ class ReservationController extends Controller
 
         $validated = $request->validate([
             'property_id' => 'required|uuid|exists:properties,id',
-            'guest_id' => 'required|uuid|exists:res.guests,id',
-            'group_booking_id' => 'nullable|uuid|exists:res.group_bookings,id',
-            'corporate_account_id' => 'nullable|uuid|exists:res.corporate_accounts,id',
+            'guest_id' => 'required|uuid|exists:guests,id',
+            'group_booking_id' => 'nullable|uuid|exists:group_bookings,id',
+            'corporate_account_id' => 'nullable|uuid|exists:corporate_accounts,id',
             'status' => 'required|in:PENDING,CONFIRMED,HOLD',
             'arrival_date' => 'required|date|after_or_equal:today',
             'departure_date' => 'required|date|after:arrival_date',
@@ -233,7 +233,7 @@ class ReservationController extends Controller
             'source' => 'nullable|string|max:50',
             'external_reference' => 'nullable|string|max:255',
             'room_type_ids' => 'required|array|min:1',
-            'room_type_ids.*' => 'required|uuid|exists:core.room_types,id',
+            'room_type_ids.*' => 'required|uuid|exists:room_types,id',
         ]);
 
         try {
@@ -463,9 +463,9 @@ class ReservationController extends Controller
 
         $validated = $request->validate([
             'property_id' => 'required|uuid|exists:properties,id',
-            'guest_id' => 'required|uuid|exists:res.guests,id',
-            'group_booking_id' => 'nullable|uuid|exists:res.group_bookings,id',
-            'corporate_account_id' => 'nullable|uuid|exists:res.corporate_accounts,id',
+            'guest_id' => 'required|uuid|exists:guests,id',
+            'group_booking_id' => 'nullable|uuid|exists:group_bookings,id',
+            'corporate_account_id' => 'nullable|uuid|exists:corporate_accounts,id',
             'status' => 'required|in:PENDING,CONFIRMED,CHECKED_IN,CHECKED_OUT,CANCELLED,NO_SHOW,HOLD',
             'arrival_date' => 'required|date',
             'departure_date' => 'required|date|after:arrival_date',
@@ -604,7 +604,7 @@ class ReservationController extends Controller
 
         $validated = $request->validate([
             'property_id' => 'required|uuid|exists:properties,id',
-            'room_type_id' => 'required|uuid|exists:core.room_types,id',
+            'room_type_id' => 'required|uuid|exists:room_types,id',
             'arrival_date' => 'required|date',
             'departure_date' => 'required|date|after:arrival_date',
         ]);
