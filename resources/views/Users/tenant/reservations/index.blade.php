@@ -153,7 +153,7 @@
 </head>
 <body>
     <div class="dashboard-container">
-        @include('Users.shared.sidebar')
+        @include('Users.shared.sidebars.receptionist')
 
         <div class="main-content">
             <div class="header">
