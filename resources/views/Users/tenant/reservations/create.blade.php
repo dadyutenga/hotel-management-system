@@ -159,10 +159,10 @@
                             <div class="form-group full-width">
                                 <label class="form-label" for="guest_search"><i class="fas fa-user"></i> Guest <span class="required">*</span></label>
                                 <div class="search-wrap">
-                                    <input type="text" id="guest_search" class="form-control" placeholder="Search guest name, email, or phone" autocomplete="off" value="{{ old('guest_query') }}" />
+                                    <input type="text" id="guest_search" class="form-control" placeholder="Search guest name, email, or phone" autocomplete="off" value="{{ old('guest_query', $preselectedGuest ? $preselectedGuest->full_name : '') }}" />
                                     <div id="guest_results" class="search-results"></div>
                                 </div>
-                                <input type="hidden" name="guest_id" id="guest_id" value="{{ old('guest_id') }}" />
+                                <input type="hidden" name="guest_id" id="guest_id" value="{{ old('guest_id', $preselectedGuest ? $preselectedGuest->id : '') }}" />
                                 <div class="helper">
                                     <a class="btn-link" href="{{ route('tenant.guests.create') }}"><i class="fas fa-user-plus"></i> Create new guest</a>
                                 </div>
@@ -312,7 +312,7 @@
             input.addEventListener('input', function () {
                 hidden.value = '';
                 const q = (input.value || '').trim();
-                if (q.length < 2) {
+                if (q.length < 1) {
                     closeResults();
                     return;
                 }

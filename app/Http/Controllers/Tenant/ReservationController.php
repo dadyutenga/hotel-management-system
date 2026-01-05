@@ -136,7 +136,13 @@ class ReservationController extends Controller
             $metrics['occupancy_rate'] = $occupancyRate . '%';
         }
 
-        return view('Users.tenant.reservations.index', compact('reservations', 'properties', 'metrics'));
+        // Get guests with no reservations for quick creation
+        $guestsWithNoReservations = Guest::where('tenant_id', $user->tenant_id)
+            ->whereDoesntHave('reservations')
+            ->orderBy('full_name')
+            ->get(['id', 'full_name']);
+
+        return view('Users.tenant.reservations.index', compact('reservations', 'properties', 'metrics', 'guestsWithNoReservations'));
     }
 
     /**
@@ -176,7 +182,15 @@ class ReservationController extends Controller
                 ->get();
         }
 
-        return view('Users.tenant.reservations.create', compact('properties', 'roomTypes'));
+        // Check for preselected guest
+        $preselectedGuest = null;
+        if (request('guest_id')) {
+            $preselectedGuest = Guest::where('id', request('guest_id'))
+                ->where('tenant_id', $user->tenant_id)
+                ->first();
+        }
+
+        return view('Users.tenant.reservations.create', compact('properties', 'roomTypes', 'preselectedGuest'));
     }
 
     /**

@@ -258,6 +258,29 @@
                     </div>
                 </div>
 
+                <div class="form-container">
+                    <div class="section-header">
+                        <i class="fas fa-user-plus"></i>
+                        Quick Reservation Creation
+                    </div>
+                    <div class="section-body">
+                        <form method="GET" action="{{ route('tenant.reservations.create') }}" class="filters-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="guest_id">Select Guest with No Reservations</label>
+                                <select id="guest_id" name="guest_id" class="form-select">
+                                    <option value="">Choose a guest...</option>
+                                    @foreach($guestsWithNoReservations ?? [] as $guest)
+                                        <option value="{{ $guest->id }}">{{ $guest->full_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group" style="justify-content: end; gap: 10px;">
+                                <button type="submit" class="btn btn-primary" id="create-btn" disabled><i class="fas fa-plus"></i> Create Reservation</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <div class="table-wrap">
                     <div class="section-header">
                         <i class="fas fa-list"></i>
@@ -347,5 +370,12 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('guest_id').addEventListener('change', function() {
+            const btn = document.getElementById('create-btn');
+            btn.disabled = !this.value;
+        });
+    </script>
 </body>
 </html>

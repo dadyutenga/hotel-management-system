@@ -378,8 +378,7 @@ class GuestController extends Controller
 
         $search = $request->q;
 
-        $guests = Guest::where('tenant_id', $user->tenant_id)
-            ->where(function($query) use ($search) {
+        $guests = Guest::where(function($query) use ($search) {
                 $query->where('full_name', 'like', "%{$search}%")
                       ->orWhere('email', 'like', "%{$search}%")
                       ->orWhere('phone', 'like', "%{$search}%")
