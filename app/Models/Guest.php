@@ -10,14 +10,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Guest Model
  * 
- * Corresponds to: res.guests table
+ * Corresponds to: guests table
  * Guest profiles
  */
 class Guest extends Model
 {
     use HasFactory, HasUuids, SoftDeletes;
 
-    protected $table = 'res.guests';
+    protected $table = 'guests';
 
     protected $fillable = [
         'tenant_id',

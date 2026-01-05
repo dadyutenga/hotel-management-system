@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * GuestContact Model
  * 
- * Corresponds to: res.guest_contacts table
+ * Corresponds to: guest_contacts table
  * Additional contact details for guests
  */
 class GuestContact extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'res.guest_contacts';
+    protected $table = 'guest_contacts';
     
     public $timestamps = false;
 
