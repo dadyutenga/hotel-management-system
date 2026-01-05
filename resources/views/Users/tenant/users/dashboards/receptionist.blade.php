@@ -312,7 +312,7 @@
                                 <i class="fas fa-calendar-check"></i>
                             </div>
                         </div>
-                        <div class="stat-value">12</div>
+                        <div class="stat-value">{{ $stats['arrivals_today'] ?? 0 }}</div>
                         <div class="stat-label">Expected guests</div>
                     </div>
                     
@@ -323,7 +323,7 @@
                                 <i class="fas fa-sign-out-alt"></i>
                             </div>
                         </div>
-                        <div class="stat-value">8</div>
+                        <div class="stat-value">{{ $stats['departures_today'] ?? 0 }}</div>
                         <div class="stat-label">Check-outs pending</div>
                     </div>
                     
@@ -334,8 +334,19 @@
                                 <i class="fas fa-bed"></i>
                             </div>
                         </div>
-                        <div class="stat-value">85%</div>
-                        <div class="stat-label">68 of 80 rooms</div>
+                        <div class="stat-value">{{ $stats['occupancy_percent'] ?? '—' }}</div>
+                        <div class="stat-label">
+                            @php
+                                $occupiedRooms = $stats['occupied_rooms'] ?? null;
+                                $totalRooms = $stats['total_rooms'] ?? null;
+                            @endphp
+
+                            @if($occupiedRooms !== null && $totalRooms !== null)
+                                {{ $occupiedRooms }} of {{ $totalRooms }} rooms
+                            @else
+                                —
+                            @endif
+                        </div>
                     </div>
                     
                     <div class="stat-card">
@@ -345,7 +356,7 @@
                                 <i class="fas fa-bell"></i>
                             </div>
                         </div>
-                        <div class="stat-value">5</div>
+                        <div class="stat-value">{{ $stats['pending_requests'] ?? 0 }}</div>
                         <div class="stat-label">Pending requests</div>
                     </div>
                 </div>
@@ -432,29 +443,23 @@
                         </div>
                         
                         <div class="guest-list">
-                            <div class="guest-item">
-                                <div class="guest-info">
-                                    <h5>John Smith</h5>
-                                    <p>Expected: 2:00 PM</p>
+                            @forelse(($arrivalsToday ?? []) as $arrival)
+                                <div class="guest-item">
+                                    <div class="guest-info">
+                                        <h5>{{ $arrival['guest_name'] ?? '—' }}</h5>
+                                        <p>Expected: {{ $arrival['time'] ?? '—' }}</p>
+                                    </div>
+                                    <div class="room-number">{{ $arrival['room_number'] ?? '—' }}</div>
                                 </div>
-                                <div class="room-number">205</div>
-                            </div>
-                            
-                            <div class="guest-item">
-                                <div class="guest-info">
-                                    <h5>Maria Garcia</h5>
-                                    <p>Expected: 3:30 PM</p>
+                            @empty
+                                <div class="guest-item">
+                                    <div class="guest-info">
+                                        <h5>No arrivals scheduled</h5>
+                                        <p>—</p>
+                                    </div>
+                                    <div class="room-number">—</div>
                                 </div>
-                                <div class="room-number">312</div>
-                            </div>
-                            
-                            <div class="guest-item">
-                                <div class="guest-info">
-                                    <h5>David Johnson</h5>
-                                    <p>Expected: 4:15 PM</p>
-                                </div>
-                                <div class="room-number">108</div>
-                            </div>
+                            @endforelse
                         </div>
                     </div>
 
@@ -466,29 +471,23 @@
                         </div>
                         
                         <div class="guest-list">
-                            <div class="guest-item">
-                                <div class="guest-info">
-                                    <h5>Sarah Wilson</h5>
-                                    <p>Check-out: 11:00 AM</p>
+                            @forelse(($departuresToday ?? []) as $departure)
+                                <div class="guest-item">
+                                    <div class="guest-info">
+                                        <h5>{{ $departure['guest_name'] ?? '—' }}</h5>
+                                        <p>Check-out: {{ $departure['time'] ?? '—' }}</p>
+                                    </div>
+                                    <div class="room-number">{{ $departure['room_number'] ?? '—' }}</div>
                                 </div>
-                                <div class="room-number">401</div>
-                            </div>
-                            
-                            <div class="guest-item">
-                                <div class="guest-info">
-                                    <h5>Robert Brown</h5>
-                                    <p>Check-out: 12:00 PM</p>
+                            @empty
+                                <div class="guest-item">
+                                    <div class="guest-info">
+                                        <h5>No departures scheduled</h5>
+                                        <p>—</p>
+                                    </div>
+                                    <div class="room-number">—</div>
                                 </div>
-                                <div class="room-number">215</div>
-                            </div>
-                            
-                            <div class="guest-item">
-                                <div class="guest-info">
-                                    <h5>Lisa Davis</h5>
-                                    <p>Check-out: 1:30 PM</p>
-                                </div>
-                                <div class="room-number">320</div>
-                            </div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
