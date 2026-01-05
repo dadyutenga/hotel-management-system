@@ -194,32 +194,6 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label" for="group_booking_id"><i class="fas fa-people-group"></i> Group Booking</label>
-                                <select id="group_booking_id" name="group_booking_id" class="form-select">
-                                    <option value="">None</option>
-                                    @foreach(($groupBookings ?? []) as $group)
-                                        <option value="{{ $group->id }}" {{ old('group_booking_id') == $group->id ? 'selected' : '' }}>
-                                            {{ $group->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('group_booking_id')<div class="error-message">{{ $message }}</div>@enderror
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" for="corporate_account_id"><i class="fas fa-briefcase"></i> Corporate Account</label>
-                                <select id="corporate_account_id" name="corporate_account_id" class="form-select">
-                                    <option value="">None</option>
-                                    @foreach(($corporateAccounts ?? []) as $account)
-                                        <option value="{{ $account->id }}" {{ old('corporate_account_id') == $account->id ? 'selected' : '' }}>
-                                            {{ $account->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('corporate_account_id')<div class="error-message">{{ $message }}</div>@enderror
-                            </div>
-
-                            <div class="form-group">
                                 <label class="form-label" for="total_amount"><i class="fas fa-money-bill"></i> Total Amount <span class="required">*</span></label>
                                 <input type="number" step="0.01" id="total_amount" name="total_amount" class="form-control" required value="{{ old('total_amount', 0) }}" />
                                 @error('total_amount')<div class="error-message">{{ $message }}</div>@enderror

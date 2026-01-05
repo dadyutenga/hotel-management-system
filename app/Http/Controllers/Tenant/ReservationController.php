@@ -9,8 +9,6 @@ use App\Models\Property;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\RatePlan;
-use App\Models\GroupBooking;
-use App\Models\CorporateAccount;
 use App\Models\ReservationRoom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,7 +30,7 @@ class ReservationController extends Controller
                 ->with('error', 'You do not have permission to access reservations.');
         }
 
-        $query = Reservation::with(['property', 'guest', 'groupBooking', 'corporateAccount', 'creator', 'reservationRooms.room', 'reservationRooms.roomType']);
+        $query = Reservation::with(['property', 'guest', 'creator', 'reservationRooms.room', 'reservationRooms.roomType']);
 
         // Filter by tenant via property
         if ($user->role->name === 'DIRECTOR') {
@@ -178,28 +176,7 @@ class ReservationController extends Controller
                 ->get();
         }
 
-        // Get corporate accounts
-        $corporateAccounts = CorporateAccount::where('tenant_id', $user->tenant_id)
-            ->orderBy('name')
-            ->get(['id', 'name']);
-
-        // Get group bookings
-        if ($user->role->name === 'DIRECTOR') {
-            $groupBookings = GroupBooking::whereHas('property', function($q) use ($user) {
-                $q->where('tenant_id', $user->tenant_id);
-            })->whereIn('status', ['PENDING', 'CONFIRMED'])
-              ->with('property')
-              ->orderBy('arrival_date', 'desc')
-              ->get(['id', 'name', 'property_id', 'arrival_date', 'departure_date']);
-        } else {
-            $groupBookings = GroupBooking::where('property_id', $user->property_id)
-                ->whereIn('status', ['PENDING', 'CONFIRMED'])
-                ->with('property')
-                ->orderBy('arrival_date', 'desc')
-                ->get(['id', 'name', 'property_id', 'arrival_date', 'departure_date']);
-        }
-
-        return view('Users.tenant.reservations.create', compact('properties', 'roomTypes', 'corporateAccounts', 'groupBookings'));
+        return view('Users.tenant.reservations.create', compact('properties', 'roomTypes'));
     }
 
     /**
@@ -218,8 +195,7 @@ class ReservationController extends Controller
         $validated = $request->validate([
             'property_id' => 'required|uuid|exists:properties,id',
             'guest_id' => 'required|uuid|exists:guests,id',
-            'group_booking_id' => 'nullable|uuid|exists:group_bookings,id',
-            'corporate_account_id' => 'nullable|uuid|exists:corporate_accounts,id',
+            'group_booking_id' => 'nullable|uuid',
             'status' => 'required|in:PENDING,CONFIRMED,HOLD',
             'arrival_date' => 'required|date|after_or_equal:today',
             'departure_date' => 'required|date|after:arrival_date',
@@ -256,26 +232,12 @@ class ReservationController extends Controller
                 ->where('tenant_id', $user->tenant_id)
                 ->firstOrFail();
 
-            // If group booking is provided, verify it belongs to tenant and property
-            if ($validated['group_booking_id'] ?? null) {
-                $groupBooking = GroupBooking::where('id', $validated['group_booking_id'])
-                    ->where('property_id', $validated['property_id'])
-                    ->firstOrFail();
-            }
-
-            // If corporate account is provided, verify it belongs to tenant
-            if ($validated['corporate_account_id'] ?? null) {
-                $corporateAccount = CorporateAccount::where('id', $validated['corporate_account_id'])
-                    ->where('tenant_id', $user->tenant_id)
-                    ->firstOrFail();
-            }
-
             // Create the reservation
             $reservation = Reservation::create([
                 'property_id' => $validated['property_id'],
                 'guest_id' => $validated['guest_id'],
-                'group_booking_id' => $validated['group_booking_id'] ?? null,
-                'corporate_account_id' => $validated['corporate_account_id'] ?? null,
+                'group_booking_id' => null,
+                'corporate_account_id' => null,
                 'status' => $validated['status'],
                 'arrival_date' => $validated['arrival_date'],
                 'departure_date' => $validated['departure_date'],
@@ -340,8 +302,6 @@ class ReservationController extends Controller
         $reservation->load([
             'property',
             'guest',
-            'groupBooking',
-            'corporateAccount',
             'creator',
             'updater',
             'reservationRooms.room',
@@ -412,30 +372,9 @@ class ReservationController extends Controller
                 ->get();
         }
 
-        // Get corporate accounts
-        $corporateAccounts = CorporateAccount::where('tenant_id', $user->tenant_id)
-            ->orderBy('name')
-            ->get(['id', 'name']);
-
-        // Get group bookings
-        if ($user->role->name === 'DIRECTOR') {
-            $groupBookings = GroupBooking::whereHas('property', function($q) use ($user) {
-                $q->where('tenant_id', $user->tenant_id);
-            })->whereIn('status', ['PENDING', 'CONFIRMED'])
-              ->with('property')
-              ->orderBy('arrival_date', 'desc')
-              ->get(['id', 'name', 'property_id', 'arrival_date', 'departure_date']);
-        } else {
-            $groupBookings = GroupBooking::where('property_id', $user->property_id)
-                ->whereIn('status', ['PENDING', 'CONFIRMED'])
-                ->with('property')
-                ->orderBy('arrival_date', 'desc')
-                ->get(['id', 'name', 'property_id', 'arrival_date', 'departure_date']);
-        }
-
         $reservation->load(['reservationRooms.room', 'reservationRooms.roomType']);
 
-        return view('Users.tenant.reservations.edit', compact('reservation', 'properties', 'roomTypes', 'corporateAccounts', 'groupBookings'));
+        return view('Users.tenant.reservations.edit', compact('reservation', 'properties', 'roomTypes'));
     }
 
     /**
@@ -464,8 +403,7 @@ class ReservationController extends Controller
         $validated = $request->validate([
             'property_id' => 'required|uuid|exists:properties,id',
             'guest_id' => 'required|uuid|exists:guests,id',
-            'group_booking_id' => 'nullable|uuid|exists:group_bookings,id',
-            'corporate_account_id' => 'nullable|uuid|exists:corporate_accounts,id',
+            'group_booking_id' => 'nullable|uuid',
             'status' => 'required|in:PENDING,CONFIRMED,CHECKED_IN,CHECKED_OUT,CANCELLED,NO_SHOW,HOLD',
             'arrival_date' => 'required|date',
             'departure_date' => 'required|date|after:arrival_date',
@@ -500,25 +438,11 @@ class ReservationController extends Controller
                 ->where('tenant_id', $user->tenant_id)
                 ->firstOrFail();
 
-            // If group booking is provided, verify it belongs to tenant and property
-            if ($validated['group_booking_id'] ?? null) {
-                $groupBooking = GroupBooking::where('id', $validated['group_booking_id'])
-                    ->where('property_id', $validated['property_id'])
-                    ->firstOrFail();
-            }
-
-            // If corporate account is provided, verify it belongs to tenant
-            if ($validated['corporate_account_id'] ?? null) {
-                $corporateAccount = CorporateAccount::where('id', $validated['corporate_account_id'])
-                    ->where('tenant_id', $user->tenant_id)
-                    ->firstOrFail();
-            }
-
             $reservation->update([
                 'property_id' => $validated['property_id'],
                 'guest_id' => $validated['guest_id'],
-                'group_booking_id' => $validated['group_booking_id'] ?? null,
-                'corporate_account_id' => $validated['corporate_account_id'] ?? null,
+                'group_booking_id' => null,
+                'corporate_account_id' => null,
                 'status' => $validated['status'],
                 'arrival_date' => $validated['arrival_date'],
                 'departure_date' => $validated['departure_date'],
